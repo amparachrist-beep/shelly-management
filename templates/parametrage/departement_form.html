@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if object %}Modifier{% else %}Nouveau{% endif %} département - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Section card */
+    .section-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    /* Primary Button (Orange Gradient to match previous Add button) */
+    .btn-primary {
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        color: white;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2);
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3);
+    }
+
+    /* Secondary Button */
+    .btn-secondary {
+        background: white;
+        color: #64748b;
+        border: 1px solid #cbd5e1;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+        background: #f8fafc;
+        color: #334155;
+        border-color: #94a3b8;
+    }
+
+    /* Form Styles */
+    label {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 600;
+        color: #334155;
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .help-text {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Tableau de bord
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <a href="{% url 'parametrage:departements_list' %}"
+       class="text-slate-500 text-sm font-medium font-jakarta hover:text-slate-700 transition-colors">
+        Départements
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">{% if object %}Modifier{% else %}Nouveau{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 pb-12">
+    <!-- Page Header -->
+    <div class="bg-white border-b border-slate-200 px-6 py-6 mb-8">
+        <div class="max-w-4xl mx-auto flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                {% if object %}
+                <iconify-icon icon="solar:pen-new-square-bold-duotone" width="24" class="text-white"></iconify-icon>
+                {% else %}
+                <iconify-icon icon="solar:add-square-bold-duotone" width="24" class="text-white"></iconify-icon>
+                {% endif %}
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                    {% if object %}Modifier le département{% else %}Nouveau département{% endif %}
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">
+                    {% if object %}Modification des informations de la zone {{ object.nom }}{% else %}Création d'une nouvelle zone géographique{% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Content -->
+    <div class="max-w-4xl mx-auto px-6">
+        <div class="section-card p-8">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3">
+                    <iconify-icon icon="solar:danger-triangle-bold" class="text-red-500 mt-0.5" width="20"></iconify-icon>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-red-800 mb-1">Erreur de validation</h4>
+                        {% for error in form.non_field_errors %}
+                        <p class="text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Colonne gauche : Infos générales -->
+                    <div class="space-y-6">
+                        <div class="pb-2 border-b border-slate-100 mb-4">
+                            <h3 class="text-lg font-semibold text-slate-800 font-jakarta">Informations générales</h3>
+                        </div>
+
+                        <div>
+                            <label for="{{ form.code_departement.id_for_label }}">
+                                {{ form.code_departement.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.code_departement }}
+                            {% if form.code_departement.errors %}
+                            <p class="mt-1 text-sm text-red-500 font-medium flex items-center gap-1">
+                                <iconify-icon icon="solar:danger-circle-bold" width="14"></iconify-icon>
+                                {{ form.code_departement.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.nom.id_for_label }}">
+                                {{ form.nom.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.nom }}
+                            {% if form.nom.errors %}
+                            <p class="mt-1 text-sm text-red-500">{{ form.nom.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.region.id_for_label }}">
+                                {{ form.region.label }}
+                            </label>
+                            {{ form.region }}
+                        </div>
+                    </div>
+
+                    <!-- Colonne droite : Géolocalisation -->
+                    <div class="space-y-6">
+                        <div class="pb-2 border-b border-slate-100 mb-4">
+                            <h3 class="text-lg font-semibold text-slate-800 font-jakarta">Géolocalisation</h3>
+                        </div>
+
+                        <div class="bg-indigo-50/50 rounded-xl p-4 border border-indigo-100 mb-4">
+                            <div class="flex items-start gap-3">
+                                <iconify-icon icon="solar:map-point-bold-duotone" width="20" class="text-indigo-500 mt-1"></iconify-icon>
+                                <p class="text-sm text-indigo-900 leading-relaxed">
+                                    Les coordonnées géographiques permettent d'afficher le département sur la carte interactive du tableau de bord.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="{{ form.centre_latitude.id_for_label }}">
+                                {{ form.centre_latitude.label }}
+                            </label>
+                            {{ form.centre_latitude }}
+                            <p class="help-text">Latitude décimale (ex: -4.26944)</p>
+                            {% if form.centre_latitude.errors %}
+                            <p class="mt-1 text-sm text-red-500">{{ form.centre_latitude.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.centre_longitude.id_for_label }}">
+                                {{ form.centre_longitude.label }}
+                            </label>
+                            {{ form.centre_longitude }}
+                            <p class="help-text">Longitude décimale (ex: 15.27194)</p>
+                            {% if form.centre_longitude.errors %}
+                            <p class="mt-1 text-sm text-red-500">{{ form.centre_longitude.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="mt-10 pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <a href="{% url 'parametrage:departements_list' %}" class="btn-secondary">
+                        Annuler
+                    </a>
+                    <button type="submit" class="btn-primary">
+                        <iconify-icon icon="solar:check-circle-bold" width="18"></iconify-icon>
+                        {% if object %}Mettre à jour{% else %}Enregistrer{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Applique le style "Light Mode" aux champs Django standards
+    const formControls = document.querySelectorAll('input:not([type=checkbox]), select, textarea');
+    formControls.forEach(field => {
+        // Retire les styles par défaut s'il y en a et ajoute le style Tailwind
+        field.classList.add(
+            'w-full',
+            'px-4',
+            'py-2.5',
+            'bg-white',
+            'border',
+            'border-slate-200',
+            'rounded-xl',
+            'text-slate-700',
+            'text-sm',
+            'font-medium',
+            'placeholder-slate-400',
+            'focus:outline-none',
+            'focus:border-indigo-500',
+            'focus:ring-4',
+            'focus:ring-indigo-500/10',
+            'transition-all',
+            'duration-200'
+        );
+    });
+});
+</script>
+{% endblock %}

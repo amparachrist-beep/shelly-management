@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analyse de consommation - SGE{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #334155; }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .section-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .section-header { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
+    .section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.125rem; font-weight: 600; color: #1e293b; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { padding: 12px 24px; text-align: left; font-size: 0.75rem; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; color: #64748b; text-transform: uppercase; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+    .data-table td { padding: 16px 24px; font-size: 0.875rem; border-bottom: 1px solid #f1f5f9; }
+    .stat-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; transition: transform 0.2s; }
+    .stat-card:hover { transform: translateY(-2px); border-color: #f97316; }
+    .stat-value { font-size: 2rem; font-weight: 700; margin-top: 8px; }
+    .stat-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% if user.is_client %}{% url 'dashboard:client_dashboard' %}{% else %}{% url 'dashboard:admin_dashboard' %}{% endif %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Tableau de bord
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">Analyse de consommation</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-slate-200 px-6 py-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
+                    <iconify-icon icon="solar:chart-square-bold-duotone" width="24" class="text-white"></iconify-icon>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">Analyse de consommation</h1>
+                    <p class="text-sm text-slate-500">
+                        {% if start_date and end_date %}
+                            Période : {{ start_date|date:"d/m/Y" }} → {{ end_date|date:"d/m/Y" }}
+                        {% else %}
+                            Données disponibles
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <form method="get" class="flex items-center gap-2">
+                <select name="period" onchange="this.form.submit()" class="bg-slate-100 text-sm font-medium px-4 py-2 rounded-lg border border-slate-200 outline-none cursor-pointer focus:ring-2 focus:ring-orange-500">
+                    <option value="day" {% if period == 'day' %}selected{% endif %}>Aujourd'hui</option>
+                    <option value="week" {% if period == 'week' %}selected{% endif %}>Cette semaine</option>
+                    <option value="month" {% if period == 'month' %}selected{% endif %}>Ce mois</option>
+                    <option value="year" {% if period == 'year' %}selected{% endif %}>Cette année</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <div class="p-6 space-y-6">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="stat-card">
+                <div class="stat-label">Total Consommé</div>
+                <div class="stat-value text-slate-900">{{ consumption_analysis.total|default:0|floatformat:1 }} <span class="text-sm font-normal text-slate-400">kWh</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Coût Estimé</div>
+                <div class="stat-value text-orange-600">{{ cout_estime|default:0|floatformat:0 }} <span class="text-sm font-normal text-slate-400">FCFA</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Moyenne journalière</div>
+                <div class="stat-value text-slate-900">{{ consumption_analysis.daily_avg|default:0|floatformat:1 }} <span class="text-sm font-normal text-slate-400">kWh</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pic d'intensité</div>
+                <div class="stat-value text-rose-500">{{ consumption_analysis.peak|default:0|floatformat:1 }} <span class="text-sm font-normal text-slate-400">kWh</span></div>
+            </div>
+        </div>
+
+        <!-- Graphs -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 section-card">
+                <div class="section-header">
+                    <h3 class="section-title">Évolution de la consommation</h3>
+                    <iconify-icon icon="solar:graph-up-linear" class="text-slate-400" width="24"></iconify-icon>
+                </div>
+                <div class="p-6" style="height: 320px;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+            <div class="section-card">
+                <div class="section-header">
+                    <h3 class="section-title">Répartition par phase</h3>
+                </div>
+                <div class="p-6" style="height: 320px;">
+                    <canvas id="applianceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Détaillée -->
+        <div class="section-card">
+            <div class="section-header">
+                <h3 class="section-title">Historique détaillé</h3>
+                <span class="px-3 py-1 bg-orange-50 text-orange-600 text-xs font-bold rounded-full">Derniers relevés</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Période</th>
+                            <th>Consommation (kWh)</th>
+                            <th>Coût Estimé (FCFA)</th>
+                            <th class="text-right">Évolution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in consommations_detaillees %}
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="font-medium text-slate-700">{{ item.periode }}</td>
+                            <td class="text-orange-600 font-semibold">{{ item.total_kwh|floatformat:2 }} kWh</td>
+                            <td class="text-slate-600">{{ item.cout|floatformat:0 }} FCFA</td>
+                            <td class="text-right">
+                                {% if not forloop.first %}
+                                    {% with prev=consommations_detaillees|slice:forloop.counter0|last %}
+                                        {% if prev.total_kwh > 0 %}
+                                            {% with variation=item.total_kwh|add:prev.total_kwh %}
+                                                {% if variation > 0 %}
+                                                    <span class="text-xs text-red-500">+{{ variation|floatformat:1 }}%</span>
+                                                {% elif variation < 0 %}
+                                                    <span class="text-xs text-emerald-500">{{ variation|floatformat:1 }}%</span>
+                                                {% else %}
+                                                    <span class="text-xs text-slate-400">0%</span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% else %}
+                                            <span class="text-xs text-slate-400">—</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% else %}
+                                    <span class="text-xs text-slate-400">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-12 text-slate-400">
+                                <iconify-icon icon="solar:chart-line-linear" width="48" class="mx-auto mb-3"></iconify-icon>
+                                <p>Aucun historique disponible pour cette période.</p>
+                                <p class="text-xs mt-1">Les données de consommation apparaîtront ici après la première synchronisation.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Comparaison avec la période précédente -->
+        {% if comparison_data %}
+        <div class="section-card">
+            <div class="section-header">
+                <h3 class="section-title">Comparaison avec la période précédente</h3>
+                <iconify-icon icon="solar:graph-new-linear" class="text-slate-400" width="24"></iconify-icon>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="text-center p-4 bg-slate-50 rounded-lg">
+                        <p class="text-sm text-slate-500">Évolution totale</p>
+                        <p class="text-xl font-bold {% if comparison_data.total_variation > 0 %}text-red-500{% else %}text-emerald-500{% endif %}">
+                            {% if comparison_data.total_variation > 0 %}+{% endif %}{{ comparison_data.total_variation|floatformat:1 }}%
+                        </p>
+                    </div>
+                    <div class="text-center p-4 bg-slate-50 rounded-lg">
+                        <p class="text-sm text-slate-500">Moyenne précédente</p>
+                        <p class="text-xl font-bold text-slate-900">{{ comparison_data.previous_avg|default:0|floatformat:1 }} kWh</p>
+                    </div>
+                    <div class="text-center p-4 bg-slate-50 rounded-lg">
+                        <p class="text-sm text-slate-500">Moyenne actuelle</p>
+                        <p class="text-xl font-bold text-slate-900">{{ comparison_data.current_avg|default:0|floatformat:1 }} kWh</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#94a3b8';
+
+    // 1. TREND CHART
+    const trendCtx = document.getElementById('trendChart');
+    if (trendCtx) {
+        let trendsData = [];
+        {% if consumption_trends %}
+            try {
+                trendsData = {{ consumption_trends|safe }};
+            } catch(e) {
+                console.warn('Erreur parsing consumption_trends:', e);
+                trendsData = [];
+            }
+        {% endif %}
+
+        if (trendsData && Array.isArray(trendsData) && trendsData.length > 0) {
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: trendsData.map(e => e.label || ''),
+                    datasets: [{
+                        label: 'Consommation (kWh)',
+                        data: trendsData.map(e => parseFloat(e.value) || 0),
+                        borderColor: '#f97316',
+                        backgroundColor: 'rgba(249, 115, 22, 0.05)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#f97316',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    return ctx.raw.toFixed(2) + ' kWh';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { borderDash: [5, 5] },
+                            title: { display: true, text: 'kWh', color: '#94a3b8', font: { size: 12 } }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        } else {
+            trendCtx.style.display = 'none';
+            const parent = trendCtx.parentElement;
+            const noDataMsg = document.createElement('div');
+            noDataMsg.className = 'flex flex-col items-center justify-center h-full text-slate-400';
+            noDataMsg.innerHTML = `
+                <iconify-icon icon="solar:chart-line-linear" width="48"></iconify-icon>
+                <p class="text-sm mt-2 font-medium">Aucune donnée de consommation disponible</p>
+                <p class="text-xs mt-1">Les données apparaîtront après la première synchronisation</p>
+            `;
+            parent.appendChild(noDataMsg);
+        }
+    }
+
+    // 2. APPLIANCE CHART (Répartition par phase)
+    const applianceCtx = document.getElementById('applianceChart');
+    if (applianceCtx) {
+        let applianceData = [];
+        {% if appliance_breakdown %}
+            try {
+                applianceData = {{ appliance_breakdown|safe }};
+            } catch(e) {
+                console.warn('Erreur parsing appliance_breakdown:', e);
+                applianceData = [];
+            }
+        {% endif %}
+
+        if (applianceData && Array.isArray(applianceData) && applianceData.length > 0) {
+            const labels = applianceData.map(a => a.name || '');
+            const values = applianceData.map(a => parseFloat(a.value) || 0);
+            const hasValidData = values.some(v => v > 0);
+
+            if (hasValidData) {
+                new Chart(applianceCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: ['#f97316', '#0ea5e9', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6', '#ec489a', '#06b6d4', '#84cc16'],
+                            borderWidth: 4,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 12,
+                                    font: { size: 11 },
+                                    usePointStyle: true
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(ctx) {
+                                        const value = ctx.raw;
+                                        const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${ctx.label}: ${value.toFixed(2)} kWh (${percent}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                applianceCtx.style.display = 'none';
+                const parent = applianceCtx.parentElement;
+                const noDataMsg = document.createElement('div');
+                noDataMsg.className = 'flex flex-col items-center justify-center h-full text-slate-400';
+                noDataMsg.innerHTML = `
+                    <iconify-icon icon="solar:chart-2-linear" width="48"></iconify-icon>
+                    <p class="text-sm mt-2 font-medium">Données non disponibles</p>
+                    <p class="text-xs mt-1">Les données de phase apparaîtront après la première synchronisation</p>
+                `;
+                parent.appendChild(noDataMsg);
+            }
+        } else {
+            applianceCtx.style.display = 'none';
+            const parent = applianceCtx.parentElement;
+            const noDataMsg = document.createElement('div');
+            noDataMsg.className = 'flex flex-col items-center justify-center h-full text-slate-400';
+            noDataMsg.innerHTML = `
+                <iconify-icon icon="solar:chart-2-linear" width="48"></iconify-icon>
+                <p class="text-sm mt-2 font-medium">Données non disponibles</p>
+                <p class="text-xs mt-1">Les données de phase apparaîtront après la première synchronisation</p>
+            `;
+            parent.appendChild(noDataMsg);
+        }
+    }
+});
+</script>
+{% endblock %}

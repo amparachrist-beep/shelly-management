@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - SGE{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; }
+    .form-input { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; }
+    .form-input:focus { outline: none; border-color: #3b82f6; }
+    .form-label { font-weight: 500; margin-bottom: 4px; display: block; }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{% url 'dashboard:admin_dashboard' %}" class="text-indigo-600 text-sm">Accueil</a></li>
+<li class="text-slate-400 px-2">›</li>
+<li><a href="{% url 'facturation:periode_list' %}" class="text-indigo-600 text-sm">Périodes</a></li>
+<li class="text-slate-400 px-2">›</li>
+<li class="text-sm font-semibold">{{ title }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 p-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="form-card">
+            <div class="p-6 border-b">
+                <h1 class="text-xl font-bold text-slate-900">{{ title }}</h1>
+            </div>
+            <form method="post" class="p-6">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="mb-4">
+                    <label class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ field.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">{{ submit_text }}</button>
+                    <a href="{% url 'facturation:periode_list' %}" class="border px-4 py-2 rounded-lg">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,368 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if object %}Modifier{% else %}Nouvel{% endif %} utilisateur - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .form-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 10px 14px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        color: #334155;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        outline: none;
+    }
+    .form-input:focus {
+        background-color: #fff;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    .form-input::placeholder { color: #94a3b8; }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        color: white;
+        transition: all 0.2s;
+    }
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    }
+    .btn-secondary {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #334155;
+    }
+
+    /* Animation pour le champ agence */
+    #agence-field {
+        transition: all 0.2s ease;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Accueil
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <a href="{% url 'users:user_list' %}" class="text-slate-500 hover:text-slate-700 text-sm font-medium font-jakarta transition-colors">Utilisateurs</a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">{% if object %}Modifier{% else %}Nouveau{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 p-6">
+    <div class="max-w-4xl mx-auto">
+
+        <!-- Header -->
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <iconify-icon icon="solar:users-group-two-rounded-bold-duotone" width="24" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                    {% if object %}Modifier l'utilisateur{% else %}Nouvel utilisateur{% endif %}
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">Remplissez les informations ci-dessous</p>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="form-card p-6 sm:p-8">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <!-- Erreurs globales -->
+                {% if form.non_field_errors %}
+                <div class="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3">
+                    <iconify-icon icon="solar:danger-circle-bold-duotone" class="text-red-500 mt-0.5" width="20"></iconify-icon>
+                    <div>
+                        {% for error in form.non_field_errors %}
+                        <p class="text-sm text-red-600 font-medium">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                    <!-- ══════════════════════════════════
+                         COLONNE GAUCHE — Informations de base
+                         ══════════════════════════════════ -->
+                    <div class="space-y-5">
+                        <div class="pb-2 border-b border-slate-100 mb-2">
+                            <h3 class="text-sm font-semibold text-indigo-600 uppercase tracking-wider font-jakarta">
+                                Informations de base
+                            </h3>
+                        </div>
+
+                        <!-- Username -->
+                        <div>
+                            <label for="{{ form.username.id_for_label }}"
+                                   class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                {{ form.username.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                            <p class="mt-1.5 text-xs text-red-500 font-medium flex items-center gap-1">
+                                <iconify-icon icon="solar:danger-triangle-bold" width="12"></iconify-icon>
+                                {{ form.username.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label for="{{ form.email.id_for_label }}"
+                                   class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                {{ form.email.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <p class="mt-1.5 text-xs text-red-500 font-medium flex items-center gap-1">
+                                <iconify-icon icon="solar:danger-triangle-bold" width="12"></iconify-icon>
+                                {{ form.email.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Téléphone -->
+                        <div>
+                            <label for="{{ form.telephone.id_for_label }}"
+                                   class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                {{ form.telephone.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.telephone }}
+                            {% if form.telephone.errors %}
+                            <p class="mt-1.5 text-xs text-red-500 font-medium flex items-center gap-1">
+                                <iconify-icon icon="solar:danger-triangle-bold" width="12"></iconify-icon>
+                                {{ form.telephone.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Prénom / Nom -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="{{ form.first_name.id_for_label }}"
+                                       class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                    {{ form.first_name.label }}
+                                </label>
+                                {{ form.first_name }}
+                            </div>
+                            <div>
+                                <label for="{{ form.last_name.id_for_label }}"
+                                       class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                    {{ form.last_name.label }}
+                                </label>
+                                {{ form.last_name }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ══════════════════════════════════
+                         COLONNE DROITE — Rôle & Sécurité
+                         ══════════════════════════════════ -->
+                    <div class="space-y-5">
+                        <div class="pb-2 border-b border-slate-100 mb-2">
+                            <h3 class="text-sm font-semibold text-indigo-600 uppercase tracking-wider font-jakarta">
+                                Rôle & Sécurité
+                            </h3>
+                        </div>
+
+                        <!-- Rôle -->
+                        <div>
+                            <label for="{{ form.role.id_for_label }}"
+                                   class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                {{ form.role.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.role }}
+                            {% if form.role.errors %}
+                            <p class="mt-1.5 text-xs text-red-500 font-medium flex items-center gap-1">
+                                <iconify-icon icon="solar:danger-triangle-bold" width="12"></iconify-icon>
+                                {{ form.role.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <!-- ✅ Agence — visible uniquement pour AGENT_TERRAIN -->
+                        <div id="agence-field" style="display:none">
+                            <label for="{{ form.agence.id_for_label }}"
+                                   class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                <iconify-icon icon="solar:building-linear" width="14" class="mr-1"></iconify-icon>
+                                {{ form.agence.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.agence }}
+                            {% if form.agence.errors %}
+                            <p class="mt-1.5 text-xs text-red-500 font-medium flex items-center gap-1">
+                                <iconify-icon icon="solar:danger-triangle-bold" width="12"></iconify-icon>
+                                {{ form.agence.errors.0 }}
+                            </p>
+                            {% endif %}
+                            <p class="mt-1.5 text-xs text-slate-400 font-medium flex items-center gap-1">
+                                <iconify-icon icon="solar:info-circle-bold" width="12"></iconify-icon>
+                                Agence E2C à laquelle cet agent sera rattaché
+                            </p>
+                        </div>
+
+                        <!-- Matricule -->
+                        <div>
+                            <label for="{{ form.matricule_agent.id_for_label }}"
+                                   class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                {{ form.matricule_agent.label }}
+                            </label>
+                            {{ form.matricule_agent }}
+                            <p class="mt-1.5 text-xs text-slate-400 font-medium flex items-center gap-1">
+                                <iconify-icon icon="solar:info-circle-bold" width="12"></iconify-icon>
+                                Uniquement pour les agents de terrain
+                            </p>
+                        </div>
+
+                        <!-- Poste -->
+                        <div>
+                            <label for="{{ form.poste_agent.id_for_label }}"
+                                   class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                {{ form.poste_agent.label }}
+                            </label>
+                            {{ form.poste_agent }}
+                        </div>
+
+                        <!-- Statut (modification uniquement) -->
+                        {% if object %}
+                        <div class="pt-2">
+                            <label for="{{ form.statut.id_for_label }}"
+                                   class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                {{ form.statut.label }}
+                            </label>
+                            {{ form.statut }}
+                        </div>
+
+                        <!-- Mots de passe (création uniquement) -->
+                        {% else %}
+                        <div class="pt-2 space-y-5">
+                            <div>
+                                <label for="{{ form.password1.id_for_label }}"
+                                       class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                    Mot de passe <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.password1 }}
+                                {% if form.password1.errors %}
+                                <p class="mt-1.5 text-xs text-red-500 font-medium flex items-center gap-1">
+                                    <iconify-icon icon="solar:danger-triangle-bold" width="12"></iconify-icon>
+                                    {{ form.password1.errors.0 }}
+                                </p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label for="{{ form.password2.id_for_label }}"
+                                       class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                    Confirmation mot de passe <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}
+                                <p class="mt-1.5 text-xs text-red-500 font-medium flex items-center gap-1">
+                                    <iconify-icon icon="solar:danger-triangle-bold" width="12"></iconify-icon>
+                                    {{ form.password2.errors.0 }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-10 pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <a href="{% url 'users:user_list' %}"
+                       class="btn-secondary px-5 py-2.5 rounded-xl font-semibold text-sm font-jakarta flex items-center gap-2">
+                        Annuler
+                    </a>
+                    <button type="submit"
+                            class="btn-primary px-6 py-2.5 rounded-xl font-semibold text-sm font-jakarta flex items-center gap-2 shadow-lg shadow-indigo-200">
+                        <iconify-icon icon="solar:check-circle-bold" width="18"></iconify-icon>
+                        {% if object %}Mettre à jour{% else %}Enregistrer{% endif %}
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ── 1. Appliquer le style form-input à tous les champs ──
+    document.querySelectorAll('input:not([type=checkbox]), select, textarea').forEach(field => {
+        field.className = '';
+        field.classList.add('form-input');
+    });
+
+    // ── 2. Toggle agence selon le rôle sélectionné ──
+    const roleSelect = document.getElementById('id_role') || document.querySelector('[name="role"]');
+    const agenceField = document.getElementById('agence-field');
+    const agenceSelect = document.getElementById('id_agence');
+
+    function toggleAgence() {
+        if (!roleSelect || !agenceField) return;
+
+        const isAgent = roleSelect.value === 'AGENT_TERRAIN';
+        agenceField.style.display = isAgent ? 'block' : 'none';
+
+        // Rendre le champ obligatoire côté HTML selon le rôle
+        if (agenceSelect) {
+            agenceSelect.required = isAgent;
+        }
+    }
+
+    roleSelect?.addEventListener('change', toggleAgence);
+    toggleAgence(); // applique au chargement (important pour le mode modification)
+
+});
+</script>
+{% endblock %}

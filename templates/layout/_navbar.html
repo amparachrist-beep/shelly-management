@@ -1,0 +1,573 @@
+<!-- templates/layout/_navbar.html -->
+{% load static %}
+
+<div class="flex items-center justify-between w-full px-4 py-2 bg-white border-b border-slate-200">
+
+    <!-- Left: page title / breadcrumb (mobile) -->
+    <div class="flex items-center gap-3">
+        <div class="lg:hidden">
+            <div class="flex items-center gap-2 text-sm">
+                <a href="{% if user.is_admin %}{% url 'dashboard:admin_dashboard' %}{% elif user.is_agent %}{% url 'dashboard:agent_dashboard' %}{% elif user.is_client %}{% url 'dashboard:client_dashboard' %}{% else %}#{% endif %}"
+                   class="text-indigo-600 hover:text-indigo-700 transition-colors">
+                    <iconify-icon icon="solar:home-2-bold-duotone" width="18"></iconify-icon>
+                </a>
+                <iconify-icon icon="solar:alt-arrow-right-linear" width="14" class="text-slate-400"></iconify-icon>
+                <span class="font-jakarta text-sm font-bold text-slate-900 max-w-[150px] whitespace-nowrap overflow-hidden text-ellipsis">
+                    {% block breadcrumb_nav %}Tableau de bord{% endblock %}
+                </span>
+            </div>
+        </div>
+
+        <!-- Desktop page title -->
+        <div class="hidden lg:block">
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-500 to-cyan-500"></div>
+                <span class="font-jakarta text-xs font-bold text-slate-500 tracking-wide uppercase">Shelly SGE</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: search + actions + notifications + user -->
+    <div class="flex items-center gap-2 sm:gap-3">
+
+        <!-- Search Desktop -->
+
+        <!-- Quick Actions -->
+        <div class="hidden md:flex items-center gap-2">
+            {% if user.is_agent %}
+            <a href="{% url 'menages:create' %}" class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                <iconify-icon icon="solar:user-plus-bold" width="16"></iconify-icon>
+                <span class="hidden sm:inline">Nouveau ménage</span>
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Notifications -->
+        <div class="relative" id="notif-wrapper">
+            <button id="notif-btn"
+                    class="relative p-2 rounded-xl text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all">
+                <iconify-icon icon="solar:bell-bold-duotone" width="20"></iconify-icon>
+                {% if notifications_count|default:0 > 0 %}
+                <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 border-2 border-white"></span>
+                {% endif %}
+            </button>
+
+            <div id="notif-dropdown" class="dropdown-panel hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-xl border border-slate-200 shadow-lg z-50">
+                <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+                    <h4 class="font-jakarta text-base font-bold text-slate-900">Notifications</h4>
+                    {% if notifications_count|default:0 > 0 %}
+                    <span class="bg-indigo-100 text-indigo-600 rounded-full px-2 py-0.5 text-xs font-semibold">{{ notifications_count|default:0 }}</span>
+                    {% endif %}
+                </div>
+                <div class="max-h-80 overflow-y-auto p-2">
+                    <!-- Notification items populated dynamically -->
+                    <p class="text-center text-slate-500 text-sm py-8">Aucune notification récente</p>
+                </div>
+                <div class="px-4 py-3 border-t border-slate-200">
+                    <a href="{% url 'dashboard:notifications_list' %}" class="block text-center text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
+                        Voir toutes les notifications →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Menu -->
+        <div class="relative" id="user-wrapper">
+            <button id="user-btn"
+                    class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-50 transition-all">
+                <div class="w-9 h-9 rounded-full overflow-hidden border-2 border-indigo-100 flex-shrink-0">
+                    {% if user.profile_image %}
+                        <img src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center">
+                            <span class="font-jakarta text-sm font-bold text-white">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="hidden lg:block text-left">
+                    <p class="font-jakarta text-sm font-bold text-slate-900 max-w-[110px] whitespace-nowrap overflow-hidden text-ellipsis">{{ user.get_full_name|default:user.username }}</p>
+                    <p class="text-xs text-slate-500">{{ user.get_role_display }}</p>
+                </div>
+                <iconify-icon icon="solar:alt-arrow-down-linear" width="16" class="hidden lg:block text-slate-400"></iconify-icon>
+            </button>
+
+            <div id="user-dropdown" class="dropdown-panel hidden absolute right-0 top-full mt-2 w-64 bg-white rounded-xl border border-slate-200 shadow-lg z-50">
+
+                <!-- User header -->
+                <div class="px-4 py-3 border-b border-slate-200">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-indigo-100 flex-shrink-0">
+                            {% if user.profile_image %}
+                                <img src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="w-full h-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center">
+                                    <span class="font-jakarta text-sm font-bold text-white">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <p class="font-jakarta text-sm font-bold text-slate-900">{{ user.get_full_name|default:user.username }}</p>
+                            <p class="text-xs text-slate-500">{{ user.email|truncatechars:22 }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu items -->
+                <div class="p-1">
+                    <a href="{% url 'users:profile' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition-colors">
+                        <iconify-icon icon="solar:user-circle-bold-duotone" width="18" class="text-indigo-600"></iconify-icon>
+                        <span>Mon profil</span>
+                    </a>
+
+                </div>
+
+                {% if user.is_admin %}
+                <div class="p-1 border-t border-slate-100">
+                    <a href="/admin/" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition-colors">
+                        <iconify-icon icon="solar:shield-bold-duotone" width="18" class="text-amber-600"></iconify-icon>
+                        <span>Administration Django</span>
+                    </a>
+                </div>
+                {% endif %}
+
+                <div class="p-1 border-t border-slate-100">
+                    <a href="{% url 'users:logout' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                        <iconify-icon icon="solar:logout-2-bold-duotone" width="18" class="text-red-600"></iconify-icon>
+                        <span>Déconnexion</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+/* Dropdown animation */
+.dropdown-panel {
+    animation: fadeInDown 0.2s ease-out;
+    transform-origin: top right;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ============================================
+    // GESTION DES DROPDOWNS
+    // ============================================
+    const notifBtn = document.getElementById('notif-btn');
+    const notifDd  = document.getElementById('notif-dropdown');
+    const userBtn  = document.getElementById('user-btn');
+    const userDd   = document.getElementById('user-dropdown');
+
+    function toggle(btn, dd, other) {
+        if (!btn || !dd) return;
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dd.classList.toggle('hidden');
+            if (other) other.classList.add('hidden');
+
+            // Si on ouvre les notifications, charger les données
+            if (!dd.classList.contains('hidden') && dd.id === 'notif-dropdown') {
+                loadNotifications(true);
+            }
+        });
+    }
+    toggle(notifBtn, notifDd, userDd);
+    toggle(userBtn,  userDd,  notifDd);
+
+    document.addEventListener('click', function() {
+        if (notifDd) notifDd.classList.add('hidden');
+        if (userDd) userDd.classList.add('hidden');
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (notifDd) notifDd.classList.add('hidden');
+            if (userDd) userDd.classList.add('hidden');
+        }
+    });
+
+    // ============================================
+    // GESTION DES NOTIFICATIONS
+    // ============================================
+    let currentUnreadCount = 0;
+    let updateInterval = null;
+
+    /**
+     * Charge les notifications depuis l'API
+     * @param {boolean} markAsRead - Marquer les notifications comme lues
+     */
+   function loadNotifications(markAsRead = false) {
+    const notifContainer = document.querySelector('#notif-dropdown .max-h-80');
+    const notifCountSpan = document.querySelector('#notif-dropdown .bg-indigo-100');
+    const bellBadge = document.querySelector('#notif-btn .absolute');
+
+    if (!notifContainer) return;
+
+    // Afficher un indicateur de chargement
+    notifContainer.innerHTML = `
+        <div class="flex items-center justify-center py-8">
+            <div class="spinner border-2 border-indigo-500 border-t-transparent rounded-full w-6 h-6 animate-spin"></div>
+            <span class="ml-2 text-sm text-slate-500">Chargement...</span>
+        </div>
+    `;
+
+    // 🔧 CORRECTION: Ajouter le header X-Requested-With
+    fetch('/dashboard/ajax/notifications/?limit=5', {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        credentials: 'same-origin'  // Important pour envoyer les cookies
+    })
+    .then(response => {
+        console.log('📡 Réponse reçue:', response.status, response.statusText);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('📦 Données notifications:', data);
+
+        if (data.success) {
+            // Mettre à jour le compteur
+            currentUnreadCount = data.unread_count;
+
+            // Mettre à jour le badge de la cloche
+            if (bellBadge) {
+                if (currentUnreadCount > 0) {
+                    bellBadge.classList.remove('hidden');
+                    bellBadge.innerHTML = currentUnreadCount > 9 ? '9+' : currentUnreadCount;
+                } else {
+                    bellBadge.classList.add('hidden');
+                }
+            }
+
+            // Mettre à jour le compteur dans le dropdown
+            if (notifCountSpan) {
+                if (currentUnreadCount > 0) {
+                    notifCountSpan.textContent = currentUnreadCount;
+                    notifCountSpan.classList.remove('hidden');
+                } else {
+                    notifCountSpan.classList.add('hidden');
+                }
+            }
+
+            // Générer le HTML des notifications
+            if (data.notifications && data.notifications.length > 0) {
+                notifContainer.innerHTML = data.notifications.map(notif => `
+                    <div class="notification-item ${notif.read ? 'opacity-70' : 'bg-indigo-50/30'} rounded-lg mb-2 p-3 hover:bg-slate-50 transition-colors cursor-pointer"
+                         data-id="${notif.id}"
+                         data-read="${notif.read}"
+                         data-url="${notif.action_url || notif.detail_url}">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0">
+                                <iconify-icon icon="solar:${notif.icon}-bold-duotone" width="18" class="${notif.color_class}"></iconify-icon>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-2">
+                                    <p class="text-sm font-semibold ${notif.read ? 'text-slate-600' : 'text-slate-900'} truncate">
+                                        ${escapeHtml(notif.title)}
+                                    </p>
+                                    ${!notif.read ? '<span class="flex-shrink-0 w-2 h-2 rounded-full bg-indigo-500"></span>' : ''}
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1 line-clamp-2">${escapeHtml(notif.message)}</p>
+                                <p class="text-xs text-slate-400 mt-2 flex items-center gap-2">
+                                    <iconify-icon icon="solar:clock-circle-linear" width="12"></iconify-icon>
+                                    ${notif.created_at}
+                                </p>
+                                ${notif.action_label && notif.action_url ? `
+                                    <a href="${notif.action_url}" class="text-xs text-indigo-600 hover:text-indigo-700 mt-2 inline-block">
+                                        ${escapeHtml(notif.action_label)} →
+                                    </a>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Ajouter les écouteurs d'événements sur les notifications
+                document.querySelectorAll('.notification-item').forEach(item => {
+                    const notifId = item.dataset.id;
+                    const isRead = item.dataset.read === 'true';
+                    const url = item.dataset.url;
+
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+
+                        // Marquer comme lue si pas encore lue
+                        if (!isRead) {
+                            markNotificationAsRead(notifId);
+                        }
+
+                        // Rediriger vers l'URL si disponible
+                        if (url && url !== '#') {
+                            window.location.href = url;
+                        }
+                    });
+                });
+
+            } else {
+                notifContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-8 text-center">
+                        <iconify-icon icon="solar:bell-off-linear" width="32" class="text-slate-400 mb-2"></iconify-icon>
+                        <p class="text-slate-500 text-sm">Aucune notification récente</p>
+                        <p class="text-xs text-slate-400 mt-1">Vous serez notifié des nouvelles alertes</p>
+                    </div>
+                `;
+            }
+
+            // Marquer comme lues si demandé
+            if (markAsRead && currentUnreadCount > 0) {
+                markAllNotificationsAsRead();
+            }
+        } else {
+            throw new Error(data.error || 'Erreur de chargement');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Erreur chargement notifications:', error);
+        notifContainer.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-8 text-center">
+                <iconify-icon icon="solar:danger-triangle-linear" width="32" class="text-red-400 mb-2"></iconify-icon>
+                <p class="text-red-500 text-sm">Erreur de chargement</p>
+                <p class="text-xs text-slate-500 mt-1">${error.message}</p>
+                <button onclick="location.reload()" class="mt-2 text-xs text-indigo-600 hover:text-indigo-700">
+                    Réessayer →
+                </button>
+            </div>
+        `;
+    });
+}
+
+// Fonction utilitaire pour échapper le HTML
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+    /**
+     * Marque une notification comme lue
+     * @param {number} notificationId - ID de la notification
+     */
+    function markNotificationAsRead(notificationId) {
+        fetch(`/dashboard/ajax/notifications/${notificationId}/mark-read/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Mettre à jour le compteur
+                currentUnreadCount = data.unread_count;
+
+                // Mettre à jour le badge
+                const bellBadge = document.querySelector('#notif-btn .absolute');
+                if (bellBadge) {
+                    if (currentUnreadCount > 0) {
+                        bellBadge.classList.remove('hidden');
+                        bellBadge.innerHTML = currentUnreadCount > 9 ? '9+' : currentUnreadCount;
+                    } else {
+                        bellBadge.classList.add('hidden');
+                    }
+                }
+
+                // Mettre à jour le compteur dans le dropdown
+                const notifCountSpan = document.querySelector('#notif-dropdown .bg-indigo-100');
+                if (notifCountSpan) {
+                    if (currentUnreadCount > 0) {
+                        notifCountSpan.textContent = currentUnreadCount;
+                        notifCountSpan.classList.remove('hidden');
+                    } else {
+                        notifCountSpan.classList.add('hidden');
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Erreur marquage notification:', error);
+        });
+    }
+
+    /**
+     * Marque toutes les notifications comme lues
+     */
+    function markAllNotificationsAsRead() {
+        fetch('/dashboard/ajax/notifications/mark-all-read/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.updated_count > 0) {
+                // Recharger les notifications
+                loadNotifications(false);
+
+                // Afficher une notification toast
+                showToast(`${data.updated_count} notification(s) marquée(s) comme lue(s)`, 'success');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur marquage toutes notifications:', error);
+        });
+    }
+
+    /**
+     * Récupère le token CSRF
+     */
+    function getCsrfToken() {
+        const csrfCookie = document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='));
+        if (csrfCookie) {
+            return csrfCookie.split('=')[1];
+        }
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    }
+
+    /**
+     * Affiche un toast de notification
+     * @param {string} message - Message à afficher
+     * @param {string} type - Type de notification (success, error, info)
+     */
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `fixed bottom-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg animate-fade-in-up`;
+
+        // Couleurs selon le type
+        const colors = {
+            success: 'bg-emerald-500 text-white',
+            error: 'bg-red-500 text-white',
+            info: 'bg-blue-500 text-white',
+            warning: 'bg-amber-500 text-white'
+        };
+
+        const icons = {
+            success: 'check-circle',
+            error: 'times-circle',
+            info: 'info-circle',
+            warning: 'exclamation-triangle'
+        };
+
+        toast.className += ' ' + (colors[type] || colors.info);
+        toast.innerHTML = `
+            <iconify-icon icon="solar:${icons[type] || icons.info}-bold" width="20"></iconify-icon>
+            <span class="text-sm font-medium">${message}</span>
+        `;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(20px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // ============================================
+    // AJOUTER UNE NOTIFICATION TOAST POUR LES ALERTES
+    // ============================================
+    /**
+     * Vérifie les nouvelles notifications non lues
+     */
+    function checkNewNotifications() {
+        fetch('/dashboard/ajax/notifications/?limit=1')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.unread_count > currentUnreadCount) {
+                    // Nouvelle notification
+                    const newNotif = data.notifications[0];
+                    if (newNotif && !newNotif.read) {
+                        showToast(newNotif.title,
+                            newNotif.priority === 2 ? 'warning' :
+                            newNotif.type === 'ERROR' ? 'error' : 'info'
+                        );
+                    }
+                    currentUnreadCount = data.unread_count;
+
+                    // Mettre à jour le badge
+                    const bellBadge = document.querySelector('#notif-btn .absolute');
+                    if (bellBadge) {
+                        if (currentUnreadCount > 0) {
+                            bellBadge.classList.remove('hidden');
+                            bellBadge.innerHTML = currentUnreadCount > 9 ? '9+' : currentUnreadCount;
+                        } else {
+                            bellBadge.classList.add('hidden');
+                        }
+                    }
+                }
+            })
+            .catch(error => console.error('Erreur vérification notifications:', error));
+    }
+
+    // ============================================
+    // INITIALISATION
+    // ============================================
+
+    // Charger les notifications au démarrage
+    setTimeout(() => loadNotifications(false), 500);
+
+    // Vérifier les nouvelles notifications toutes les 30 secondes
+    updateInterval = setInterval(checkNewNotifications, 30000);
+
+    // Nettoyer l'intervalle lors de la déconnexion de la page
+    window.addEventListener('beforeunload', () => {
+        if (updateInterval) {
+            clearInterval(updateInterval);
+        }
+    });
+
+    // Ajouter le style pour l'animation des toasts
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.3s ease-out;
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .notification-item {
+            transition: all 0.2s ease;
+        }
+        .notification-item:hover {
+            transform: translateX(2px);
+        }
+    `;
+    document.head.appendChild(style);
+
+    console.log('✅ Système de notifications initialisé');
+});
+</script>

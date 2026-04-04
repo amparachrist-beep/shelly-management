@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if object %}Modifier{% else %}Nouveau{% endif %} type de compteur - SGE{% endblock %}
+
+{% block breadcrumb %}
+<li class="flex items-center">
+    <a href="{% url 'dashboard:admin_dashboard' %}" class="text-slate-400 hover:text-white transition-colors">Tableau de bord</a>
+    <iconify-icon icon="solar:alt-arrow-right-linear" class="mx-2 text-slate-600" width="16"></iconify-icon>
+</li>
+<li class="flex items-center">
+    <a href="{% url 'compteurs:typecompteur_list' %}" class="text-slate-400 hover:text-white transition-colors">Types de compteur</a>
+    <iconify-icon icon="solar:alt-arrow-right-linear" class="mx-2 text-slate-600" width="16"></iconify-icon>
+</li>
+<li class="text-white">{% if object %}Modifier{% else %}Nouveau{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-500/10 rounded-lg">
+                <iconify-icon icon="solar:database-linear" width="24" class="text-blue-500"></iconify-icon>
+            </div>
+            <h1 class="text-2xl font-semibold text-white">
+                {% if object %}Modifier le type de compteur{% else %}Nouveau type de compteur{% endif %}
+            </h1>
+        </div>
+    </div>
+
+    <!-- Formulaire -->
+    <div class="bg-slate-900/50 border border-white/5 rounded-xl p-6">
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <!-- AFFICHAGE DES ERREURS GLOBALES -->
+            {% if form.non_field_errors %}
+            <div class="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                {% for error in form.non_field_errors %}
+                <p class="text-sm text-red-400">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- AFFICHAGE DE TOUTES LES ERREURS (DÉBOGAGE) -->
+            {% if form.errors %}
+            <div class="mb-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                <p class="text-yellow-400 font-semibold mb-2">Veuillez corriger les erreurs suivantes :</p>
+                <ul class="list-disc list-inside text-sm text-yellow-300">
+                {% for field, errors in form.errors.items %}
+                    <li><strong>{{ field|capfirst }} :</strong> {{ errors.0 }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Colonne gauche -->
+                <div class="space-y-4">
+                    <!-- Code -->
+                    <div>
+                        <label for="{{ form.code.id_for_label }}" class="block text-sm font-medium text-slate-400 mb-2">
+                            {{ form.code.label }} <span class="text-red-400">*</span>
+                        </label>
+                        {{ form.code }}
+                        {% if form.code.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.code.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-slate-500">Code unique identifiant le type (ex: CMP-CHNT-001)</p>
+                    </div>
+
+                    <!-- Nom -->
+                    <div>
+                        <label for="{{ form.nom.id_for_label }}" class="block text-sm font-medium text-slate-400 mb-2">
+                            {{ form.nom.label }} <span class="text-red-400">*</span>
+                        </label>
+                        {{ form.nom }}
+                        {% if form.nom.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.nom.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Marque et Modèle -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="{{ form.marque.id_for_label }}" class="block text-sm font-medium text-slate-400 mb-2">
+                                {{ form.marque.label }}
+                            </label>
+                            {{ form.marque }}
+                            {% if form.marque.errors %}
+                            <p class="mt-1 text-sm text-red-400">{{ form.marque.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.modele.id_for_label }}" class="block text-sm font-medium text-slate-400 mb-2">
+                                {{ form.modele.label }}
+                            </label>
+                            {{ form.modele }}
+                            {% if form.modele.errors %}
+                            <p class="mt-1 text-sm text-red-400">{{ form.modele.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Technologie -->
+                    <div>
+                        <label for="{{ form.technologie.id_for_label }}" class="block text-sm font-medium text-slate-400 mb-2">
+                            {{ form.technologie.label }} <span class="text-red-400">*</span>
+                        </label>
+                        {{ form.technologie }}
+                        {% if form.technologie.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.technologie.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Ordre d'affichage -->
+                    <div>
+                        <label for="{{ form.ordre_affichage.id_for_label }}" class="block text-sm font-medium text-slate-400 mb-2">
+                            {{ form.ordre_affichage.label }}
+                        </label>
+                        {{ form.ordre_affichage }}
+                        {% if form.ordre_affichage.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.ordre_affichage.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-slate-500">Ordre d'affichage dans les listes (le plus petit apparaît en premier)</p>
+                    </div>
+                </div>
+
+                <!-- Colonne droite -->
+                <div class="space-y-4">
+                    <!-- Tension de compatibilité -->
+                    <div>
+                        <label for="{{ form.tension_compatibilite.id_for_label }}" class="block text-sm font-medium text-slate-400 mb-2">
+                            {{ form.tension_compatibilite.label }} <span class="text-red-400">*</span>
+                        </label>
+                        {{ form.tension_compatibilite }}
+                        {% if form.tension_compatibilite.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.tension_compatibilite.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-slate-500">Ex: BT_220V, BT_110V, HT, etc.</p>
+                    </div>
+
+                    <!-- Nombre de phases -->
+                    <div>
+                        <label for="{{ form.nombre_phases.id_for_label }}" class="block text-sm font-medium text-slate-400 mb-2">
+                            {{ form.nombre_phases.label }} <span class="text-red-400">*</span>
+                        </label>
+                        {{ form.nombre_phases }}
+                        {% if form.nombre_phases.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.nombre_phases.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Prix unitaire -->
+                    <div>
+                        <label for="{{ form.prix_unitaire_fcfa.id_for_label }}" class="block text-sm font-medium text-slate-400 mb-2">
+                            {{ form.prix_unitaire_fcfa.label }}
+                        </label>
+                        {{ form.prix_unitaire_fcfa }}
+                        {% if form.prix_unitaire_fcfa.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.prix_unitaire_fcfa.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-slate-500">Prix d'achat unitaire (optionnel)</p>
+                    </div>
+
+                    <!-- Stock disponible -->
+                    <div>
+                        <label for="{{ form.stock_disponible.id_for_label }}" class="block text-sm font-medium text-slate-400 mb-2">
+                            {{ form.stock_disponible.label }}
+                        </label>
+                        {{ form.stock_disponible }}
+                        {% if form.stock_disponible.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.stock_disponible.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Options supplémentaires (pleine largeur) -->
+            <div class="mt-6 pt-6 border-t border-white/5">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="flex items-center gap-3">
+                        {{ form.compatible_shelly }}
+                        <label for="{{ form.compatible_shelly.id_for_label }}" class="text-sm font-medium text-slate-400">
+                            {{ form.compatible_shelly.label }}
+                        </label>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        {{ form.en_stock }}
+                        <label for="{{ form.en_stock.id_for_label }}" class="text-sm font-medium text-slate-400">
+                            {{ form.en_stock.label }}
+                        </label>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        {{ form.actif }}
+                        <label for="{{ form.actif.id_for_label }}" class="text-sm font-medium text-slate-400">
+                            {{ form.actif.label }}
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-white/5 flex items-center justify-end gap-3">
+                <a href="{% url 'compteurs:typecompteur_list' %}"
+                   class="px-4 py-2 border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white rounded-lg transition-colors">
+                    Annuler
+                </a>
+                <button type="submit"
+                        class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors flex items-center gap-2">
+                    <iconify-icon icon="solar:check-circle-linear" width="18"></iconify-icon>
+                    {% if object %}Mettre à jour{% else %}Enregistrer{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Ajouter automatiquement les classes Tailwind aux champs du formulaire
+document.addEventListener('DOMContentLoaded', function() {
+    // Pour les champs input, select, textarea (sauf les checkboxes)
+    const formControls = document.querySelectorAll('input:not([type=checkbox]), select, textarea');
+    formControls.forEach(field => {
+        // Enlever les classes existantes si nécessaire
+        field.classList.remove('form-control');
+        field.classList.add('w-full', 'px-4', 'py-2', 'bg-slate-800', 'border', 'border-white/10', 'rounded-lg', 'text-white', 'focus:outline-none', 'focus:border-orange-500', 'focus:ring-1', 'focus:ring-orange-500', 'transition-colors');
+    });
+
+    // Pour les checkboxes
+    const checkboxes = document.querySelectorAll('input[type=checkbox]');
+    checkboxes.forEach(cb => {
+        cb.classList.remove('form-check-input');
+        cb.classList.add('w-4', 'h-4', 'rounded', 'border-white/10', 'bg-slate-800', 'text-orange-500', 'focus:ring-orange-500', 'focus:ring-offset-0');
+    });
+});
+</script>
+{% endblock %}

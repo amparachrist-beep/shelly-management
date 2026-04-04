@@ -1,0 +1,697 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tarifications - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Card & Section Styles */
+    .section-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    /* KPI Cards */
+    .stat-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    /* Inputs */
+    .filter-input {
+        width: 100%;
+        padding: 9px 12px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        color: #334155;
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .filter-input:focus {
+        background-color: #fff;
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+        font-weight: 500;
+        transition: all 0.2s;
+        border: none;
+    }
+    .btn-primary:hover {
+        box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+        transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #1e293b;
+    }
+
+    /* Table Styles */
+    .data-table th {
+        background: #f8fafc;
+        color: #64748b;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .data-table td {
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+        vertical-align: middle;
+    }
+    .data-table tr:hover td { background: #f8fafc; }
+
+    /* Pills */
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .pill-emerald{ background: #ecfdf5; color: #059669; }
+    .pill-amber  { background: #fffbeb; color: #d97706; }
+    .pill-slate  { background: #f1f5f9; color: #64748b; }
+    .pill-red    { background: #fef2f2; color: #dc2626; }
+    .pill-sky    { background: #f0f9ff; color: #0284c7; }
+    .pill-purple { background: #f5f3ff; color: #7c3aed; }
+
+    /* Tax badges */
+    .tax-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-right: 4px;
+        margin-bottom: 4px;
+    }
+    .tax-badge-rav { background: #fff3cd; color: #856404; }
+    .tax-badge-tva { background: #d1e7dd; color: #0f5132; }
+    .tax-badge-ca { background: #cfe2ff; color: #084298; }
+    .tax-badge-timbre { background: #e2d5f3; color: #4a1d96; }
+    .tax-badge-other { background: #e9ecef; color: #495057; }
+
+    /* Action Icons */
+    .action-btn {
+        width: 32px; height: 32px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+    .action-btn:hover { transform: scale(1.1); }
+
+    /* Tranche preview */
+    .tranche-preview {
+        font-size: 0.7rem;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-right: 4px;
+        margin-bottom: 2px;
+    }
+
+    /* Expandable details */
+    .expandable {
+        cursor: pointer;
+    }
+    .details-row {
+        display: none;
+        background-color: #fafafc;
+    }
+    .details-row.show {
+        display: table-row;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Tableau de bord
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-medium text-slate-500 font-jakarta">Paramétrage</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">Tarifications</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 p-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg">
+                <iconify-icon icon="solar:bill-list-bold-duotone" width="24" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">Tarifications</h1>
+                <p class="text-sm text-slate-500 mt-1">Gestion des grilles tarifaires et des taxes associées</p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'parametrage:tarification_create' %}"
+               class="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-full shadow-lg shadow-amber-200">
+                <iconify-icon icon="solar:add-circle-bold" width="18"></iconify-icon>
+                <span>Nouvelle tarification</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistiques rapides améliorées -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        <div class="stat-card border-l-4 border-l-slate-500">
+            <div class="flex items-center gap-3 mb-1">
+                <div class="p-1.5 bg-slate-100 rounded-lg text-slate-600">
+                    <iconify-icon icon="solar:database-bold" width="18"></iconify-icon>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Total</p>
+            </div>
+            <p class="text-2xl font-bold text-slate-800 font-jakarta ml-1">{{ total_tarifs }}</p>
+        </div>
+
+        <div class="stat-card border-l-4 border-l-emerald-500">
+            <div class="flex items-center gap-3 mb-1">
+                <div class="p-1.5 bg-emerald-50 rounded-lg text-emerald-600">
+                    <iconify-icon icon="solar:check-circle-bold" width="18"></iconify-icon>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Actifs</p>
+            </div>
+            <p class="text-2xl font-bold text-slate-800 font-jakarta ml-1">{{ active_count }}</p>
+        </div>
+
+        <div class="stat-card border-l-4 border-l-amber-500">
+            <div class="flex items-center gap-3 mb-1">
+                <div class="p-1.5 bg-amber-50 rounded-lg text-amber-600">
+                    <iconify-icon icon="solar:clock-circle-bold" width="18"></iconify-icon>
+                </div>
+                <p class="text-sm font-medium text-slate-500">À venir</p>
+            </div>
+            <p class="text-2xl font-bold text-slate-800 font-jakarta ml-1">{{ upcoming_count }}</p>
+        </div>
+
+        <div class="stat-card border-l-4 border-l-purple-500">
+            <div class="flex items-center gap-3 mb-1">
+                <div class="p-1.5 bg-purple-50 rounded-lg text-purple-600">
+                    <iconify-icon icon="solar:tag-bold" width="18"></iconify-icon>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Taxes actives</p>
+            </div>
+            <p class="text-2xl font-bold text-slate-800 font-jakarta ml-1">{{ total_taxes }}</p>
+        </div>
+
+        <div class="stat-card border-l-4 border-l-sky-500">
+            <div class="flex items-center gap-3 mb-1">
+                <div class="p-1.5 bg-sky-50 rounded-lg text-sky-600">
+                    <iconify-icon icon="solar:calendar-date-bold" width="18"></iconify-icon>
+                </div>
+                <p class="text-sm font-medium text-slate-500">En vigueur</p>
+            </div>
+            <p class="text-2xl font-bold text-slate-800 font-jakarta ml-1">{{ en_vigueur_count }}</p>
+        </div>
+    </div>
+
+    <!-- Filtres avancés -->
+    <div class="section-card p-4 mb-6">
+        <form method="get" class="space-y-4" id="filterForm">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div>
+                    <input type="text" name="search" placeholder="Rechercher (code, nom)..."
+                           value="{{ request.GET.search|default:'' }}"
+                           class="filter-input placeholder-slate-400">
+                </div>
+                <div>
+                    <select name="categorie" class="filter-input cursor-pointer">
+                        <option value="" class="text-slate-400">Toutes catégories</option>
+                        {% for code, label in categorie_choices %}
+                        <option value="{{ code }}" {% if request.GET.categorie == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <select name="periodicite" class="filter-input cursor-pointer">
+                        <option value="" class="text-slate-400">Toutes périodicités</option>
+                        {% for code, label in periodicite_choices %}
+                        <option value="{{ code }}" {% if request.GET.periodicite == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <select name="taxe" class="filter-input cursor-pointer">
+                        <option value="" class="text-slate-400">Toutes taxes</option>
+                        <option value="RAV" {% if request.GET.taxe == 'RAV' %}selected{% endif %}>Avec RAV</option>
+                        <option value="CA" {% if request.GET.taxe == 'CA' %}selected{% endif %}>Avec CA</option>
+                        <option value="TIMBRE" {% if request.GET.taxe == 'TIMBRE' %}selected{% endif %}>Avec Timbre</option>
+                        <option value="TVA" {% if request.GET.taxe == 'TVA' %}selected{% endif %}>TVA spécifique</option>
+                    </select>
+                </div>
+                <div>
+                    <select name="actif" class="filter-input cursor-pointer">
+                        <option value="" class="text-slate-400">Tous statuts</option>
+                        <option value="true" {% if request.GET.actif == 'true' %}selected{% endif %}>Actifs</option>
+                        <option value="false" {% if request.GET.actif == 'false' %}selected{% endif %}>Inactifs</option>
+                        <option value="upcoming" {% if request.GET.actif == 'upcoming' %}selected{% endif %}>À venir</option>
+                        <option value="expired" {% if request.GET.actif == 'expired' %}selected{% endif %}>Expirés</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-between items-center">
+                <div>
+                    <label class="flex items-center gap-2 text-sm text-slate-600">
+                        <input type="checkbox" name="show_inactive_taxes" value="1"
+                               {% if request.GET.show_inactive_taxes %}checked{% endif %}
+                               class="w-4 h-4 text-amber-600 border-slate-300 rounded focus:ring-amber-500">
+                        <span>Afficher les taxes inactives</span>
+                    </label>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn-primary px-4 py-2 rounded-lg flex items-center gap-2">
+                        <iconify-icon icon="solar:filter-bold" width="16"></iconify-icon>
+                        Appliquer les filtres
+                    </button>
+                    <a href="{% url 'parametrage:tarification_list' %}" class="btn-secondary px-4 py-2 rounded-lg flex items-center gap-2">
+                        <iconify-icon icon="solar:restart-bold" width="16"></iconify-icon>
+                        Réinitialiser
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Résultats de recherche -->
+    {% if request.GET.search or request.GET.categorie or request.GET.periodicite or request.GET.taxe or request.GET.actif %}
+    <div class="mb-4 flex items-center gap-2 text-sm text-slate-500">
+        <iconify-icon icon="solar:filter-bold" width="16"></iconify-icon>
+        <span>Filtres actifs:</span>
+        <div class="flex flex-wrap gap-2">
+            {% if request.GET.search %}
+            <span class="pill pill-slate">Recherche: "{{ request.GET.search }}"</span>
+            {% endif %}
+            {% if request.GET.categorie %}
+            <span class="pill pill-slate">{{ request.GET.categorie }}</span>
+            {% endif %}
+            <a href="{% url 'parametrage:tarification_list' %}" class="text-red-500 hover:text-red-700 ml-2">
+                <iconify-icon icon="solar:close-circle-bold" width="16"></iconify-icon>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Tableau principal -->
+    <div class="section-card">
+        <div class="overflow-x-auto">
+            <table class="w-full data-table">
+                <thead>
+                    <tr>
+                        <th class="px-6 py-4 text-left w-8"></th>
+                        <th class="px-6 py-4 text-left">Code</th>
+                        <th class="px-6 py-4 text-left">Nom</th>
+                        <th class="px-6 py-4 text-left">Catégorie</th>
+                        <th class="px-6 py-4 text-left">Abonnement</th>
+                        <th class="px-6 py-4 text-left">Tranches</th>
+                        <th class="px-6 py-4 text-left">Taxes</th>
+                        <th class="px-6 py-4 text-left">Date effet</th>
+                        <th class="px-6 py-4 text-left">Statut</th>
+                        <th class="px-6 py-4 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for tarif in tarifs %}
+                    <!-- Ligne principale -->
+                    <tr class="transition-colors expandable" data-target="details-{{ tarif.pk }}">
+                        <td class="px-6 py-4">
+                            <iconify-icon icon="solar:alt-arrow-down-linear" class="text-slate-400 expand-icon" width="16"></iconify-icon>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-mono font-semibold border border-slate-200">
+                                {{ tarif.code }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="font-semibold text-slate-800 font-jakarta">{{ tarif.nom }}</div>
+                            <div class="text-xs text-slate-400">{{ tarif.get_periodicite_display }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm text-slate-600 font-medium">{{ tarif.get_categorie_display }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="font-bold text-indigo-600">{{ tarif.abonnement_mensuel|floatformat:0 }}</span>
+                            <span class="text-xs text-slate-400">{{ tarif.devise }}/mois</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-wrap gap-1 max-w-xs">
+                                {% with tarif.get_tranches_ordonnees as tranches %}
+                                    {% for tranche in tranches|slice:":2" %}
+                                        <span class="tranche-preview">
+                                            {% if forloop.first %}0-{% endif %}
+                                            {% if tranche.borne_superieure %}
+                                                {{ tranche.borne_superieure }}kWh
+                                            {% else %}
+                                                ∞
+                                            {% endif %}
+                                            : {{ tranche.prix_kwh|floatformat:0 }}
+                                        </span>
+                                    {% endfor %}
+                                    {% if tranches|length > 2 %}
+                                        <span class="tranche-preview">+{{ tranches|length|add:"-2" }}...</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-wrap gap-1 max-w-xs">
+                                {% with tarif.taxes.all as taxes %}
+                                    {% for taxe in taxes %}
+                                        {% if taxe.active or request.GET.show_inactive_taxes %}
+                                        <span class="tax-badge
+                                            {% if taxe.code == 'RAV' %}tax-badge-rav
+                                            {% elif taxe.code == 'TVA' %}tax-badge-tva
+                                            {% elif taxe.code == 'CA' %}tax-badge-ca
+                                            {% elif taxe.code == 'TIMBRE' %}tax-badge-timbre
+                                            {% else %}tax-badge-other{% endif %}"
+                                            title="{{ taxe.nom }}{% if not taxe.active %} (inactive){% endif %}">
+                                            {{ taxe.code }}
+                                            {% if taxe.type_taxe == 'FIXE' %}
+                                                ({{ taxe.montant_fixe|floatformat:0 }})
+                                            {% else %}
+                                                ({{ taxe.pourcentage|floatformat:1 }}%)
+                                            {% endif %}
+                                        </span>
+                                        {% endif %}
+                                    {% empty %}
+                                        <span class="text-xs text-slate-400">Aucune taxe</span>
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                            {{ tarif.date_effet|date:"d/m/Y" }}
+                            {% if tarif.date_fin %}
+                                <br><span class="text-xs">→ {{ tarif.date_fin|date:"d/m/Y" }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if tarif.actif %}
+                                {% if tarif.est_active %}
+                                <span class="pill pill-emerald">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span>Actif
+                                </span>
+                                {% elif tarif.date_fin and tarif.date_fin < today %}
+                                <span class="pill pill-red">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-2"></span>Expiré
+                                </span>
+                                {% else %}
+                                <span class="pill pill-amber" title="Programmé pour le {{ tarif.date_effet|date:'d/m/Y' }}">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-2"></span>À venir
+                                </span>
+                                {% endif %}
+                            {% else %}
+                            <span class="pill pill-slate">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400 mr-2"></span>Inactif
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-1">
+                                <a href="{% url 'parametrage:tarification_detail' tarif.pk %}"
+                                   class="action-btn text-sky-600 bg-sky-50 hover:bg-sky-100"
+                                   title="Détails">
+                                    <iconify-icon icon="solar:eye-bold-duotone" width="18"></iconify-icon>
+                                </a>
+                                <a href="{% url 'parametrage:tarification_edit' tarif.pk %}"
+                                   class="action-btn text-amber-600 bg-amber-50 hover:bg-amber-100"
+                                   title="Modifier">
+                                    <iconify-icon icon="solar:pen-bold-duotone" width="18"></iconify-icon>
+                                </a>
+                                <a href="{% url 'parametrage:tarification_duplicate' tarif.pk %}"
+                                   class="action-btn text-purple-600 bg-purple-50 hover:bg-purple-100"
+                                   title="Dupliquer">
+                                    <iconify-icon icon="solar:copy-bold-duotone" width="18"></iconify-icon>
+                                </a>
+                                <a href="{% url 'parametrage:tarification_edit' tarif.pk %}?next={{ request.get_full_path|urlencode }}"
+                                   class="action-btn {% if tarif.actif %}text-slate-500 bg-slate-100 hover:text-red-600 hover:bg-red-50{% else %}text-emerald-600 bg-emerald-50 hover:bg-emerald-100{% endif %}"
+                                   title="{% if tarif.actif %}Désactiver{% else %}Activer{% endif %}">
+                                    <iconify-icon icon="solar:{% if tarif.actif %}power-bold-duotone{% else %}play-circle-bold-duotone{% endif %}" width="18"></iconify-icon>
+                                </a>
+                                <a href="{% url 'parametrage:tarification_delete' tarif.pk %}?next={{ request.get_full_path|urlencode }}"
+                                   class="action-btn text-red-600 bg-red-50 hover:bg-red-100"
+                                   title="Supprimer"
+                                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer {{ tarif.code }} ?')">
+                                    <iconify-icon icon="solar:trash-bin-trash-bold-duotone" width="18"></iconify-icon>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Ligne détaillée (cachée par défaut) -->
+                    <tr class="details-row" id="details-{{ tarif.pk }}">
+                        <td colspan="10" class="px-6 py-4 bg-slate-50">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Détail des tranches -->
+                                <div>
+                                    <h4 class="text-xs font-semibold text-slate-500 uppercase mb-3">Détail des tranches</h4>
+                                    <table class="w-full text-sm">
+                                        <thead class="bg-slate-100">
+                                            <tr>
+                                                <th class="px-3 py-2 text-left text-xs">Borne inf.</th>
+                                                <th class="px-3 py-2 text-left text-xs">Borne sup.</th>
+                                                <th class="px-3 py-2 text-left text-xs">Prix kWh</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% with tarif.get_tranches_ordonnees as tranches %}
+                                                {% for tranche in tranches %}
+                                                <tr class="border-b border-slate-200">
+                                                    <td class="px-3 py-2">{{ tranche.borne_inferieure }} kWh</td>
+                                                    <td class="px-3 py-2">
+                                                        {% if tranche.borne_superieure %}
+                                                            {{ tranche.borne_superieure }} kWh
+                                                        {% else %}
+                                                            <span class="text-slate-400">Illimité</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="px-3 py-2 font-semibold text-indigo-600">{{ tranche.prix_kwh|floatformat:2 }} FCFA</td>
+                                                </tr>
+                                                {% endfor %}
+                                            {% endwith %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Détail des taxes -->
+                                <div>
+                                    <h4 class="text-xs font-semibold text-slate-500 uppercase mb-3">Détail des taxes</h4>
+                                    <table class="w-full text-sm">
+                                        <thead class="bg-slate-100">
+                                            <tr>
+                                                <th class="px-3 py-2 text-left text-xs">Code</th>
+                                                <th class="px-3 py-2 text-left text-xs">Type</th>
+                                                <th class="px-3 py-2 text-left text-xs">Valeur</th>
+                                                <th class="px-3 py-2 text-left text-xs">Base</th>
+                                                <th class="px-3 py-2 text-left text-xs">TVA</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for taxe in tarif.taxes.all %}
+                                            <tr class="border-b border-slate-200">
+                                                <td class="px-3 py-2 font-mono">{{ taxe.code }}</td>
+                                                <td class="px-3 py-2">{{ taxe.get_type_taxe_display }}</td>
+                                                <td class="px-3 py-2">
+                                                    {% if taxe.type_taxe == 'FIXE' %}
+                                                        {{ taxe.montant_fixe|floatformat:0 }} FCFA
+                                                    {% else %}
+                                                        {{ taxe.pourcentage|floatformat:2 }}%
+                                                    {% endif %}
+                                                </td>
+                                                <td class="px-3 py-2">{{ taxe.get_base_calcul_display }}</td>
+                                                <td class="px-3 py-2">
+                                                    {% if taxe.soumis_tva %}
+                                                        <span class="pill-emerald text-xs">Oui</span>
+                                                    {% else %}
+                                                        <span class="pill-slate text-xs">Non</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="5" class="px-3 py-4 text-center text-slate-400">Aucune taxe configurée</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                                    <iconify-icon icon="solar:bill-list-linear" width="32" class="text-slate-400"></iconify-icon>
+                                </div>
+                                <p class="text-slate-900 font-semibold mb-1">Aucune tarification trouvée</p>
+                                <p class="text-slate-500 text-sm mb-4">Commencez par en créer une nouvelle.</p>
+                                <a href="{% url 'parametrage:tarification_create' %}"
+                                   class="btn-primary px-4 py-2 rounded-lg text-sm">
+                                    Créer une tarification
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination améliorée -->
+        {% if is_paginated %}
+        <div class="px-6 py-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50">
+            <div class="text-xs font-medium text-slate-500 font-jakarta">
+                Affichage de <span class="text-slate-900">{{ page_obj.start_index }}</span> à
+                <span class="text-slate-900">{{ page_obj.end_index }}</span> sur
+                <span class="text-slate-900">{{ paginator.count }}</span> tarifications
+            </div>
+
+            <div class="flex items-center gap-2">
+                <!-- Bouton Précédent -->
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.categorie %}&categorie={{ request.GET.categorie }}{% endif %}{% if request.GET.periodicite %}&periodicite={{ request.GET.periodicite }}{% endif %}{% if request.GET.taxe %}&taxe={{ request.GET.taxe }}{% endif %}{% if request.GET.actif %}&actif={{ request.GET.actif }}{% endif %}{% if request.GET.show_inactive_taxes %}&show_inactive_taxes={{ request.GET.show_inactive_taxes }}{% endif %}"
+                   class="p-2 bg-white border border-slate-200 text-slate-500 hover:text-amber-600 hover:border-amber-600 rounded-lg transition-all shadow-sm">
+                    <iconify-icon icon="solar:alt-arrow-left-linear" width="16"></iconify-icon>
+                </a>
+                {% endif %}
+
+                <!-- Numéros de page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <span class="px-3.5 py-1.5 bg-amber-600 text-white rounded-lg text-sm font-semibold shadow-md shadow-amber-200">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.categorie %}&categorie={{ request.GET.categorie }}{% endif %}{% if request.GET.periodicite %}&periodicite={{ request.GET.periodicite }}{% endif %}{% if request.GET.taxe %}&taxe={{ request.GET.taxe }}{% endif %}{% if request.GET.actif %}&actif={{ request.GET.actif }}{% endif %}{% if request.GET.show_inactive_taxes %}&show_inactive_taxes={{ request.GET.show_inactive_taxes }}{% endif %}"
+                           class="px-3.5 py-1.5 bg-white border border-slate-200 text-slate-600 hover:bg-amber-50 hover:border-amber-200 rounded-lg text-sm font-medium transition-colors">
+                            {{ num }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Bouton Suivant -->
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.categorie %}&categorie={{ request.GET.categorie }}{% endif %}{% if request.GET.periodicite %}&periodicite={{ request.GET.periodicite }}{% endif %}{% if request.GET.taxe %}&taxe={{ request.GET.taxe }}{% endif %}{% if request.GET.actif %}&actif={{ request.GET.actif }}{% endif %}{% if request.GET.show_inactive_taxes %}&show_inactive_taxes={{ request.GET.show_inactive_taxes }}{% endif %}"
+                   class="p-2 bg-white border border-slate-200 text-slate-500 hover:text-amber-600 hover:border-amber-600 rounded-lg transition-all shadow-sm">
+                    <iconify-icon icon="solar:alt-arrow-right-linear" width="16"></iconify-icon>
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Selecteur de nombre d'éléments par page -->
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-500">Afficher</span>
+                <select class="text-xs border border-slate-200 rounded-lg p-1" onchange="window.location.href=this.value">
+                    {% for size in page_sizes %}
+                    <option value="?page=1&page_size={{ size }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.categorie %}&categorie={{ request.GET.categorie }}{% endif %}{% if request.GET.periodicite %}&periodicite={{ request.GET.periodicite }}{% endif %}{% if request.GET.taxe %}&taxe={{ request.GET.taxe }}{% endif %}{% if request.GET.actif %}&actif={{ request.GET.actif }}{% endif %}{% if request.GET.show_inactive_taxes %}&show_inactive_taxes={{ request.GET.show_inactive_taxes }}{% endif %}"
+                            {% if paginator.per_page == size %}selected{% endif %}>
+                        {{ size }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <span class="text-xs text-slate-500">par page</span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Expandable rows pour voir les détails
+    const expandables = document.querySelectorAll('.expandable');
+
+    expandables.forEach(row => {
+        row.addEventListener('click', function() {
+            const targetId = this.dataset.target;
+            const detailsRow = document.getElementById(targetId);
+            const icon = this.querySelector('.expand-icon');
+
+            if (detailsRow) {
+                detailsRow.classList.toggle('show');
+
+                // Changer l'icône
+                if (detailsRow.classList.contains('show')) {
+                    icon.setAttribute('icon', 'solar:alt-arrow-up-linear');
+                } else {
+                    icon.setAttribute('icon', 'solar:alt-arrow-down-linear');
+                }
+            }
+        });
+    });
+
+    // Auto-submit du formulaire de filtre sur changement des selects
+    const filterSelects = document.querySelectorAll('#filterForm select');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            document.getElementById('filterForm').submit();
+        });
+    });
+
+    // Confirmation pour suppression
+    const deleteBtns = document.querySelectorAll('.action-btn[title="Supprimer"]');
+    deleteBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cette tarification ?')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,511 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mon Compteur - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .stat-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 20px;
+        transition: all 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .detail-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.2s;
+    }
+    .detail-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .badge-success { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .badge-danger { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+    .badge-warning { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+    .badge-info { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .badge-slate { background: #f1f5f9; color: #475569; }
+
+    .btn-icon {
+        width: 32px; height: 32px;
+        border-radius: 8px;
+        display: inline-flex; align-items: center; justify-content: center;
+        transition: all 0.2s;
+    }
+    .btn-icon:hover { transform: translateY(-1px); }
+    .btn-view { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .btn-live { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+    }
+    .btn-secondary {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #475569;
+    }
+    .btn-outline {
+        background: transparent;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    .btn-outline:hover {
+        background: #f8fafc;
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+
+    .phase-card {
+        text-align: center;
+        padding: 16px;
+        background: #f8fafc;
+        border-radius: 12px;
+        transition: all 0.2s;
+    }
+    .phase-card:hover {
+        background: #f1f5f9;
+    }
+
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+        padding: 12px 24px;
+        text-align: left;
+        font-size: 0.75rem;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .data-table td {
+        padding: 16px 24px;
+        font-size: 0.875rem;
+        color: #334155;
+        border-bottom: 1px solid #f1f5f9;
+        font-weight: 500;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #f8fafc; }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:client_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Mon tableau de bord
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">Mon Compteur</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50">
+    <!-- Page Header -->
+    <div class="bg-white border-b border-slate-200 px-6 py-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                    <iconify-icon icon="solar:electrification-bold-duotone" width="24" class="text-white"></iconify-icon>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                        Mon Compteur
+                    </h1>
+                    <p class="text-sm text-slate-500 mt-1">Gérez et surveillez vos compteurs d'énergie</p>
+                </div>
+            </div>
+
+            <div>
+                <a href="{% url 'dashboard:client_dashboard' %}" class="btn-secondary">
+                    <iconify-icon icon="solar:home-linear" width="18"></iconify-icon>
+                    Retour au tableau de bord
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-6">
+        {% if compteur_principal %}
+        <!-- Carte du compteur principal -->
+        <div class="detail-card mb-6">
+            <div class="p-6 border-b border-slate-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold text-slate-900 font-jakarta">Compteur principal</h2>
+                        <p class="text-sm text-slate-500 mt-1">Suivez votre consommation en temps réel</p>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded-xl">
+                        <iconify-icon icon="solar:energy-programming-linear" width="24" class="text-blue-500"></iconify-icon>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Informations du compteur -->
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Informations du compteur</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-slate-50 rounded-xl p-4">
+                                    <p class="text-xs text-slate-500 mb-1">Numéro de contrat</p>
+                                    <p class="text-lg font-bold text-slate-900">{{ compteur_principal.numero_contrat|default:"Non défini" }}</p>
+                                </div>
+                                <div class="bg-slate-50 rounded-xl p-4">
+                                    <p class="text-xs text-slate-500 mb-1">Type</p>
+                                    <p class="text-lg font-bold text-slate-900">{{ compteur_principal.type_compteur_detail.nom|default:"Standard" }}</p>
+                                </div>
+                                <div class="bg-slate-50 rounded-xl p-4">
+                                    <p class="text-xs text-slate-500 mb-1">Puissance souscrite</p>
+                                    <p class="text-lg font-bold text-slate-900">{{ compteur_principal.puissance_souscrite }} kVA</p>
+                                </div>
+                                <div class="bg-slate-50 rounded-xl p-4">
+                                    <p class="text-xs text-slate-500 mb-1">Index actuel</p>
+                                    <p class="text-lg font-bold text-slate-900">{{ compteur_principal.index_actuel|floatformat:2 }} kWh</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">État du compteur</h3>
+                            <div class="flex items-center gap-6">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-full {% if compteur_principal.statut == 'ACTIF' %}bg-emerald-500{% else %}bg-red-500{% endif %}"></div>
+                                    <span class="text-sm font-medium text-slate-700">{{ compteur_principal.get_statut_display }}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-full {% if compteur_principal.shelly_status == 'CONNECTE' %}bg-emerald-500{% else %}bg-red-500{% endif %}"></div>
+                                    <span class="text-sm font-medium text-slate-700">{{ compteur_principal.get_shelly_status_display }}</span>
+                                </div>
+                                {% if compteur_principal.shelly_last_seen %}
+                                <div class="flex items-center gap-2 text-xs text-slate-500">
+                                    <iconify-icon icon="solar:clock-circle-linear" width="14"></iconify-icon>
+                                    Dernière connexion: {{ compteur_principal.shelly_last_seen|date:"d/m/Y H:i" }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistiques en temps réel -->
+                    <div class="bg-slate-50 rounded-xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Consommation en temps réel</h3>
+                            {% if compteur_principal.shelly_status == 'CONNECTE' %}
+                            <span class="badge badge-success">
+                                <iconify-icon icon="solar:wifi-linear" width="12"></iconify-icon>
+                                Connecté
+                            </span>
+                            {% else %}
+                            <span class="badge badge-danger">
+                                <iconify-icon icon="solar:wifi-linear" width="12"></iconify-icon>
+                                Hors ligne
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        {% if consommation_actuelle %}
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div class="phase-card">
+                                <iconify-icon icon="solar:flash-linear" width="20" class="text-orange-500 mb-2"></iconify-icon>
+                                <p class="text-xs text-slate-500">Phase 1</p>
+                                <p class="text-xl font-bold text-slate-900">{{ consommation_actuelle.phase_1|default:0 }} W</p>
+                            </div>
+                            <div class="phase-card">
+                                <iconify-icon icon="solar:flash-linear" width="20" class="text-yellow-500 mb-2"></iconify-icon>
+                                <p class="text-xs text-slate-500">Phase 2</p>
+                                <p class="text-xl font-bold text-slate-900">{{ consommation_actuelle.phase_2|default:0 }} W</p>
+                            </div>
+                            <div class="phase-card">
+                                <iconify-icon icon="solar:flash-linear" width="20" class="text-green-500 mb-2"></iconify-icon>
+                                <p class="text-xs text-slate-500">Phase 3</p>
+                                <p class="text-xl font-bold text-slate-900">{{ consommation_actuelle.phase_3|default:0 }} W</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-slate-600">Charge totale</span>
+                                <span class="text-sm font-bold text-blue-600">{{ consommation_actuelle.charge|default:0 }}%</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full" style="width: {{ consommation_actuelle.charge|default:0 }}%"></div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">
+                                Puissance max: {{ compteur_principal.puissance_souscrite|default:"10" }} kVA
+                            </p>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-8">
+                            <iconify-icon icon="solar:plug-circle-linear" width="48" class="text-slate-300 mb-3"></iconify-icon>
+                            <p class="text-slate-500">Données de consommation non disponibles</p>
+                            <p class="text-sm text-slate-400">Le compteur semble être hors ligne</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Autres compteurs associés -->
+        {% if autres_compteurs %}
+        <div class="detail-card mb-6">
+            <div class="p-6 border-b border-slate-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-900">Autres compteurs associés</h3>
+                        <p class="text-sm text-slate-500 mt-1">{{ autres_compteurs|length }} compteur(s) supplémentaire(s)</p>
+                    </div>
+                    <span class="badge badge-info">{{ autres_compteurs|length }} compteur(s)</span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Numéro de contrat</th>
+                            <th>Adresse d'installation</th>
+                            <th>Type</th>
+                            <th>Statut</th>
+                            <th>Connectivité</th>
+                            <th>Index actuel</th>
+                            <th class="text-right">Actions</th>
+                        </thead>
+                    <tbody>
+                        {% for compteur in autres_compteurs %}
+                        <tr>
+                            <td class="font-medium text-slate-800">{{ compteur.numero_contrat }}<td class="text-slate-600">{{ compteur.adresse_installation|default:"Non spécifié" }}<td>
+                                <span class="text-slate-600">{{ compteur.type_compteur_detail.nom|default:"Standard" }}</span>
+                            <td>
+                                {% if compteur.statut == 'ACTIF' %}
+                                <span class="badge badge-success">{{ compteur.get_statut_display }}</span>
+                                {% elif compteur.statut == 'INACTIF' %}
+                                <span class="badge badge-danger">{{ compteur.get_statut_display }}</span>
+                                {% else %}
+                                <span class="badge badge-slate">{{ compteur.get_statut_display }}</span>
+                                {% endif %}
+                            <td>
+                                {% if compteur.shelly_status == 'CONNECTE' %}
+                                <span class="badge badge-success">
+                                    <iconify-icon icon="solar:wifi-linear" width="12"></iconify-icon>
+                                    Connecté
+                                </span>
+                                {% else %}
+                                <span class="badge badge-danger">
+                                    <iconify-icon icon="solar:wifi-linear" width="12"></iconify-icon>
+                                    Hors ligne
+                                </span>
+                                {% endif %}
+                            <td class="font-mono text-slate-700">{{ compteur.index_actuel|floatformat:2 }} kWh
+                            <td class="text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{% url 'compteurs:client_compteur_detail' pk=compteur.id %}"
+                                       class="btn-icon btn-view" title="Voir détails">
+                                        <iconify-icon icon="solar:eye-bold-duotone" width="18"></iconify-icon>
+                                    </a>
+                                    {% if compteur.shelly_status == 'CONNECTE' %}
+                                    <a href="{% url 'compteurs:live_data' compteur_id=compteur.id %}"
+                                       class="btn-icon btn-live" title="Surveillance en direct">
+                                        <iconify-icon icon="solar:monitor-bold-duotone" width="18"></iconify-icon>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            <td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Historique des interventions -->
+        {% if interventions %}
+        <div class="detail-card mb-6">
+            <div class="p-6 border-b border-slate-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-900">Historique des interventions</h3>
+                        <p class="text-sm text-slate-500 mt-1">Suivi des opérations sur vos compteurs</p>
+                    </div>
+                    <span class="badge badge-slate">{{ interventions|length }} intervention(s)</span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Agent</th>
+                            <th>Description</th>
+                            <th>Statut</th>
+                        </thead>
+                    <tbody>
+                        {% for intervention in interventions %}
+                        <tr>
+                            <td class="whitespace-nowrap">
+                                <div class="flex flex-col">
+                                    <span class="text-slate-700">{{ intervention.date|date:"d/m/Y" }}</span>
+                                    <span class="text-xs text-slate-400">{{ intervention.date|date:"H:i" }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge badge-slate">{{ intervention.get_type_display }}</span>
+                            </td>
+                            <td class="text-slate-600">{{ intervention.agent.get_full_name|default:"Système" }}</td>
+                            <td class="max-w-xs truncate">{{ intervention.description|truncatechars:50 }}</td>
+                            <td>
+                                {% if intervention.statut == 'TERMINÉ' %}
+                                <span class="badge badge-success">{{ intervention.get_statut_display }}</span>
+                                {% elif intervention.statut == 'EN_COURS' %}
+                                <span class="badge badge-warning">{{ intervention.get_statut_display }}</span>
+                                {% else %}
+                                <span class="badge badge-slate">{{ intervention.get_statut_display }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Actions rapides -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <a href="{% url 'compteurs:client_compteur_detail' pk=compteur_principal.id %}"
+               class="stat-card hover:border-blue-200 group">
+                <div class="flex items-start gap-4">
+                    <div class="p-3 bg-blue-50 rounded-xl group-hover:bg-blue-100 transition-colors">
+                        <iconify-icon icon="solar:chart-line-linear" width="24" class="text-blue-500"></iconify-icon>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-slate-900 mb-1">Analyse détaillée</h4>
+                        <p class="text-sm text-slate-500">Graphiques et statistiques détaillés de votre consommation</p>
+                    </div>
+                </div>
+            </a>
+
+            {% if compteur_principal.shelly_status == 'CONNECTE' %}
+            <a href="{% url 'compteurs:live_data' compteur_id=compteur_principal.id %}"
+               class="stat-card hover:border-emerald-200 group">
+                <div class="flex items-start gap-4">
+                    <div class="p-3 bg-emerald-50 rounded-xl group-hover:bg-emerald-100 transition-colors">
+                        <iconify-icon icon="solar:monitor-linear" width="24" class="text-emerald-500"></iconify-icon>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-slate-900 mb-1">Surveillance en direct</h4>
+                        <p class="text-sm text-slate-500">Visualisez votre consommation en temps réel</p>
+                    </div>
+                </div>
+            </a>
+            {% endif %}
+
+            <a href="{% url 'dashboard:client_conseils' %}"
+               class="stat-card hover:border-amber-200 group">
+                <div class="flex items-start gap-4">
+                    <div class="p-3 bg-amber-50 rounded-xl group-hover:bg-amber-100 transition-colors">
+                        <iconify-icon icon="solar:lightbulb-linear" width="24" class="text-amber-500"></iconify-icon>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-slate-900 mb-1">Conseils d'économie</h4>
+                        <p class="text-sm text-slate-500">Optimisez votre consommation et réduisez vos factures</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% else %}
+        <!-- Message si pas de compteur -->
+        <div class="detail-card">
+            <div class="p-12 text-center">
+                <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <iconify-icon icon="solar:electrification-linear" width="40" class="text-slate-400"></iconify-icon>
+                </div>
+                <h2 class="text-xl font-semibold text-slate-900 mb-2">Aucun compteur trouvé</h2>
+                <p class="text-slate-500 mb-4">Vous n'avez pas encore de compteur associé à votre compte.</p>
+                <p class="text-sm text-slate-400 mb-6">Veuillez contacter votre administrateur pour ajouter un compteur.</p>
+                <a href="{% url 'dashboard:client_dashboard' %}"
+                   class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                    <iconify-icon icon="solar:home-linear" width="18"></iconify-icon>
+                    Retour au tableau de bord
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* KPI Card */
+    .kpi-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .kpi-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    }
+    .kpi-blue::before   { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+    .kpi-emerald::before { background: linear-gradient(90deg, #10b981, #34d399); }
+    .kpi-purple::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+    .kpi-red::before    { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+    .icon-box {
+        width: 48px; height: 48px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Section card */
+    .section-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
+    .section-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+
+    /* Table */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+        padding: 12px 24px; text-align: left;
+        font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+        color: #64748b; background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+        letter-spacing: 0.05em; font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .data-table td {
+        padding: 16px 24px; font-size: 0.875rem; color: #334155;
+        border-bottom: 1px solid #f1f5f9; font-weight: 500;
+    }
+    .data-table tr:hover td { background: #f8fafc; }
+
+    /* Forms */
+    .form-input {
+        border: 1px solid #e2e8f0; border-radius: 10px;
+        padding: 8px 12px; font-size: 0.875rem; outline: none;
+        transition: all 0.2s;
+    }
+    .form-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}" class="flex items-center gap-2 text-blue-600 text-sm font-medium font-jakarta">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Dashboard
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">Suivi Global</li>
+{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center shadow-lg">
+                <iconify-icon icon="solar:chart-square-bold-duotone" width="24" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900 font-jakarta">{{ page_title }}</h1>
+                <p class="text-sm text-slate-500 font-medium">Vue d'ensemble des consommations</p>
+            </div>
+        </div>
+
+        <form method="get" class="flex flex-wrap items-center gap-3 bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-2 px-2 text-slate-400">
+                <iconify-icon icon="solar:calendar-bold-duotone" width="18"></iconify-icon>
+                <span class="text-xs font-bold uppercase">Période</span>
+            </div>
+            <input type="date" name="date_debut" value="{{ date_debut|date:'Y-m-d' }}" class="form-input">
+            <span class="text-slate-300">/</span>
+            <input type="date" name="date_fin" value="{{ date_fin|date:'Y-m-d' }}" class="form-input">
+            <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-all shadow-md shadow-blue-100">
+                Appliquer
+            </button>
+        </form>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="kpi-card kpi-blue">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Consommation</p>
+                    <h3 class="text-2xl font-bold text-slate-900 mt-1">{{ current_total|floatformat:0 }} <span class="text-sm font-medium text-slate-400">kWh</span></h3>
+                </div>
+                <div class="icon-box bg-blue-50 text-blue-600">
+                    <iconify-icon icon="solar:bolt-bold-duotone" width="24"></iconify-icon>
+                </div>
+            </div>
+            <div class="mt-4 flex items-center gap-2">
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full {% if variation.percentage > 0 %}bg-red-50 text-red-600{% else %}bg-emerald-50 text-emerald-600{% endif %}">
+                    {% if variation.percentage > 0 %}+{% endif %}{{ variation.percentage|floatformat:1 }}%
+                </span>
+                <span class="text-xs text-slate-400 font-medium">vs période préc.</span>
+            </div>
+        </div>
+
+        <div class="kpi-card kpi-emerald">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Compteurs</p>
+                    <h3 class="text-2xl font-bold text-slate-900 mt-1">{{ stats.nombre_compteurs|default:"0" }}</h3>
+                </div>
+                <div class="icon-box bg-emerald-50 text-emerald-600">
+                    <iconify-icon icon="solar:widget-2-bold-duotone" width="24"></iconify-icon>
+                </div>
+            </div>
+            <p class="mt-4 text-xs text-slate-400 font-medium">Unités actives</p>
+        </div>
+
+        <div class="kpi-card kpi-purple">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Puissance Moy.</p>
+                    <h3 class="text-2xl font-bold text-slate-900 mt-1">{{ stats.puissance_moyenne|floatformat:1 }} <span class="text-sm font-medium text-slate-400">kW</span></h3>
+                </div>
+                <div class="icon-box bg-purple-50 text-purple-600">
+                    <iconify-icon icon="solar:graph-up-bold-duotone" width="24"></iconify-icon>
+                </div>
+            </div>
+            <p class="mt-4 text-xs text-slate-400 font-medium">Demande moyenne</p>
+        </div>
+
+        <div class="kpi-card kpi-red">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Anomalies</p>
+                    <h3 class="text-2xl font-bold text-slate-900 mt-1">{{ stats.nombre_anomalies|default:"0" }}</h3>
+                </div>
+                <div class="icon-box bg-red-50 text-red-600">
+                    <iconify-icon icon="solar:danger-bold-duotone" width="24"></iconify-icon>
+                </div>
+            </div>
+            <p class="mt-4 text-xs text-slate-400 font-medium">Alertes système</p>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="section-card">
+        <div class="section-header">
+            <h3 class="text-lg font-bold text-slate-900 font-jakarta">Évolution Mensuelle</h3>
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-blue-600"></div>
+                <span class="text-xs font-bold text-slate-500 uppercase">kWh / Mois</span>
+            </div>
+        </div>
+        <div class="p-6">
+            <div class="h-80">
+                <canvas id="evolutionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="section-card">
+        <div class="section-header">
+            <h3 class="text-lg font-bold text-slate-900 font-jakarta">Top Départements</h3>
+            <iconify-icon icon="solar:map-point-wave-bold-duotone" class="text-blue-600" width="24"></iconify-icon>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Département</th>
+                        <th class="text-right">Consommation</th>
+                        <th class="text-center">Ménages</th>
+                        <th class="text-center">Compteurs</th>
+                        <th class="text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dept in top_departements %}
+                    <tr>
+                        <td class="font-bold text-slate-700">{{ dept.nom }}</td>
+                        <td class="text-right text-blue-600 font-bold">
+                            {{ dept.consommation_totale|floatformat:0 }} <span class="text-xs font-medium text-slate-400">kWh</span>
+                        </td>
+                        <td class="text-center text-slate-500">{{ dept.nombre_menages }}</td>
+                        <td class="text-center text-slate-500">{{ dept.nombre_compteurs }}</td>
+                        <td class="text-right">
+                            <!-- ✅ CORRECTION ICI : Utilisation de dept.id au lieu de dept.pk -->
+                            <a href="{% url 'dashboard_suivi:suivi_departement' dept.id %}"
+                               class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all">
+                                <iconify-icon icon="solar:eye-bold-duotone" width="20"></iconify-icon>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('evolutionChart').getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(37, 99, 235, 0.2)');
+    gradient.addColorStop(1, 'rgba(37, 99, 235, 0)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ evolution_labels|safe }},
+            datasets: [{
+                label: 'Consommation (kWh)',
+                data: {{ evolution_values|safe }},
+                borderColor: '#2563eb',
+                backgroundColor: gradient,
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#2563eb',
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { borderDash: [5, 5], color: '#f1f5f9' },
+                    ticks: { font: { family: 'Inter', size: 11 } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { family: 'Inter', size: 11 } }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

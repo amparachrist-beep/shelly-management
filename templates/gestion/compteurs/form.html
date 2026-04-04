@@ -1,0 +1,620 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Section card */
+    .section-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        color: white;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex; align-items: center; gap: 8px;
+        box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2);
+        transition: all 0.2s;
+        border: none; cursor: pointer;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #64748b;
+        border: 1px solid #cbd5e1;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-secondary:hover {
+        background: #f8fafc;
+        color: #334155;
+        border-color: #94a3b8;
+    }
+
+    .btn-action-soft {
+        background: rgba(14, 165, 233, 0.1);
+        color: #0284c7;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 6px;
+        border: 1px solid rgba(14, 165, 233, 0.2);
+    }
+    .btn-action-soft:hover {
+        background: rgba(14, 165, 233, 0.2);
+        color: #0369a1;
+    }
+
+    /* Form Styles */
+    label {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 600;
+        color: #334155;
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .help-text {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+    }
+
+    /* States for JS interaction */
+    .field-auto-filled {
+        background-color: #ecfdf5 !important; /* emerald-50 */
+        border-color: #6ee7b7 !important; /* emerald-300 */
+        color: #065f46 !important;
+        transition: all 0.5s ease;
+    }
+
+    .field-error {
+        background-color: #fef2f2 !important; /* red-50 */
+        border-color: #fca5a5 !important; /* red-300 */
+        animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    /* Spinner */
+    .btn-spinner {
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid #ffffff;
+        border-radius: 50%;
+        width: 16px; height: 16px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+    }
+    .btn-action-soft .btn-spinner {
+        border-color: rgba(2, 132, 199, 0.3);
+        border-top-color: #0284c7;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* Toast Notification */
+    .toast {
+        position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 50;
+        animation: slideInUp 0.3s ease-out forwards;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(8px);
+    }
+    @keyframes slideInUp {
+        from { transform: translateY(100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Overlay */
+    .loading-overlay {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(4px);
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Tableau de bord
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <a href="{% url 'compteurs:compteur_list' %}"
+       class="text-slate-500 text-sm font-medium font-jakarta hover:text-slate-700 transition-colors">
+        Compteurs
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">{{ page_title }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 pb-12 relative">
+
+    <!-- Chargement overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden fixed inset-0 z-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-100 flex flex-col items-center">
+            <div class="btn-spinner border-slate-200 border-t-indigo-600 w-10 h-10 mb-4"></div>
+            <h3 class="text-lg font-semibold text-slate-900 mb-1">Chargement</h3>
+            <p class="text-slate-500 text-sm">Récupération des données...</p>
+        </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="bg-white border-b border-slate-200 px-6 py-6 mb-8">
+        <div class="max-w-6xl mx-auto flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                <iconify-icon icon="solar:electricity-bold-duotone" width="24" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                    {{ page_title }}
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">
+                    {% if form.instance.pk %}Modification du compteur {{ form.instance.numero_contrat }}{% else %}Ajout d'un nouveau point de comptage{% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Content -->
+    <div class="max-w-6xl mx-auto px-6">
+        <form method="post" id="compteurForm" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3">
+                <iconify-icon icon="solar:danger-triangle-bold" class="text-red-500 mt-0.5" width="20"></iconify-icon>
+                <div class="flex-1">
+                    <h4 class="text-sm font-semibold text-red-800 mb-1">Erreur de validation</h4>
+                    {% for error in form.non_field_errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                <!-- COLONNE GAUCHE -->
+                <div class="space-y-8">
+                    <!-- Section: Identification -->
+                    <div class="section-card p-6">
+                        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                            <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                                <iconify-icon icon="solar:user-id-bold-duotone" width="20"></iconify-icon>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-800 font-jakarta">Identification</h3>
+                        </div>
+
+                        <div class="space-y-5">
+                            <div>
+                                <label for="{{ form.numero_contrat.id_for_label }}">
+                                    {{ form.numero_contrat.label }} <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.numero_contrat }}
+                                {% if form.numero_contrat.errors %}
+                                <p class="mt-1 text-sm text-red-500">{{ form.numero_contrat.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ form.matricule_compteur.id_for_label }}">
+                                        {{ form.matricule_compteur.label }} <span class="text-red-500">*</span>
+                                    </label>
+                                    {{ form.matricule_compteur }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.numero_client.id_for_label }}">
+                                        {{ form.numero_client.label }}
+                                    </label>
+                                    {{ form.numero_client }}
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                <label for="{{ form.menage.id_for_label }}">
+                                    Ménage associé <span class="text-red-500">*</span>
+                                </label>
+                                <div class="flex gap-2 mt-1">
+                                    <div class="flex-1">
+                                        {{ form.menage }}
+                                    </div>
+                                    <button type="button" onclick="loadMenageData()" id="btnLoadMenage"
+                                            class="btn-action-soft shrink-0"
+                                            title="Récupérer l'adresse et les coordonnées">
+                                        <iconify-icon icon="solar:cloud-download-bold-duotone" width="18"></iconify-icon>
+                                        <span class="hidden sm:inline">Charger infos</span>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-2 flex items-center gap-1">
+                                    <iconify-icon icon="solar:info-circle-linear" width="14"></iconify-icon>
+                                    Sélectionnez un ménage pour pré-remplir la localisation.
+                                </p>
+                            </div>
+
+                            <div>
+                                <label for="{{ form.type_tarification.id_for_label }}">
+                                    Type de tarification <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.type_tarification }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Localisation -->
+                    <div class="section-card p-6">
+                        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                            <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600">
+                                <iconify-icon icon="solar:map-point-bold-duotone" width="20"></iconify-icon>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-800 font-jakarta">Localisation</h3>
+                        </div>
+
+                        <div class="space-y-5">
+                            <div>
+                                <label for="{{ form.adresse_installation.id_for_label }}">
+                                    {{ form.adresse_installation.label }} <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.adresse_installation }}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.localite.id_for_label }}">
+                                    Localité <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.localite }}
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ form.gps_latitude.id_for_label }}">Latitude</label>
+                                    {{ form.gps_latitude }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.gps_longitude.id_for_label }}">Longitude</label>
+                                    {{ form.gps_longitude }}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="{{ form.reference_local.id_for_label }}">Référence locale</label>
+                                {{ form.reference_local }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLONNE DROITE -->
+                <div class="space-y-8">
+                    <!-- Section: Technique -->
+                    <div class="section-card p-6">
+                        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                            <div class="p-2 bg-amber-50 rounded-lg text-amber-600">
+                                <iconify-icon icon="solar:settings-bold-duotone" width="20"></iconify-icon>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-800 font-jakarta">Technique & Contrat</h3>
+                        </div>
+
+                        <div class="space-y-5">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ form.type_compteur_detail.id_for_label }}">Type de compteur <span class="text-red-500">*</span></label>
+                                    {{ form.type_compteur_detail }}
+                                    <!-- AJOUT : On affiche aussi le texte d'aide du modèle -->
+                                    {% if form.type_compteur_detail.help_text %}
+                                        <p class="help-text">{{ form.type_compteur_detail.help_text }}</p>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ form.puissance_souscrite.id_for_label }}">Puissance (kVA) <span class="text-red-500">*</span></label>
+                                    {{ form.puissance_souscrite }}
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ form.tension.id_for_label }}">Tension <span class="text-red-500">*</span></label>
+                                    {{ form.tension }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.phase.id_for_label }}">Phase <span class="text-red-500">*</span></label>
+                                    {{ form.phase }}
+                                </div>
+                            </div>
+
+                            <div class="h-px bg-slate-100 my-2"></div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ form.date_installation.id_for_label }}">Date d'installation <span class="text-red-500">*</span></label>
+                                    {{ form.date_installation }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.date_debut_contrat.id_for_label }}">Début contrat <span class="text-red-500">*</span></label>
+                                    {{ form.date_debut_contrat }}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="{{ form.date_fin_contrat.id_for_label }}">Fin contrat</label>
+                                {{ form.date_fin_contrat }}
+                            </div>
+
+                             <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label for="{{ form.periode_facturation.id_for_label }}" class="text-xs">Périodicité</label>
+                                    {{ form.periode_facturation }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.jour_releve.id_for_label }}" class="text-xs">Jour relevé</label>
+                                    {{ form.jour_releve }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.jour_paiement.id_for_label }}" class="text-xs">Jour paiement</label>
+                                    {{ form.jour_paiement }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Statut & Shelly -->
+                    <div class="section-card p-6">
+                        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                            <div class="p-2 bg-cyan-50 rounded-lg text-cyan-600">
+                                <iconify-icon icon="solar:wifi-bold-duotone" width="20"></iconify-icon>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-800 font-jakarta">Statut & Connectivité</h3>
+                        </div>
+
+                        <div class="space-y-5">
+                            <div>
+                                <label for="{{ form.statut.id_for_label }}">Statut <span class="text-red-500">*</span></label>
+                                {{ form.statut }}
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ form.index_initial.id_for_label }}">Index Initial <span class="text-red-500">*</span></label>
+                                    {{ form.index_initial }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.index_actuel.id_for_label }}">Index Actuel <span class="text-red-500">*</span></label>
+                                    {{ form.index_actuel }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="mt-8 pt-6 border-t border-slate-200 flex items-center justify-between">
+                <a href="{% url 'compteurs:compteur_list' %}" class="btn-secondary">
+                    Annuler
+                </a>
+
+                <div class="flex items-center gap-3">
+                    {% if form.instance.pk and can_delete %}
+                    <a href="{% url 'compteurs:compteur_delete' form.instance.pk %}"
+                       class="px-4 py-2.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-sm font-semibold transition-colors flex items-center gap-2">
+                        <iconify-icon icon="solar:trash-bin-trash-bold" width="16"></iconify-icon>
+                        Supprimer
+                    </a>
+                    {% endif %}
+
+                    <button type="submit" class="btn-primary">
+                        <iconify-icon icon="solar:check-circle-bold" width="18"></iconify-icon>
+                        {{ submit_label }}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// --- Configuration Globale ---
+let API_BASE_URL = "{% url 'menages:menage_api_detail' 0 %}";
+
+// --- Notification System ---
+function showNotification(message, type = 'info') {
+    const configs = {
+        'success': { icon: 'solar:check-circle-bold', bg: 'bg-emerald-50', border: 'border-emerald-100', text: 'text-emerald-800', iconColor: 'text-emerald-500' },
+        'error':   { icon: 'solar:danger-triangle-bold', bg: 'bg-red-50', border: 'border-red-100', text: 'text-red-800', iconColor: 'text-red-500' },
+        'info':    { icon: 'solar:info-circle-bold', bg: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-800', iconColor: 'text-blue-500' },
+        'warning': { icon: 'solar:bell-bing-bold', bg: 'bg-amber-50', border: 'border-amber-100', text: 'text-amber-800', iconColor: 'text-amber-500' }
+    };
+    const c = configs[type] || configs.info;
+
+    const existing = document.querySelectorAll('.toast');
+    existing.forEach(el => el.remove());
+
+    const toast = document.createElement('div');
+    toast.className = `toast flex items-start gap-3 p-4 rounded-xl border shadow-lg ${c.bg} ${c.border}`;
+    toast.innerHTML = `
+        <iconify-icon icon="${c.icon}" width="20" class="${c.iconColor} mt-0.5"></iconify-icon>
+        <div class="flex-1 text-sm font-medium ${c.text}">${message}</div>
+        <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 transition-colors">
+            <iconify-icon icon="solar:close-circle-bold" width="16"></iconify-icon>
+        </button>
+    `;
+
+    document.body.appendChild(toast);
+    setTimeout(() => { if(toast.parentElement) toast.remove(); }, 5000);
+}
+
+// --- Logic de Chargement Ménage ---
+function highlightField(field) {
+    if (!field) return;
+    field.classList.add('field-auto-filled');
+    setTimeout(() => field.classList.remove('field-auto-filled'), 2000);
+}
+
+function loadMenageData() {
+    const menageSelect = document.getElementById('{{ form.menage.id_for_label }}');
+    const menageId = menageSelect.value;
+
+    if (!menageId) {
+        showNotification('Veuillez d\'abord sélectionner un ménage', 'warning');
+        return;
+    }
+
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.remove('hidden');
+
+    const btn = document.getElementById('btnLoadMenage');
+    const originalContent = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<div class="btn-spinner"></div>';
+
+    const url = API_BASE_URL.replace('0', menageId);
+
+    fetch(url, {
+        headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
+    })
+    .then(r => {
+        if (!r.ok) throw new Error(r.status === 404 ? 'Ménage introuvable' : 'Erreur serveur');
+        return r.json();
+    })
+    .then(data => {
+        if (!data.success) throw new Error(data.error || 'Erreur inconnue');
+        if (data.menage) {
+            // Remplissage des champs
+            const fields = {
+                '{{ form.adresse_installation.id_for_label }}': data.menage.adresse_complete,
+                '{{ form.reference_local.id_for_label }}': data.menage.point_repere,
+                '{{ form.gps_latitude.id_for_label }}': data.menage.latitude ? parseFloat(data.menage.latitude).toFixed(6) : '',
+                '{{ form.gps_longitude.id_for_label }}': data.menage.longitude ? parseFloat(data.menage.longitude).toFixed(6) : ''
+            };
+
+            for (const [id, value] of Object.entries(fields)) {
+                const el = document.getElementById(id);
+                if (el && value) {
+                    el.value = value;
+                    highlightField(el);
+                }
+            }
+
+            // Localité (Select)
+            const localiteField = document.getElementById('{{ form.localite.id_for_label }}');
+            if (localiteField && data.menage.localite?.id) {
+                localiteField.value = data.menage.localite.id;
+                highlightField(localiteField);
+            }
+
+            showNotification(`Données chargées pour ${data.menage.nom_menage}`, 'success');
+        }
+    })
+    .catch(err => showNotification(err.message, 'error'))
+    .finally(() => {
+        overlay.classList.add('hidden');
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+    });
+}
+
+// --- Initialisation ---
+document.addEventListener('DOMContentLoaded', function() {
+    // Style automatique des champs Django
+    const formControls = document.querySelectorAll('input:not([type=checkbox]):not([type=submit]), select, textarea');
+    formControls.forEach(field => {
+        field.classList.add(
+            'w-full', 'px-4', 'py-2.5', 'bg-white', 'border', 'border-slate-200',
+            'rounded-xl', 'text-slate-700', 'text-sm', 'font-medium',
+            'placeholder-slate-400', 'focus:outline-none', 'focus:border-indigo-500',
+            'focus:ring-4', 'focus:ring-indigo-500/10', 'transition-all', 'duration-200'
+        );
+    });
+
+    // Auto-update Index Actuel
+    const idxInit = document.getElementById('{{ form.index_initial.id_for_label }}');
+    const idxAct = document.getElementById('{{ form.index_actuel.id_for_label }}');
+    if (idxInit && idxAct) {
+        idxInit.addEventListener('change', function() {
+            if (!idxAct.value || parseFloat(idxAct.value) < parseFloat(this.value)) {
+                idxAct.value = this.value;
+            }
+        });
+    }
+
+    // Validation Dates
+    const dInstall = document.getElementById('{{ form.date_installation.id_for_label }}');
+    const dStart = document.getElementById('{{ form.date_debut_contrat.id_for_label }}');
+    const dEnd = document.getElementById('{{ form.date_fin_contrat.id_for_label }}');
+
+    function validateDates() {
+        if (dInstall.value && dStart.value && new Date(dInstall.value) > new Date(dStart.value)) {
+            dInstall.classList.add('field-error');
+            return false;
+        } else {
+            dInstall.classList.remove('field-error');
+        }
+        return true;
+    }
+
+    [dInstall, dStart, dEnd].forEach(el => el?.addEventListener('change', validateDates));
+
+    // Submit Handler
+    document.getElementById('compteurForm')?.addEventListener('submit', function(e) {
+        if (!validateDates()) {
+            e.preventDefault();
+            showNotification('La date d\'installation ne peut être postérieure au début du contrat', 'error');
+            return;
+        }
+
+        // Loader sur le bouton submit
+        const btn = this.querySelector('button[type="submit"]');
+        const oldHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<div class="btn-spinner"></div> Enregistrement...';
+    });
+});
+</script>
+{% endblock %}

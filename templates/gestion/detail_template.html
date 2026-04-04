@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ menage.nom_menage }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="fas fa-home"></i> {{ menage.nom_menage }}
+        <small class="text-muted">({{ menage.reference_menage }})</small>
+    </h1>
+
+    <div class="btn-group" role="group">
+        {% if request.user.role in 'ADMIN AGENT_TERRAIN'|split %}
+        <a href="{% url 'menages:update' menage.pk %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Modifier
+        </a>
+        {% endif %}
+
+        {% for action in actions %}
+        <a href="{{ action.url }}" class="btn btn-outline-{{ action.color }}">
+            <i class="fas fa-{{ action.icon }}"></i> {{ action.text }}
+        </a>
+        {% endfor %}
+
+        <a href="{% url 'menages:list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Informations principales -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Informations du Ménage</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl>
+                            <dt>Référence</dt>
+                            <dd>{{ menage.reference_menage }}</dd>
+
+                            <dt>Statut</dt>
+                            <dd>
+                                <span class="badge bg-{% if menage.statut == 'ACTIF' %}success{% elif menage.statut == 'INACTIF' %}warning{% else %}secondary{% endif %}">
+                                    {{ menage.get_statut_display }}
+                                </span>
+                            </dd>
+
+                            <dt>Utilisateur associé</dt>
+                            <dd>
+                                {% if menage.utilisateur %}
+                                {{ menage.utilisateur.get_full_name|default:menage.utilisateur.username }}
+                                <br>
+                                <small class="text-muted">{{ menage.utilisateur.email }}</small>
+                                {% else %}
+                                <span class="text-muted">Aucun</span>
+                                {% endif %}
+                            </dd>
+
+                            <dt>Localité</dt>
+                            <dd>{{ menage.localite.nom }}</dd>
+
+                            <dt>Adresse</dt>
+                            <dd>{{ menage.adresse_complete|linebreaks }}</dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl>
+                            <dt>Type d'habitation</dt>
+                            <dd>{{ menage.get_type_habitation_display }}</dd>
+
+                            <dt>Nombre de personnes</dt>
+                            <dd>{{ menage.nombre_personnes }}</dd>
+
+                            <dt>Surface</dt>
+                            <dd>{{ menage.surface_m2|default:"-" }} m²</dd>
+
+                            <dt>Téléphone secondaire</dt>
+                            <dd>{{ menage.telephone_secondaire|default:"-" }}</dd>
+
+                            <dt>Personne de contact</dt>
+                            <dd>{{ menage.personne_contact|default:"-" }}</dd>
+
+                            <dt>Date création</dt>
+                            <dd>{{ menage.date_creation|date:"d/m/Y H:i" }}</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                {% if menage.point_repere or menage.code_acces %}
+                <div class="mt-3">
+                    <h6>Informations d'accès</h6>
+                    <dl class="row">
+                        {% if menage.point_repere %}
+                        <dt class="col-sm-3">Point de repère</dt>
+                        <dd class="col-sm-9">{{ menage.point_repere }}</dd>
+                        {% endif %}
+
+                        {% if menage.code_acces %}
+                        <dt class="col-sm-3">Code d'accès</dt>
+                        <dd class="col-sm-9">{{ menage.code_acces }}</dd>
+                        {% endif %}
+                    </dl>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Compteurs associés -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Compteurs ({{ compteurs_count }})</h5>
+                {% if request.user.role in 'ADMIN AGENT_TERRAIN'|split %}
+                <a href="{% url 'compteurs:create' %}?menage={{ menage.pk }}" class="btn btn-sm btn-light">
+                    <i class="fas fa-plus"></i> Ajouter
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if compteurs %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Numéro</th>
+                                <th>Type tarification</th>
+                                <th>Statut</th>
+                                <th>Date installation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for compteur in compteurs %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'compteurs:detail' compteur.pk %}">
+                                        {{ compteur.numero_contrat }}
+                                    </a>
+                                </td>
+                                <td>{{ compteur.type_tarification.nom|default:"-" }}</td>
+                                <td>
+                                    <span class="badge bg-{% if compteur.statut == 'ACTIF' %}success{% elif compteur.statut == 'INACTIF' %}warning{% else %}secondary{% endif %}">
+                                        {{ compteur.get_statut_display }}
+                                    </span>
+                                </td>
+                                <td>{{ compteur.date_installation|date:"d/m/Y" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-3">Aucun compteur associé</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques et actions -->
+    <div class="col-md-4">
+        <!-- Statistiques rapides -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Statistiques</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        Consommation du mois
+                        <span class="badge bg-primary rounded-pill">
+                            {{ consommation_mois|floatformat:2 }} kWh
+                        </span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        Factures impayées
+                        <span class="badge bg-danger rounded-pill">
+                            {{ factures_impayees.count }}
+                        </span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        Montant impayé
+                        <span class="badge bg-warning rounded-pill">
+                            {{ montant_impaye|floatformat:2 }} FCFA
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation rapide -->
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0">Navigation</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'menages:compteurs' menage.pk %}" class="btn btn-outline-primary">
+                        <i class="fas fa-tachometer-alt"></i> Voir les compteurs
+                    </a>
+                    <a href="{% url 'menages:factures' menage.pk %}" class="btn btn-outline-info">
+                        <i class="fas fa-file-invoice-dollar"></i> Voir les factures
+                    </a>
+                    <a href="{% url 'menages:consommation' menage.pk %}" class="btn btn-outline-success">
+                        <i class="fas fa-chart-line"></i> Voir la consommation
+                    </a>
+                    <a href="{% url 'menages:paiements' menage.pk %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-money-bill-wave"></i> Voir les paiements
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Factures récentes -->
+        {% if factures_recentes %}
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Factures récentes</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    {% for facture in factures_recentes %}
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <strong>{{ facture.numero_facture }}</strong>
+                            <span class="badge bg-{% if facture.statut == 'PAYEE' %}success{% else %}warning{% endif %}">
+                                {{ facture.get_statut_display }}
+                            </span>
+                        </div>
+                        <small class="text-muted">
+                            {{ facture.periode_facturation.date_debut|date:"m/Y" }} -
+                            {{ facture.montant_total|floatformat:2 }} FCFA
+                        </small>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialiser des fonctionnalités JS si nécessaire
+</script>
+{% endblock %}

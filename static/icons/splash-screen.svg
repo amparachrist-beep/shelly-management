@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <!-- Fond sombre -->
+  <rect width="1080" height="1920" fill="#0A0F1E"/>
+  
+  <!-- Cercles décoratifs d'ambiance -->
+  <circle cx="540" cy="860" r="420" fill="none" stroke="#38BDF8" stroke-width="1" opacity="0.08"/>
+  <circle cx="540" cy="860" r="320" fill="none" stroke="#38BDF8" stroke-width="1" opacity="0.12"/>
+  <circle cx="540" cy="860" r="220" fill="none" stroke="#38BDF8" stroke-width="1" opacity="0.18"/>
+
+  <!-- Logo centré -->
+  <!-- Fond cercle logo -->
+  <circle cx="540" cy="830" r="180" fill="#0F172A"/>
+  <circle cx="540" cy="830" r="180" fill="none" stroke="#38BDF8" stroke-width="6"/>
+  
+  <!-- Arc accent -->
+  <path d="M390 740 A180 180 0 0 1 690 740" fill="none" stroke="#0EA5E9" stroke-width="14" stroke-linecap="round" opacity="0.35"/>
+  
+  <!-- Points circuit -->
+  <circle cx="362" cy="825" r="10" fill="#38BDF8" opacity="0.5"/>
+  <line x1="362" y1="825" x2="392" y2="825" stroke="#38BDF8" stroke-width="4" opacity="0.3"/>
+  <circle cx="718" cy="840" r="10" fill="#38BDF8" opacity="0.5"/>
+  <line x1="688" y1="840" x2="718" y2="840" stroke="#38BDF8" stroke-width="4" opacity="0.3"/>
+
+  <!-- Éclair -->
+  <path d="M562 680 L510 820 L548 820 L518 980 L596 830 L554 830 Z" fill="#38BDF8"/>
+  <path d="M562 680 L546 722 L556 722 L548 758 L570 730 L558 730 Z" fill="#BAE6FD" opacity="0.6"/>
+
+  <!-- Texte app -->
+  <text x="540" y="1060" font-family="Georgia, serif" font-size="72" font-weight="700" fill="#F8FAFC" text-anchor="middle" letter-spacing="-1">EnergiSuivi</text>
+  <text x="540" y="1118" font-family="'Courier New', monospace" font-size="28" fill="#38BDF8" text-anchor="middle" letter-spacing="5">SUIVI ÉLECTRIQUE</text>
+
+  <!-- Point décoratif bas -->
+  <circle cx="540" cy="1680" r="5" fill="#38BDF8" opacity="0.4"/>
+  <circle cx="510" cy="1680" r="3" fill="#38BDF8" opacity="0.2"/>
+  <circle cx="570" cy="1680" r="3" fill="#38BDF8" opacity="0.2"/>
+</svg>

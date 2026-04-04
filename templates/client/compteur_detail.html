@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Détail du Compteur - SGE{% endblock %}
+
+{% block breadcrumb %}
+<li class="flex items-center">
+    <a href="{% url 'dashboard:client_dashboard' %}" class="text-slate-400 hover:text-white transition-colors">Mon Tableau de bord</a>
+    <iconify-icon icon="solar:alt-arrow-right-linear" class="mx-2 text-slate-600" width="16"></iconify-icon>
+</li>
+<li class="flex items-center">
+    <a href="{% url 'compteurs:client_mes_compteurs' %}" class="text-slate-400 hover:text-white transition-colors">Mes Compteurs</a>
+    <iconify-icon icon="solar:alt-arrow-right-linear" class="mx-2 text-slate-600" width="16"></iconify-icon>
+</li>
+<li class="text-white">{{ compteur.matricule_compteur }}</li>  <!-- ✅ Changé de numero_serie à matricule_compteur -->
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-orange-500/10 rounded-lg">
+                <iconify-icon icon="solar:electrification-linear" width="24" class="text-orange-500"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-white">Compteur {{ compteur.matricule_compteur }}</h1>  <!-- ✅ Changé -->
+                <p class="text-slate-400">Ménage: {{ household.nom_menage }}</p>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+            <a href="{% url 'compteurs:client_mes_compteurs' %}"
+               class="flex items-center gap-2 px-4 py-2 border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white rounded-lg transition-colors">
+                <iconify-icon icon="solar:arrow-left-linear" width="18"></iconify-icon>
+                <span>Retour à la liste</span>
+            </a>
+            {% if compteur.shelly_status == 'CONNECTE' %}
+            <a href="{% url 'compteurs:live_data' compteur_id=compteur.id %}"
+               class="flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg transition-colors">
+                <iconify-icon icon="solar:monitor-linear" width="18"></iconify-icon>
+                <span>Surveillance en direct</span>
+            </a>
+            {% endif %}
+            <a href="{% url 'dashboard:client_consumption_analysis' %}"
+               class="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors">
+                <iconify-icon icon="solar:chart-line-linear" width="18"></iconify-icon>
+                <span>Analyse consommation</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Informations générales -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <div class="lg:col-span-2">
+        <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-white/5 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-white mb-4">Informations du compteur</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <p class="text-sm text-slate-400 mb-1">Numéro de série</p>
+                    <p class="text-white font-medium">{{ compteur.matricule_compteur }}</p>  <!-- ✅ Changé -->
+                </div>
+                <div>
+                    <p class="text-sm text-slate-400 mb-1">Numéro de contrat</p>
+                    <p class="text-white font-medium">{{ compteur.numero_contrat|default:"Non défini" }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-400 mb-1">Type</p>
+                    <p class="text-white font-medium">{{ compteur.type_compteur_detail.nom|default:"Non défini" }}</p>  <!-- ✅ Changé -->
+                </div>
+                <div>
+                    <p class="text-sm text-slate-400 mb-1">Puissance souscrite</p>
+                    <p class="text-white font-medium">{{ compteur.puissance_souscrite }} kVA</p>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-400 mb-1">Localisation</p>
+                    <p class="text-white font-medium">{{ compteur.adresse_installation|default:"Non spécifiée" }}</p>  <!-- ✅ Changé de localisation à adresse_installation -->
+                </div>
+                <div>
+                    <p class="text-sm text-slate-400 mb-1">Date d'installation</p>
+                    <p class="text-white font-medium">{{ compteur.date_installation|date:"d/m/Y"|default:"Non spécifiée" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statut du compteur -->
+    <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-white/5 rounded-xl p-6">
+        <h3 class="text-lg font-semibold text-white mb-4">État du compteur</h3>
+        <div class="space-y-4">
+            <div>
+                <p class="text-sm text-slate-400 mb-2">Statut</p>
+                {% if compteur.statut == 'ACTIF' %}
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                    <span class="text-emerald-400 font-medium">{{ compteur.get_statut_display }}</span>
+                </div>
+                {% elif compteur.statut == 'INACTIF' %}
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <span class="text-red-400 font-medium">{{ compteur.get_statut_display }}</span>
+                </div>
+                {% else %}
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <span class="text-yellow-400 font-medium">{{ compteur.get_statut_display }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div>
+                <p class="text-sm text-slate-400 mb-2">Connectivité</p>
+                {% if compteur.shelly_status == 'CONNECTE' %}
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                    <span class="text-emerald-400 font-medium">{{ compteur.get_shelly_status_display }}</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">Dernière connexion: {{ compteur.derniere_sync_shelly|date:"d/m/Y H:i"|default:"-" }}</p>  <!-- ✅ Changé de shelly_last_seen à derniere_sync_shelly -->
+                {% else %}
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <span class="text-red-400 font-medium">{{ compteur.get_shelly_status_display }}</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">Hors ligne</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <p class="text-sm text-slate-400 mb-2">Index actuel</p>
+                <p class="text-2xl font-bold text-white">{{ compteur.index_actuel|floatformat:2 }} kWh</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Consommation du mois -->
+<div class="bg-slate-900/50 border border-white/5 rounded-xl p-6 mb-6">
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-semibold text-white">Consommation du mois en cours</h3>
+        <span class="text-sm text-slate-400">{{ current_month|date:"F Y" }}</span>
+    </div>
+
+    {% if consommation_mois %}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="text-center">
+            <p class="text-sm text-slate-400 mb-2">Phase 1</p>
+            <p class="text-3xl font-bold text-white">{{ consommation_mois.phase_1_kwh|default:0|floatformat:2 }} kWh</p>
+        </div>
+        <div class="text-center">
+            <p class="text-sm text-slate-400 mb-2">Phase 2</p>
+            <p class="text-3xl font-bold text-white">{{ consommation_mois.phase_2_kwh|default:0|floatformat:2 }} kWh</p>
+        </div>
+        <div class="text-center">
+            <p class="text-sm text-slate-400 mb-2">Phase 3</p>
+            <p class="text-3xl font-bold text-white">{{ consommation_mois.phase_3_kwh|default:0|floatformat:2 }} kWh</p>
+        </div>
+    </div>
+    <div class="mt-6">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-sm text-slate-400">Total ce mois</span>
+            <span class="text-lg font-bold text-white">
+                {% with total=consommation_mois.phase_1_kwh|add:consommation_mois.phase_2_kwh|add:consommation_mois.phase_3_kwh %}
+                    {{ total|floatformat:2 }} kWh
+                {% endwith %}
+            </span>
+        </div>
+        <div class="w-full bg-slate-800 rounded-full h-3">
+            {% if compteur.puissance_souscrite and compteur.puissance_souscrite > 0 %}
+                <div class="bg-orange-500 h-3 rounded-full" style="width: {% if pourcentage > 100 %}100{% else %}{{ pourcentage }}{% endif %}%"></div>
+            {% else %}
+                <div class="bg-orange-500 h-3 rounded-full" style="width: 0%"></div>
+            {% endif %}
+        </div>
+        <p class="text-xs text-slate-500 mt-2">
+            {% if compteur.puissance_souscrite %}
+                {{ pourcentage|floatformat:1 }}% de votre puissance souscrite ({{ compteur.puissance_souscrite }} kVA)
+            {% else %}
+                Données de puissance non disponibles
+            {% endif %}
+        </p>
+    </div>
+    {% else %}
+    <div class="text-center py-8">
+        <iconify-icon icon="solar:chart-line-linear" width="48" class="text-slate-600 mb-4"></iconify-icon>
+        <p class="text-slate-400">Aucune donnée de consommation pour ce mois</p>
+        <p class="text-sm text-slate-500">Les données seront disponibles après le prochain relevé</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Historique des consommations -->
+<div class="bg-slate-900/50 border border-white/5 rounded-xl overflow-hidden mb-6">
+    <div class="px-6 py-4 border-b border-white/5">
+        <h3 class="text-lg font-semibold text-white">Historique des consommations (12 derniers mois)</h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-900/80 border-b border-white/5">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Période</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Phase 1 (kWh)</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Phase 2 (kWh)</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Phase 3 (kWh)</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Total (kWh)</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Facture</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                {% for consommation in consommations %}
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-slate-300">{{ consommation.periode|date:"m/Y" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-slate-300">{{ consommation.phase_1_kwh|default:0|floatformat:2 }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-slate-300">{{ consommation.phase_2_kwh|default:0|floatformat:2 }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-slate-300">{{ consommation.phase_3_kwh|default:0|floatformat:2 }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="font-semibold text-orange-400">
+                            {% with total=consommation.phase_1_kwh|add:consommation.phase_2_kwh|add:consommation.phase_3_kwh %}
+                                {{ total|floatformat:2 }} kWh
+                            {% endwith %}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-slate-500">À associer</span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="p-4 bg-slate-800/50 rounded-full mb-4">
+                                <iconify-icon icon="solar:chart-line-linear" width="48" class="text-slate-600"></iconify-icon>
+                            </div>
+                            <p class="text-slate-400">Aucune donnée de consommation disponible</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Alertes actives -->
+{% if alertes %}
+<div class="bg-slate-900/50 border border-white/5 rounded-xl overflow-hidden mb-6">
+    <div class="px-6 py-4 border-b border-white/5 flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-white">Alertes actives</h3>
+        <span class="px-3 py-1 bg-red-500/10 text-red-400 text-sm rounded-full">{{ alertes|length }} alerte(s)</span>
+    </div>
+    <div class="p-6">
+        <div class="space-y-4">
+            {% for alerte in alertes %}
+            <div class="bg-slate-800/50 border border-white/5 rounded-lg p-4">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <iconify-icon icon="solar:danger-triangle-linear" width="20" class="text-red-400"></iconify-icon>
+                            <h4 class="font-medium text-white">{{ alerte.get_type_alerte_display }}</h4>
+                        </div>
+                        <p class="text-sm text-slate-300 mb-2">{{ alerte.message }}</p>
+                        <p class="text-xs text-slate-500">Détectée le {{ alerte.date_detection|date:"d/m/Y H:i" }}</p>
+                    </div>
+                    <div>
+                        <span class="px-3 py-1 text-xs font-medium bg-red-500/10 text-red-400 rounded-full">Active</span>
+                    </div>
+                </div>
+                {% if alerte.recommendation %}
+                <div class="mt-3 pt-3 border-t border-white/5">
+                    <p class="text-sm text-slate-400">{{ alerte.recommendation }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Statistiques globales -->
+<div class="mt-6 bg-gradient-to-br from-slate-900 to-slate-950 border border-white/5 rounded-xl p-6">
+    <h3 class="text-lg font-semibold text-white mb-4">Statistiques globales</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="text-center">
+            <p class="text-sm text-slate-400 mb-2">Total consommation</p>
+            <p class="text-3xl font-bold text-white">{{ total_consommation_kwh|floatformat:2 }} kWh</p>
+            <p class="text-xs text-slate-500">Depuis l'installation</p>
+        </div>
+        <div class="text-center">
+            <p class="text-sm text-slate-400 mb-2">Moyenne mensuelle</p>
+            <p class="text-3xl font-bold text-white">{{ moyenne_mensuelle|floatformat:2 }} kWh</p>
+            <p class="text-xs text-slate-500">Sur {{ consommations|length }} période(s)</p>
+        </div>
+        <div class="text-center">
+            <p class="text-sm text-slate-400 mb-2">Consommation max</p>
+            <p class="text-3xl font-bold text-white">{{ max_consommation|floatformat:2 }} kWh</p>
+            <p class="text-xs text-slate-500">Record de consommation</p>
+        </div>
+    </div>
+</div>
+
+<!-- Actions rapides -->
+<div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <a href="{% url 'dashboard:client_consumption_analysis' %}"
+       class="bg-slate-900/50 border border-white/5 rounded-xl p-6 hover:bg-slate-800/50 transition-colors group">
+        <div class="flex items-start gap-4">
+            <div class="p-3 bg-orange-500/10 rounded-lg group-hover:bg-orange-500/20 transition-colors">
+                <iconify-icon icon="solar:chart-line-linear" width="24" class="text-orange-500"></iconify-icon>
+            </div>
+            <div>
+                <h4 class="font-semibold text-white mb-2">Analyse détaillée</h4>
+                <p class="text-sm text-slate-400">Consultez des graphiques et analyses avancés de votre consommation</p>
+            </div>
+        </div>
+    </a>
+
+    {% if compteur.shelly_status == 'CONNECTE' %}
+    <a href="{% url 'compteurs:live_data' compteur_id=compteur.id %}"
+       class="bg-slate-900/50 border border-white/5 rounded-xl p-6 hover:bg-slate-800/50 transition-colors group">
+        <div class="flex items-start gap-4">
+            <div class="p-3 bg-sky-500/10 rounded-lg group-hover:bg-sky-500/20 transition-colors">
+                <iconify-icon icon="solar:monitor-linear" width="24" class="text-sky-500"></iconify-icon>
+            </div>
+            <div>
+                <h4 class="font-semibold text-white mb-2">Surveillance en direct</h4>
+                <p class="text-sm text-slate-400">Visualisez votre consommation en temps réel avec des graphiques actualisés</p>
+            </div>
+        </div>
+    </a>
+    {% endif %}
+</div>
+{% endblock %}

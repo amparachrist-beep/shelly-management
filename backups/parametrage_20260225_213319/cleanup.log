@@ -1,0 +1,30 @@
+[2026-02-25 21:33:19] [🔍 VÉRIFICATION DE LA CONNEXION] SECTION
+[2026-02-25 21:33:19] [✅ Connexion à la base de données OK] SUCCESS
+[2026-02-25 21:33:19] [📊 COMPTAGE DES OBJETS] SECTION
+[2026-02-25 21:33:19] [📈 État actuel:] INFO
+[2026-02-25 21:33:19] [   - Types de tarification: 10] INFO
+[2026-02-25 21:33:19] [   - Départements: 12] INFO
+[2026-02-25 21:33:19] [   - Localités: 61] INFO
+[2026-02-25 21:33:19] [   - Types d'habitation: 5] INFO
+[2026-02-25 21:33:19] [   - Compteurs avec tarif: 0] INFO
+[2026-02-25 21:33:19] [   - Factures avec tarif: 0] INFO
+[2026-02-25 21:33:19] [   - Ménages avec type d'habitation: 2] INFO
+[2026-02-25 21:33:19] [   - Ménages avec localité: 2] INFO
+[2026-02-25 21:33:19] [🔗 VÉRIFICATION DES DÉPENDANCES] SECTION
+[2026-02-25 21:33:19] [⚠️  Des localités sont utilisées par 2 ménages] WARNING
+[2026-02-25 21:33:19] [⚠️  2 types d'habitation sont utilisés par des ménages] WARNING
+[2026-02-25 21:33:19] [⚠️  Des dépendances existent. La suppression mettra à NULL les références.] WARNING
+[2026-02-25 21:33:19] [💾 CRÉATION DE LA SAUVEGARDE] SECTION
+[2026-02-25 21:33:19] [✅ 10 types de tarification sauvegardés] SUCCESS
+[2026-02-25 21:33:19] [✅ 12 départements sauvegardés] SUCCESS
+[2026-02-25 21:33:19] [✅ 61 localités sauvegardées] SUCCESS
+[2026-02-25 21:33:19] [✅ 5 types d'habitation sauvegardés] SUCCESS
+[2026-02-25 21:33:19] [✅ 2 ménages (type habitation) sauvegardés] SUCCESS
+[2026-02-25 21:33:19] [✅ 2 ménages (localité) sauvegardés] SUCCESS
+[2026-02-25 21:33:19] [✅ Sauvegarde complète dans: backups\parametrage_20260225_213319] SUCCESS
+[2026-02-25 21:33:19] [⚠️  CONFIRMATION DE SUPPRESSION] SECTION
+[2026-02-25 21:33:23] [🗑️  SUPPRESSION DES DONNÉES] SECTION
+[2026-02-25 21:33:23] [   → 2 ménages dissociés de leur type d'habitation] INFO
+[2026-02-25 21:33:23] [❌ Erreur lors de la suppression: ERREUR:  une valeur NULL viole la contrainte NOT NULL de la colonne « localite_id » dans la relation « menage »
+DETAIL:  La ligne en échec contient (2, Moundzo, MEN490258, 70 Rue Mbessala, -4.25680000, 15.28720000, null, GPS_AGENT, , , 1, null, , , Papy, , null, , , , ACTIF, 2026-02-08 01:41:53.096035+00, null, 7, null, null).
+] ERROR

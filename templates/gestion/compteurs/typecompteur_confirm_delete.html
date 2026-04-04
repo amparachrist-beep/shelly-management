@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Supprimer un type de compteur - SGE{% endblock %}
+
+{% block breadcrumb %}
+<li class="flex items-center">
+    <a href="{% url 'dashboard:admin_dashboard' %}" class="text-slate-400 hover:text-white transition-colors">Tableau de bord</a>
+    <iconify-icon icon="solar:alt-arrow-right-linear" class="mx-2 text-slate-600" width="16"></iconify-icon>
+</li>
+<li class="flex items-center">
+    <a href="{% url 'compteurs:typecompteur_list' %}" class="text-slate-400 hover:text-white transition-colors">Types de compteur</a>
+    <iconify-icon icon="solar:alt-arrow-right-linear" class="mx-2 text-slate-600" width="16"></iconify-icon>
+</li>
+<li class="text-white">Suppression</li>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+    <!-- Carte de confirmation -->
+    <div class="bg-slate-900/50 border border-white/5 rounded-xl p-8 text-center">
+        <div class="flex justify-center mb-6">
+            <div class="p-4 bg-red-500/10 rounded-full">
+                <iconify-icon icon="solar:trash-bin-trash-linear" width="48" class="text-red-500"></iconify-icon>
+            </div>
+        </div>
+        <h2 class="text-2xl font-semibold text-white mb-2">Confirmer la suppression</h2>
+        <p class="text-slate-400 mb-6">
+            Êtes-vous sûr de vouloir supprimer le type de compteur <span class="font-medium text-white">{{ object.nom }}</span> ({{ object.code }}) ?
+        </p>
+        <p class="text-sm text-slate-500 mb-6">
+            Cette action est irréversible. Vérifiez qu'aucun compteur n'est associé à ce type.
+        </p>
+
+        <form method="post" class="flex items-center justify-center gap-4">
+            {% csrf_token %}
+            <a href="{% url 'compteurs:typecompteur_list' %}"
+               class="px-6 py-2 border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white rounded-lg transition-colors">
+                Annuler
+            </a>
+            <button type="submit"
+                    class="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center gap-2">
+                <iconify-icon icon="solar:trash-bin-trash-linear" width="18"></iconify-icon>
+                Supprimer définitivement
+            </button>
+        </form>
+    </div>
+
+    <!-- Détails du type (optionnel) -->
+    {% if object.compteurs.exists %}
+    <div class="mt-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+        <div class="flex items-start gap-3">
+            <iconify-icon icon="solar:danger-triangle-linear" width="20" class="text-amber-500 flex-shrink-0 mt-0.5"></iconify-icon>
+            <div>
+                <p class="text-sm text-amber-400 font-medium">Attention : Ce type est utilisé par {{ object.compteurs.count }} compteur(s).</p>
+                <p class="text-xs text-amber-400/80 mt-1">La suppression est impossible tant que des compteurs y sont liés.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

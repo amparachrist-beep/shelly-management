@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}Paiement {{ paiement.reference_paiement }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="fas fa-money-bill-wave"></i> Paiement {{ paiement.reference_paiement }}
+    </h1>
+
+    <div class="btn-group" role="group">
+        {% if paiement.statut == 'EN_ATTENTE' %}
+            <a href="{% url 'paiements:valider' paiement.pk %}"
+               class="btn btn-success"
+               onclick="return confirm('Valider ce paiement ?');">
+                <i class="fas fa-check"></i> Valider
+            </a>
+            <a href="{% url 'paiements:rejeter' paiement.pk %}"
+               class="btn btn-danger">
+                <i class="fas fa-times"></i> Rejeter
+            </a>
+        {% endif %}
+        <a href="{% url 'paiements:update' paiement.pk %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Modifier
+        </a>
+        <a href="{% url 'paiements:list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Informations principales -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Informations du Paiement</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Référence</dt>
+                    <dd class="col-sm-9"><strong>{{ paiement.reference_paiement }}</strong></dd>
+
+                    <dt class="col-sm-3">Facture</dt>
+                    <dd class="col-sm-9">
+                        <a href="#">{{ paiement.facture.numero_facture }}</a>
+                        - {{ paiement.facture.menage.nom_complet }}
+                    </dd>
+
+                    <dt class="col-sm-3">Montant</dt>
+                    <dd class="col-sm-9">{{ paiement.montant }} FCFA</dd>
+
+                    <dt class="col-sm-3">Mode de paiement</dt>
+                    <dd class="col-sm-9">{{ paiement.get_mode_paiement_display }}</dd>
+
+                    <dt class="col-sm-3">Statut</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge bg-{% if paiement.statut == 'VALIDÉ' %}success{% elif paiement.statut == 'EN_ATTENTE' %}warning{% else %}danger{% endif %}">
+                            {{ paiement.get_statut_display }}
+                        </span>
+                    </dd>
+
+                    <dt class="col-sm-3">Date paiement</dt>
+                    <dd class="col-sm-9">{{ paiement.date_paiement|date:"d/m/Y H:i" }}</dd>
+
+                    {% if paiement.date_validation %}
+                    <dt class="col-sm-3">Date validation</dt>
+                    <dd class="col-sm-9">{{ paiement.date_validation|date:"d/m/Y H:i" }}</dd>
+                    {% endif %}
+
+                    <dt class="col-sm-3">Référence externe</dt>
+                    <dd class="col-sm-9">{{ paiement.reference_externe|default:"-" }}</dd>
+
+                    <dt class="col-sm-3">Créé par</dt>
+                    <dd class="col-sm-9">{{ paiement.cree_par.get_full_name|default:paiement.cree_par.username }}</dd>
+
+                    {% if paiement.valide_par %}
+                    <dt class="col-sm-3">Validé par</dt>
+                    <dd class="col-sm-9">{{ paiement.valide_par.get_full_name|default:paiement.valide_par.username }}</dd>
+                    {% endif %}
+
+                    {% if paiement.notes %}
+                    <dt class="col-sm-3">Notes</dt>
+                    <dd class="col-sm-9">{{ paiement.notes }}</dd>
+                    {% endif %}
+
+                    {% if paiement.fichier_justificatif %}
+                    <dt class="col-sm-3">Fichier justificatif</dt>
+                    <dd class="col-sm-9">
+                        <a href="{{ paiement.fichier_justificatif.url }}" target="_blank">
+                            <i class="fas fa-file-pdf"></i> Télécharger
+                        </a>
+                    </dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+
+        <!-- Historique des statuts -->
+        {% if historique %}
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Historique des statuts</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for hist in historique %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">
+                                <span class="badge bg-secondary">{{ hist.get_nouveau_statut_display }}</span>
+                            </h6>
+                            <small class="text-muted">
+                                {{ hist.created_at|date:"d/m/Y H:i" }}
+                                par {{ hist.utilisateur.get_full_name|default:hist.utilisateur.username }}
+                            </small>
+                            {% if hist.raison %}
+                            <p class="mb-0 mt-1">{{ hist.raison }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Actions et informations secondaires -->
+    <div class="col-md-4">
+        <!-- Actions rapides -->
+        {% if actions %}
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% for action in actions %}
+                    <a href="{% url 'paiements:'|add:action.url %}"
+                       class="btn btn-outline-{{ action.color }}">
+                        <i class="fas fa-{{ action.icon }}"></i> {{ action.text }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Frais associés -->
+        {% if frais %}
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0">Frais de transaction</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for f in frais %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ f.get_type_frais_display }}
+                        <span>{{ f.montant }} FCFA</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Commission -->
+        {% if commission %}
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Commission agent</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-6">Agent</dt>
+                    <dd class="col-sm-6">{{ commission.agent.get_full_name }}</dd>
+
+                    <dt class="col-sm-6">Taux</dt>
+                    <dd class="col-sm-6">{{ commission.taux_commission }}%</dd>
+
+                    <dt class="col-sm-6">Montant</dt>
+                    <dd class="col-sm-6">{{ commission.montant_commission }} FCFA</dd>
+
+                    <dt class="col-sm-6">Statut</dt>
+                    <dd class="col-sm-6">
+                        <span class="badge bg-{% if commission.statut == 'PAYEE' %}success{% else %}warning{% endif %}">
+                            {{ commission.get_statut_display }}
+                        </span>
+                    </dd>
+
+                    {% if commission.date_paiement_commission %}
+                    <dt class="col-sm-6">Date paiement</dt>
+                    <dd class="col-sm-6">{{ commission.date_paiement_commission|date:"d/m/Y" }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

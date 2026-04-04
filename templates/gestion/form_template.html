@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title|default:"Formulaire" }} - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .form-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .form-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .form-body {
+        padding: 24px;
+    }
+    .form-footer {
+        padding: 20px 24px;
+        border-top: 1px solid #f1f5f9;
+        background: #f8fafc;
+    }
+
+    .form-input, .form-select, .form-textarea {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 0.875rem;
+        color: #334155;
+        width: 100%;
+        transition: all 0.2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .form-label {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .form-text {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: 4px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+    }
+    .btn-secondary {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #475569;
+    }
+
+    .errorlist {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin-top: 6px;
+        list-style: none;
+    }
+    .errorlist li {
+        color: #dc2626;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .errorlist li::before {
+        content: "⚠️";
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Tableau de bord
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <a href="{% url 'alertes:regles_list' %}" class="text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700">
+        Règles d'alerte
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">{{ title }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50">
+    <!-- Page Header -->
+    <div class="bg-white border-b border-slate-200 px-6 py-6">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                <iconify-icon icon="solar:settings-bold-duotone" width="24" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                    {{ title }}
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">Remplissez les informations ci-dessous</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Content -->
+    <div class="p-6 max-w-3xl mx-auto">
+        <div class="form-card">
+            <div class="form-header">
+                <div class="flex items-center gap-2">
+                    <iconify-icon icon="solar:document-linear" width="20" class="text-blue-500"></iconify-icon>
+                    <h3 class="section-title text-slate-900">Informations</h3>
+                </div>
+            </div>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="form-body">
+                    {% for field in form %}
+                    <div class="mb-5">
+                        <label class="form-label">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+                        </label>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% if field.errors %}
+                        <div class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-footer flex items-center justify-between">
+                    <a href="{% url 'alertes:regles_list' %}" class="btn-secondary">
+                        <iconify-icon icon="solar:arrow-left-linear" width="16"></iconify-icon>
+                        Annuler
+                    </a>
+                    <button type="submit" class="btn-primary">
+                        <iconify-icon icon="solar:check-circle-bold" width="18"></iconify-icon>
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

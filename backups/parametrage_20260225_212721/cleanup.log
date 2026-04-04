@@ -1,0 +1,12 @@
+[2026-02-25 21:27:21] [🔍 VÉRIFICATION DE LA CONNEXION] SECTION
+[2026-02-25 21:27:21] [✅ Connexion à la base de données OK] SUCCESS
+[2026-02-25 21:27:21] [📊 COMPTAGE DES OBJETS] SECTION
+[2026-02-25 21:27:21] [📈 État actuel:] INFO
+[2026-02-25 21:27:21] [   - Types de tarification: 10] INFO
+[2026-02-25 21:27:21] [   - Départements: 12] INFO
+[2026-02-25 21:27:21] [   - Localités: 61] INFO
+[2026-02-25 21:27:21] [   - Types d'habitation: 5] INFO
+[2026-02-25 21:27:21] [   - Compteurs avec tarif: 0] INFO
+[2026-02-25 21:27:21] [   - Factures avec tarif: 0] INFO
+[2026-02-25 21:27:21] [   - Ménages avec type d'habitation: 2] INFO
+[2026-02-25 21:27:21] [🔗 VÉRIFICATION DES DÉPENDANCES] SECTION

@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if object %}Modifier{% else %}Nouvelle{% endif %} localité - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Card Style */
+    .form-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    /* Input Styling */
+    .form-input {
+        width: 100%;
+        padding: 10px 14px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        color: #334155;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        outline: none;
+    }
+    .form-input:focus {
+        background-color: #fff;
+        border-color: #10b981; /* Emerald-500 */
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    .form-input::placeholder { color: #94a3b8; }
+
+    /* Button Styling */
+    .btn-primary {
+        background: linear-gradient(135deg, #10b981, #059669); /* Emerald gradient */
+        color: white;
+        transition: all 0.2s;
+        border: none;
+    }
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+    }
+    .btn-secondary {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #334155;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Tableau de bord
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <a href="{% url 'parametrage:localites_list' %}" class="text-slate-500 hover:text-slate-700 text-sm font-medium font-jakarta transition-colors">Localités</a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">{% if object %}Modifier{% else %}Nouvelle{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 p-6">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header Section -->
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg">
+                <iconify-icon icon="solar:map-point-bold-duotone" width="24" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                    {% if object %}Modifier la localité{% else %}Nouvelle localité{% endif %}
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">Configurez les informations géographiques</p>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="form-card p-6 sm:p-8">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3">
+                    <iconify-icon icon="solar:danger-circle-bold-duotone" class="text-red-500 mt-0.5" width="20"></iconify-icon>
+                    <div>
+                        {% for error in form.non_field_errors %}
+                        <p class="text-sm text-red-600 font-medium">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Colonne gauche : infos générales -->
+                    <div class="space-y-5">
+                        <div class="pb-2 border-b border-slate-100 mb-2">
+                            <h3 class="text-sm font-semibold text-emerald-600 uppercase tracking-wider font-jakarta">Informations Générales</h3>
+                        </div>
+
+                        <div>
+                            <label for="{{ form.nom.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                {{ form.nom.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.nom }}
+                            {% if form.nom.errors %}
+                            <p class="mt-1.5 text-xs text-red-500 font-medium flex items-center gap-1">
+                                <iconify-icon icon="solar:danger-triangle-bold" width="12"></iconify-icon>
+                                {{ form.nom.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.type_localite.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                {{ form.type_localite.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.type_localite }}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.departement.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                {{ form.departement.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.departement }}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.code_postal.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                {{ form.code_postal.label }}
+                            </label>
+                            {{ form.code_postal }}
+                        </div>
+                    </div>
+
+                    <!-- Colonne droite : géolocalisation -->
+                    <div class="space-y-5">
+                        <div class="pb-2 border-b border-slate-100 mb-2">
+                            <h3 class="text-sm font-semibold text-emerald-600 uppercase tracking-wider font-jakarta">Géolocalisation</h3>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="{{ form.latitude.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                    {{ form.latitude.label }}
+                                </label>
+                                {{ form.latitude }}
+                            </div>
+                            <div>
+                                <label for="{{ form.longitude.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                    {{ form.longitude.label }}
+                                </label>
+                                {{ form.longitude }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="{{ form.google_place_id.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                {{ form.google_place_id.label }}
+                            </label>
+                            {{ form.google_place_id }}
+                            <p class="mt-1.5 text-xs text-slate-400 font-medium flex items-center gap-1">
+                                <iconify-icon icon="solar:info-circle-bold" width="12"></iconify-icon>
+                                Identifiant Google Places (optionnel)
+                            </p>
+                        </div>
+
+                        <div>
+                            <label for="{{ form.zone_rayon_km.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                {{ form.zone_rayon_km.label }}
+                            </label>
+                            {{ form.zone_rayon_km }}
+                            <p class="mt-1.5 text-xs text-slate-400 font-medium">Rayon de validité en kilomètres</p>
+                        </div>
+
+                        <div class="flex items-center gap-3 pt-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            {{ form.actif }}
+                            <label for="{{ form.actif.id_for_label }}" class="text-sm font-medium text-slate-700 cursor-pointer select-none">
+                                {{ form.actif.label }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-10 pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <a href="{% url 'parametrage:localites_list' %}"
+                       class="btn-secondary px-5 py-2.5 rounded-xl font-semibold text-sm font-jakarta flex items-center gap-2">
+                        Annuler
+                    </a>
+                    <button type="submit"
+                            class="btn-primary px-6 py-2.5 rounded-xl font-semibold text-sm font-jakarta flex items-center gap-2 shadow-lg shadow-emerald-200">
+                        <iconify-icon icon="solar:check-circle-bold" width="18"></iconify-icon>
+                        {% if object %}Mettre à jour{% else %}Enregistrer{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Application des styles aux champs Django
+    const formControls = document.querySelectorAll('input:not([type=checkbox]), select, textarea');
+    formControls.forEach(field => {
+        field.className = ''; // Reset
+        field.classList.add('form-input');
+    });
+
+    // Style spécifique pour la checkbox
+    const checkbox = document.querySelector('input[type=checkbox]');
+    if (checkbox) {
+        checkbox.classList.add('w-5', 'h-5', 'text-emerald-600', 'bg-slate-100', 'border-slate-300', 'rounded', 'focus:ring-emerald-500', 'focus:ring-2');
+    }
+});
+</script>
+{% endblock %}

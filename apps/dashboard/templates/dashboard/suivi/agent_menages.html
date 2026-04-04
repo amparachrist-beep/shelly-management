@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes ménages - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Custom Scrollbar */
+    .custom-scroll::-webkit-scrollbar { width: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Menage Card */
+    .menage-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .menage-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.1);
+        border-color: #10b981; /* Emerald-500 */
+    }
+
+    .menage-card .icon-box {
+        width: 42px; height: 42px;
+        border-radius: 12px;
+        background-color: #ecfdf5; /* Emerald-50 */
+        color: #059669; /* Emerald-600 */
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 16px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .menage-card:hover .icon-box {
+        background-color: #10b981;
+        color: #ffffff;
+    }
+
+    .menage-card .arrow-icon {
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: all 0.3s ease;
+        color: #10b981;
+    }
+
+    .menage-card:hover .arrow-icon {
+        opacity: 1;
+        transform: translateX(0);
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:agent_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Dashboard
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">Mes ménages</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 p-6">
+
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-200">
+                <iconify-icon icon="solar:users-group-two-rounded-bold-duotone" width="24" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                    Mes ménages assignés
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">Gestion et suivi de votre portefeuille client</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid Layout -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for menage in menages %}
+        <a href="{% url 'dashboard_suivi:suivi_menage' menage.pk %}" class="menage-card group">
+
+            <div class="flex justify-between items-start">
+                <div class="icon-box">
+                    <iconify-icon icon="solar:home-smile-bold-duotone" width="22"></iconify-icon>
+                </div>
+                <div class="arrow-icon">
+                    <iconify-icon icon="solar:arrow-right-bold" width="24"></iconify-icon>
+                </div>
+            </div>
+
+            <h3 class="text-lg font-bold text-slate-900 font-jakarta mb-1 group-hover:text-emerald-600 transition-colors">
+                {{ menage.nom_menage }}
+            </h3>
+
+            <div class="mt-auto pt-4 space-y-2">
+                <div class="flex items-center gap-2 text-sm text-slate-500">
+                    <iconify-icon icon="solar:map-point-linear" width="16" class="text-slate-400"></iconify-icon>
+                    <span class="truncate">{{ menage.localite.nom }} <span class="text-slate-300 mx-1">•</span> {{ menage.departement.nom }}</span>
+                </div>
+
+                <div class="flex items-center gap-2 pt-2 border-t border-slate-50 mt-2">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-semibold group-hover:bg-emerald-50 group-hover:text-emerald-700 transition-colors">
+                        <iconify-icon icon="solar:electricity-bold" width="12"></iconify-icon>
+                        {{ menage.compteurs.count }} compteur(s)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Bottom decorative line -->
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        </a>
+        {% empty %}
+        <div class="col-span-full py-16 text-center bg-white rounded-2xl border border-slate-200 border-dashed">
+            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+                <iconify-icon icon="solar:users-group-rounded-linear" width="32"></iconify-icon>
+            </div>
+            <h3 class="text-lg font-medium text-slate-900">Aucun ménage assigné</h3>
+            <p class="text-slate-500 mt-1">Vous n'avez pas encore de ménages dans votre liste.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

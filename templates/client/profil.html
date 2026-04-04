@@ -1,0 +1,554 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mon Profil - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Custom Scrollbar */
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Profile Card */
+    .profile-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(.22,.68,0,1.2);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .profile-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+    }
+
+    /* Section Header */
+    .section-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .section-title {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+        line-height: 1.3;
+    }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    .info-item {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.25rem;
+        transition: all 0.2s;
+    }
+    .info-item:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .info-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+    .info-value {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #334155;
+    }
+
+    /* Badge */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+    }
+    .badge-emerald {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+    .badge-orange {
+        background-color: rgba(249, 115, 22, 0.1);
+        color: #f97316;
+    }
+    .badge-sky {
+        background-color: rgba(14, 165, 233, 0.1);
+        color: #0ea5e9;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 16px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        transition: all 0.22s;
+        text-decoration: none;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(14, 165, 233, 0.4);
+        color: #fff;
+    }
+    .btn-secondary {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        border-radius: 12px;
+        padding: 10px 16px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.22s;
+        text-decoration: none;
+    }
+    .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #334155;
+    }
+    .btn-emerald {
+        background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 16px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        transition: all 0.22s;
+        text-decoration: none;
+    }
+    .btn-emerald:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(16, 185, 129, 0.4);
+        color: #fff;
+    }
+
+    /* Alert Box */
+    .alert-box {
+        background: rgba(14, 165, 233, 0.1);
+        border: 1px solid rgba(14, 165, 233, 0.2);
+        border-radius: 12px;
+        padding: 1rem;
+    }
+    .alert-emerald {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    .alert-amber {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideRight {
+        from { opacity: 0; transform: translateX(-20px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .anim-fade-up { animation: fadeUp 0.6s cubic-bezier(.22,.68,0,1.1) both; }
+    .anim-slide   { animation: slideRight 0.6s cubic-bezier(.22,.68,0,1.1) both; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.18s; }
+    .delay-3 { animation-delay: 0.26s; }
+    .delay-4 { animation-delay: 0.34s; }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="flex items-center">
+    <a href="{% if user.is_admin %}{% url 'dashboard:admin_dashboard' %}
+             {% elif user.is_agent %}{% url 'dashboard:agent_dashboard' %}
+             {% elif user.is_client %}{% url 'dashboard:client_dashboard' %}
+             {% else %}#{% endif %}"
+       class="text-slate-500 hover:text-slate-700 transition-colors">Tableau de bord</a>
+    <iconify-icon icon="solar:alt-arrow-right-linear" class="mx-2 text-slate-400" width="16"></iconify-icon>
+</li>
+<li class="text-slate-900">Mon Profil</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
+                        <iconify-icon icon="solar:user-circle-bold-duotone" width="24" class="text-white"></iconify-icon>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                            Mon Profil
+                        </h1>
+                        <p class="text-sm text-slate-500 mt-1">Gérez vos informations personnelles</p>
+                    </div>
+                </div>
+
+                <!-- Bouton WhatsApp Support -->
+                <a href="https://wa.me/242061814279?text=Bonjour,%20j'ai%20besoin%20de%20modifier%20mes%20informations%20de%20profil"
+                   target="_blank"
+                   class="btn-emerald">
+                    <iconify-icon icon="solar:phone-calling-rounded-duotone" width="20"></iconify-icon>
+                    <span>Contacter le Support</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+            <div class="flex items-center gap-3 p-4 rounded-lg {% if message.tags == 'success' %}bg-emerald-50 border-emerald-200{% elif message.tags == 'error' %}bg-red-50 border-red-200{% else %}bg-sky-50 border-sky-200{% endif %}">
+                <iconify-icon icon="{% if message.tags == 'success' %}solar:check-circle-bold-duotone{% elif message.tags == 'error' %}solar:close-circle-bold-duotone{% else %}solar:info-circle-bold-duotone{% endif %}"
+                             width="20"
+                             class="{% if message.tags == 'success' %}text-emerald-600{% elif message.tags == 'error' %}text-red-600{% else %}text-sky-600{% endif %}"></iconify-icon>
+                <p class="text-sm {% if message.tags == 'success' %}text-emerald-700{% elif message.tags == 'error' %}text-red-700{% else %}text-sky-700{% endif %}">{{ message }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Colonne gauche - Photo de profil -->
+            <div class="lg:col-span-1">
+                <div class="profile-card anim-fade-up">
+                    <div class="section-header">
+                        <h3 class="section-title">Photo de profil</h3>
+                        <div class="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center">
+                            <iconify-icon icon="solar:camera-bold-duotone" width="20" class="text-sky-600"></iconify-icon>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <!-- Photo de profil -->
+                        <div class="flex flex-col items-center">
+                            <div class="relative group mb-6">
+                                <div id="profile-image-container" class="w-32 h-32 rounded-full overflow-hidden border-4 border-sky-100 bg-slate-100">
+                                    {% if user.profile_image %}
+                                    <img id="profile-image" src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                    <div id="profile-image" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-sky-500 to-orange-500">
+                                        <span class="text-white font-bold text-3xl">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Overlay sur hover -->
+                                <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                     onclick="document.getElementById('photo-input').click()">
+                                    <iconify-icon icon="solar:camera-bold-duotone" width="32" class="text-white"></iconify-icon>
+                                </div>
+                            </div>
+
+                            <!-- Formulaire d'upload -->
+                            <form id="photo-form" method="post" action="{% url 'users:update_profile_photo' %}" enctype="multipart/form-data" class="w-full">
+                                {% csrf_token %}
+                                <input type="file"
+                                       id="photo-input"
+                                       name="profile_image"
+                                       accept="image/*"
+                                       class="hidden"
+                                       onchange="handlePhotoChange(event)">
+
+                                <button type="button"
+                                        onclick="document.getElementById('photo-input').click()"
+                                        class="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 hover:text-slate-900 rounded-lg transition-colors mb-3">
+                                    <iconify-icon icon="solar:gallery-add-bold-duotone" width="18"></iconify-icon>
+                                    <span>Choisir une photo</span>
+                                </button>
+
+                                <button type="submit"
+                                        id="upload-btn"
+                                        class="hidden w-full btn-primary">
+                                    <iconify-icon icon="solar:upload-bold-duotone" width="18"></iconify-icon>
+                                    <span>Enregistrer la photo</span>
+                                </button>
+                            </form>
+
+                            <!-- Indication taille -->
+                            <p class="text-xs text-slate-500 text-center mt-3">
+                                JPG, PNG ou GIF. Max 2MB.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carte d'information rapide -->
+                <div class="profile-card anim-fade-up delay-1">
+                    <div class="section-header">
+                        <h3 class="section-title">Statut du compte</h3>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                            <iconify-icon icon="solar:shield-check-bold-duotone" width="20" class="text-emerald-600"></iconify-icon>
+                        </div>
+                    </div>
+
+                    <div class="p-6 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-slate-600">Rôle</span>
+                            <span class="badge badge-orange">{{ user.get_role_display }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-slate-600">Statut</span>
+                            <span class="badge badge-emerald">Actif</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-slate-600">Membre depuis</span>
+                            <span class="text-sm text-slate-900 font-medium">{{ user.date_joined|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne droite - Informations -->
+            <div class="lg:col-span-2">
+                <div class="profile-card anim-fade-up delay-2">
+                    <div class="section-header">
+                        <h3 class="section-title">Informations personnelles</h3>
+                        <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full">
+                            <iconify-icon icon="solar:lock-password-bold-duotone" width="14" class="text-slate-600"></iconify-icon>
+                            <span class="text-xs text-slate-600">Lecture seule</span>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="info-grid">
+                            <!-- Identité -->
+                            <div class="info-item">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <iconify-icon icon="solar:user-bold-duotone" width="18" class="text-slate-600"></iconify-icon>
+                                    <h4 class="text-slate-900 font-semibold">Identité</h4>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <p class="info-label">Nom d'utilisateur</p>
+                                        <p class="info-value">{{ user.username }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="info-label">Prénom</p>
+                                        <p class="info-value">{{ user.first_name|default:"—" }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="info-label">Nom</p>
+                                        <p class="info-value">{{ user.last_name|default:"—" }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="info-label">Rôle</p>
+                                        <p class="info-value">{{ user.get_role_display }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contact -->
+                            <div class="info-item">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <iconify-icon icon="solar:phone-bold-duotone" width="18" class="text-slate-600"></iconify-icon>
+                                    <h4 class="text-slate-900 font-semibold">Contact</h4>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <p class="info-label">Email</p>
+                                        <p class="info-value break-all">{{ user.email|default:"—" }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="info-label">Téléphone</p>
+                                        <p class="info-value">{{ user.telephone|default:"—" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informations supplémentaires pour les clients -->
+                            {% if user.is_client %}
+                            {% with menage_client=user.menage_set.first %}
+                            {% if menage_client %}
+                            <div class="info-item">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <iconify-icon icon="solar:home-smile-bold-duotone" width="18" class="text-slate-600"></iconify-icon>
+                                    <h4 class="text-slate-900 font-semibold">Ménage</h4>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <p class="info-label">Nom du ménage</p>
+                                        <p class="info-value">{{ menage_client.nom_menage }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="info-label">Localité</p>
+                                        <p class="info-value">{{ menage_client.localite.nom|default:"—" }}</p>
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <p class="info-label">Adresse</p>
+                                        <p class="info-value">{{ menage_client.adresse_complete|default:"—" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="info-item">
+                                <div class="flex flex-col items-center justify-center py-8">
+                                    <iconify-icon icon="solar:home-smile-bold-duotone" width="48" class="text-slate-400 mb-3"></iconify-icon>
+                                    <p class="text-slate-500 text-center">Aucun ménage associé</p>
+                                    <p class="text-xs text-slate-400 mt-1">Contactez le support pour vous assigner un ménage</p>
+                                    <a href="https://wa.me/242061814279?text=Bonjour,%20j'ai%20besoin%20de%20modifier%20mes%20informations%20de%20profil"
+                                       target="_blank"
+                                       class="btn-emerald mt-3">
+                                        <iconify-icon icon="solar:phone-calling-rounded-duotone" width="16"></iconify-icon>
+                                        <span>Contacter le support</span>
+                                    </a>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endwith %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Alert pour modifier -->
+                        <div class="alert-box">
+                            <div class="flex items-start gap-3">
+                                <iconify-icon icon="solar:info-circle-bold-duotone" width="20" class="text-sky-600 mt-0.5"></iconify-icon>
+                                <div class="flex-1">
+                                    <p class="text-sm text-slate-700 mb-2">
+                                        Pour modifier vos informations personnelles, veuillez contacter notre support.
+                                    </p>
+                                    <a href="https://wa.me/242061814279?text=Bonjour,%20j'ai%20besoin%20de%20modifier%20mes%20informations%20de%20profil"
+                                       target="_blank"
+                                       class="btn-primary mt-2">
+                                        <iconify-icon icon="solar:phone-calling-rounded-duotone" width="16"></iconify-icon>
+                                        <span>Contacter sur WhatsApp</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section de changement de mot de passe -->
+                <div class="profile-card anim-fade-up delay-3">
+                    <div class="section-header">
+                        <h3 class="section-title">Sécurité</h3>
+                        <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+                            <iconify-icon icon="solar:lock-key-bold-duotone" width="20" class="text-orange-600"></iconify-icon>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-sm text-slate-600 mb-4">
+                            Protégez votre compte en modifiant régulièrement votre mot de passe.
+                        </p>
+                        <a href="{% url 'users:change_password' %}"
+                           class="btn-secondary w-full justify-center">
+                            <iconify-icon icon="solar:key-bold-duotone" width="18"></iconify-icon>
+                            <span>Changer le mot de passe</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function handlePhotoChange(event) {
+    const file = event.target.files[0];
+    if (file) {
+        // Vérifier la taille (2MB max)
+        if (file.size > 2 * 1024 * 1024) {
+            alert('La taille de l\'image ne doit pas dépasser 2MB');
+            event.target.value = '';
+            return;
+        }
+
+        // Vérifier le type
+        if (!file.type.match('image.*')) {
+            alert('Veuillez sélectionner une image valide');
+            event.target.value = '';
+            return;
+        }
+
+        // Prévisualiser l'image
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const container = document.getElementById('profile-image-container');
+            container.innerHTML = `<img id="profile-image" src="${e.target.result}" alt="Profile" class="w-full h-full object-cover">`;
+
+            // Afficher le bouton d'upload
+            document.getElementById('upload-btn').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Animation au scroll
+window.addEventListener('scroll', () => {
+    const elements = document.querySelectorAll('.anim-fade-up, .anim-slide');
+    elements.forEach(element => {
+        const rect = element.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        }
+    });
+});
+</script>
+{% endblock %}

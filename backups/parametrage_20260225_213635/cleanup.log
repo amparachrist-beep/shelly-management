@@ -1,0 +1,31 @@
+[2026-02-25 21:36:35] [🔍 VÉRIFICATION DE LA CONNEXION] SECTION
+[2026-02-25 21:36:35] [✅ Connexion à la base de données OK] SUCCESS
+[2026-02-25 21:36:35] [📊 COMPTAGE DES OBJETS] SECTION
+[2026-02-25 21:36:35] [📈 État actuel:] INFO
+[2026-02-25 21:36:35] [   - Types de tarification: 10] INFO
+[2026-02-25 21:36:35] [   - Départements: 12] INFO
+[2026-02-25 21:36:35] [   - Localités: 61] INFO
+[2026-02-25 21:36:35] [   - Types d'habitation: 5] INFO
+[2026-02-25 21:36:35] [   - Compteurs avec tarif: 0] INFO
+[2026-02-25 21:36:35] [   - Factures avec tarif: 0] INFO
+[2026-02-25 21:36:35] [   - Ménages avec type d'habitation: 2] INFO
+[2026-02-25 21:36:35] [   - Ménages avec localité: 2] INFO
+[2026-02-25 21:36:35] [🔗 VÉRIFICATION DES DÉPENDANCES] SECTION
+[2026-02-25 21:36:35] [⚠️  Des localités sont utilisées par 2 ménages] WARNING
+[2026-02-25 21:36:35] [⚠️  2 types d'habitation sont utilisés par des ménages] WARNING
+[2026-02-25 21:36:35] [⚠️  Des dépendances existent. La suppression mettra à NULL les références.] WARNING
+[2026-02-25 21:36:35] [💾 CRÉATION DE LA SAUVEGARDE] SECTION
+[2026-02-25 21:36:35] [✅ 10 types de tarification sauvegardés] SUCCESS
+[2026-02-25 21:36:35] [✅ 12 départements sauvegardés] SUCCESS
+[2026-02-25 21:36:35] [✅ 61 localités sauvegardées] SUCCESS
+[2026-02-25 21:36:35] [✅ 5 types d'habitation sauvegardés] SUCCESS
+[2026-02-25 21:36:35] [✅ 2 ménages (type habitation) sauvegardés] SUCCESS
+[2026-02-25 21:36:35] [✅ 2 ménages (localité) sauvegardés] SUCCESS
+[2026-02-25 21:36:35] [✅ Sauvegarde complète dans: backups\parametrage_20260225_213635] SUCCESS
+[2026-02-25 21:36:35] [⚠️  CONFIRMATION DE SUPPRESSION] SECTION
+[2026-02-25 21:36:37] [🗑️  SUPPRESSION DES DONNÉES] SECTION
+[2026-02-25 21:36:37] [   → 2 ménages dissociés de leur type d'habitation] INFO
+[2026-02-25 21:36:37] [   → 2 ménages réassignés à la localité par défaut] INFO
+[2026-02-25 21:36:37] [   → 5 types d'habitation supprimés] INFO
+[2026-02-25 21:36:37] [   → 60 localités supprimées (localité par défaut conservée)] INFO
+[2026-02-25 21:36:37] [❌ Erreur lors de la suppression: ("Cannot delete some instances of model 'Departement' because they are referenced through protected foreign keys: 'Localite.departement'.", {<Menage: Moundzo (MEN490258)>, <Menage: Sassou (MEN-20260209210015)>})] ERROR

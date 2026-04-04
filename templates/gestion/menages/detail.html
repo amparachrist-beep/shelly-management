@@ -1,0 +1,709 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ menage.nom_menage }} - Détails Ménage - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Custom Scrollbar */
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Info Card */
+    .info-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    /* Section card */
+    .section-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        height: fit-content;
+    }
+    .section-header {
+        padding: 18px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .section-title {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+    }
+    .section-sub {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin: 4px 0 0;
+        font-weight: 500;
+    }
+
+    /* KPI mini cards */
+    .mini-kpi {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 16px;
+        transition: all 0.2s;
+    }
+    .mini-kpi:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+    }
+    .mini-kpi-value {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1e293b;
+        line-height: 1.2;
+        margin: 8px 0 2px;
+    }
+    .mini-kpi-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: #64748b;
+    }
+
+    /* Pill badge */
+    .pill {
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        display: inline-block;
+        letter-spacing: 0.025em;
+    }
+    .pill-blue  { background: rgba(79, 70, 229, 0.1);  color: #4f46e5; }
+    .pill-cyan  { background: rgba(8, 145, 178, 0.1);  color: #0891b2; }
+    .pill-amber { background: rgba(217, 119, 6, 0.1); color: #d97706; }
+    .pill-red   { background: rgba(220, 38, 38, 0.1);   color: #dc2626; }
+    .pill-green { background: rgba(5, 150, 105, 0.1); color: #059669; }
+    .pill-gray  { background: #f1f5f9;           color: #64748b; }
+
+    /* Status badge */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px 4px 8px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .status-actif {
+        background: rgba(5, 150, 105, 0.1);
+        color: #059669;
+    }
+    .status-inactif {
+        background: rgba(100, 116, 139, 0.1);
+        color: #64748b;
+    }
+    .status-demenage {
+        background: rgba(217, 119, 6, 0.1);
+        color: #d97706;
+    }
+
+    /* Table */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+        padding: 10px 16px;
+        text-align: left;
+        font-size: 0.7rem;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .data-table td {
+        padding: 12px 16px;
+        font-size: 0.85rem;
+        color: #334155;
+        border-bottom: 1px solid #f1f5f9;
+        font-weight: 500;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #f8fafc; }
+
+    /* Property list */
+    .property-list { display: flex; flex-wrap: wrap; gap: 12px 20px; }
+    .property-item { flex: 1 1 calc(50% - 20px); min-width: 180px; }
+    .property-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: #64748b;
+        margin-bottom: 2px;
+    }
+    .property-value {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #1e293b;
+        word-break: break-word;
+    }
+
+    /* Action buttons */
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+    .action-btn-primary {
+        background: #4f46e5;
+        color: white;
+    }
+    .action-btn-primary:hover {
+        background: #4338ca;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(79, 70, 229, 0.2);
+    }
+    .action-btn-warning {
+        background: #d97706;
+        color: white;
+    }
+    .action-btn-warning:hover {
+        background: #b45309;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(217, 119, 6, 0.2);
+    }
+    .action-btn-success {
+        background: #059669;
+        color: white;
+    }
+    .action-btn-success:hover {
+        background: #047857;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(5, 150, 105, 0.2);
+    }
+
+    /* Info row */
+    .info-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-icon {
+        width: 32px; height: 32px;
+        border-radius: 10px;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        flex-shrink: 0;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Accueil
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <a href="{% url 'menages:list' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        Ménages
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">{{ menage.nom_menage|truncatechars:30 }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50">
+    <!-- Page Header -->
+    <div class="bg-white border-b border-slate-200 px-6 py-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                    <iconify-icon icon="solar:home-2-bold-duotone" width="28" class="text-white"></iconify-icon>
+                </div>
+                <div>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                            {{ menage.nom_menage }}
+                        </h1>
+                        <span class="status-badge status-{{ menage.statut|lower }}">
+                            <iconify-icon icon="solar:{{ menage.statut|lower }}-bold" width="12"></iconify-icon>
+                            {{ menage.get_statut_display }}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-3 mt-2 flex-wrap">
+                        <span class="text-sm text-slate-500 flex items-center gap-1">
+                            <iconify-icon icon="solar:hashtag-square-bold-duotone" width="14" class="text-indigo-400"></iconify-icon>
+                            Réf: {{ menage.reference_menage }}
+                        </span>
+                        {% if menage.utilisateur %}
+                        <span class="text-sm text-slate-500 flex items-center gap-1">
+                            <iconify-icon icon="solar:user-circle-bold-duotone" width="14" class="text-indigo-400"></iconify-icon>
+                            {{ menage.utilisateur.get_full_name|default:menage.utilisateur.username }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions rapides -->
+
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="p-6">
+        <!-- Mini KPIs -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+            <!-- Compteurs -->
+            <div class="mini-kpi">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+                        <iconify-icon icon="solar:electricity-bold-duotone" width="20" class="text-indigo-600"></iconify-icon>
+                    </div>
+                    <span class="mini-kpi-label">Compteurs</span>
+                </div>
+                <div class="mini-kpi-value">{{ compteurs_count }}</div>
+                <div class="flex items-center gap-2 mt-2 text-xs text-slate-500">
+                    <iconify-icon icon="solar:alt-arrow-right-linear" width="14" class="text-indigo-400"></iconify-icon>
+                    <span>{{ compteurs|length }} installé(s)</span>
+                </div>
+            </div>
+
+            <!-- Consommation mois -->
+            <div class="mini-kpi">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                        <iconify-icon icon="solar:chart-2-bold-duotone" width="20" class="text-amber-600"></iconify-icon>
+                    </div>
+                    <span class="mini-kpi-label">Conso. mois</span>
+                </div>
+                <div class="mini-kpi-value">{{ consommation_mois|floatformat:1 }} <span class="text-sm font-normal text-slate-400">kWh</span></div>
+                <div class="flex items-center gap-2 mt-2 text-xs text-slate-500">
+                    <iconify-icon icon="solar:calendar-bold-duotone" width="12"></iconify-icon>
+                    <span>{{ today|date:"F Y" }}</span>
+                </div>
+            </div>
+
+            <!-- Factures impayées -->
+            <div class="mini-kpi">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
+                        <iconify-icon icon="solar:danger-triangle-bold-duotone" width="20" class="text-red-600"></iconify-icon>
+                    </div>
+                    <span class="mini-kpi-label">Impayés</span>
+                </div>
+                <div class="mini-kpi-value">{{ factures_impayees|length }}</div>
+                <div class="flex items-center gap-2 mt-2 text-xs font-semibold text-red-600">
+                    <iconify-icon icon="solar:dollar-minimalistic-bold" width="14"></iconify-icon>
+                    <span>{{ montant_impaye|floatformat:0 }} FCFA</span>
+                </div>
+            </div>
+
+            <!-- Contact -->
+            <div class="mini-kpi">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
+                        <iconify-icon icon="solar:phone-bold-duotone" width="20" class="text-cyan-600"></iconify-icon>
+                    </div>
+                    <span class="mini-kpi-label">Contact</span>
+                </div>
+                <div class="mini-kpi-value text-base font-semibold mt-1">
+                    {{ menage.utilisateur.telephone|default:menage.telephone_secondaire|default:"—" }}
+                </div>
+                <div class="text-xs text-slate-500 mt-1">{{ menage.utilisateur.email|default:menage.email_secondaire|default:""|truncatechars:25 }}</div>
+            </div>
+        </div>
+
+        <!-- Two columns layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left column: Informations détaillées + Localisation -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Informations générales -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3 class="section-title">Informations générales</h3>
+                        <div class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                            <iconify-icon icon="solar:info-circle-bold-duotone" width="16" class="text-indigo-600"></iconify-icon>
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="space-y-3">
+                            <div class="info-row">
+                                <div class="info-icon"><iconify-icon icon="solar:user-bold-duotone" width="16"></iconify-icon></div>
+                                <div>
+                                    <div class="property-label">Personne de contact</div>
+                                    <div class="property-value">{{ menage.personne_contact|default:"—" }}</div>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-icon"><iconify-icon icon="solar:users-group-rounded-bold-duotone" width="16"></iconify-icon></div>
+                                <div>
+                                    <div class="property-label">Nombre de personnes</div>
+                                    <div class="property-value">{{ menage.nombre_personnes }}</div>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-icon"><iconify-icon icon="solar:home-bold-duotone" width="16"></iconify-icon></div>
+                                <div>
+                                    <div class="property-label">Type d'habitation</div>
+                                    <div class="property-value">{{ menage.type_habitation.nom|default:"—" }}</div>
+                                </div>
+                            </div>
+                            {% if menage.surface_m2 %}
+                            <div class="info-row">
+                                <div class="info-icon"><iconify-icon icon="solar:ruler-bold-duotone" width="16"></iconify-icon></div>
+                                <div>
+                                    <div class="property-label">Surface</div>
+                                    <div class="property-value">{{ menage.surface_m2 }} m²</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="info-row">
+                                <div class="info-icon"><iconify-icon icon="solar:tag-price-bold-duotone" width="16"></iconify-icon></div>
+                                <div>
+                                    <div class="property-label">Catégorie socio-prof.</div>
+                                    <div class="property-value">{{ menage.categorie_socio_professionnelle|default:"—" }}</div>
+                                </div>
+                            </div>
+                            {% if menage.revenu_mensuel_estime %}
+                            <div class="info-row">
+                                <div class="info-icon"><iconify-icon icon="solar:dollar-minimalistic-bold-duotone" width="16"></iconify-icon></div>
+                                <div>
+                                    <div class="property-label">Revenu estimé</div>
+                                    <div class="property-value">{{ menage.revenu_mensuel_estime|floatformat:0 }} FCFA/mois</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Localisation & GPS -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3 class="section-title">Localisation & Accès</h3>
+                        <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                            <iconify-icon icon="solar:map-point-bold-duotone" width="16" class="text-amber-600"></iconify-icon>
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="space-y-4">
+                            <div>
+                                <div class="property-label mb-1">Localité</div>
+                                <div class="property-value flex items-center gap-1">
+                                    <iconify-icon icon="solar:city-bold-duotone" width="14" class="text-indigo-400"></iconify-icon>
+                                    {{ menage.localite.nom }} ({{ menage.localite.departement.nom }})
+                                </div>
+                            </div>
+                            <div>
+                                <div class="property-label mb-1">Adresse complète</div>
+                                <div class="property-value text-sm">{{ menage.adresse_complete }}</div>
+                            </div>
+
+                            {% if menage.latitude and menage.longitude %}
+                            <div class="bg-slate-50 p-3 rounded-xl">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-semibold text-slate-500">COORDONNÉES GPS</span>
+                                    <span class="pill pill-blue text-[0.6rem]">{{ menage.get_source_geolocalisation_display }}</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3 text-xs">
+                                    <div>
+                                        <span class="text-slate-400">Latitude:</span>
+                                        <span class="font-mono font-medium">{{ menage.latitude }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400">Longitude:</span>
+                                        <span class="font-mono font-medium">{{ menage.longitude }}</span>
+                                    </div>
+                                </div>
+                                {% if menage.precision_gps %}
+                                <div class="text-xs text-slate-400 mt-1">Précision: ±{{ menage.precision_gps }}m</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            {% if menage.point_repere or menage.code_acces or menage.instructions_livraison %}
+                            <div class="border-t border-slate-100 pt-3">
+                                {% if menage.point_repere %}
+                                <div class="mb-2">
+                                    <div class="property-label mb-1">Point de repère</div>
+                                    <div class="text-sm">{{ menage.point_repere }}</div>
+                                </div>
+                                {% endif %}
+                                {% if menage.code_acces %}
+                                <div class="mb-2">
+                                    <div class="property-label mb-1">Code d'accès</div>
+                                    <div class="text-sm font-mono bg-slate-100 p-2 rounded-lg">{{ menage.code_acces }}</div>
+                                </div>
+                                {% endif %}
+                                {% if menage.instructions_livraison %}
+                                <div>
+                                    <div class="property-label mb-1">Instructions livraison</div>
+                                    <div class="text-sm">{{ menage.instructions_livraison }}</div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agent assigné -->
+                {% if menage.agent %}
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3 class="section-title">Agent assigné</h3>
+                        <div class="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center">
+                            <iconify-icon icon="solar:user-id-bold-duotone" width="16" class="text-cyan-600"></iconify-icon>
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center text-white font-bold text-lg">
+                                {{ menage.agent.get_initials|default:"AG" }}
+                            </div>
+                            <div>
+                                <div class="font-semibold">{{ menage.agent.get_full_name|default:menage.agent.username }}</div>
+                                <div class="text-xs text-slate-500">{{ menage.agent.email }}</div>
+                                <div class="text-xs text-slate-500">{{ menage.agent.telephone|default:"" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right column (2/3): Compteurs, Factures, Paiements -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Compteurs -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <div>
+                            <h3 class="section-title">Compteurs installés</h3>
+                            <p class="section-sub">{{ compteurs_count }} compteur(s) actif(s)</p>
+                        </div>
+                        {% if user.role in 'ADMIN,AGENT_TERRAIN' %}
+                        <a href="/compteurs/create/?menage={{ menage.pk }}" class="pill pill-blue flex items-center gap-1">
+                            <iconify-icon icon="solar:add-circle-bold" width="14"></iconify-icon> Ajouter
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>N° Série</th>
+                                    <th>Type</th>
+                                    <th>Tarification</th>
+                                    <th class="text-center">Statut</th>
+                                    <th class="text-right">Dernier relevé</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for compteur in compteurs %}
+                                <tr>
+                                    <td class="font-mono font-semibold">{{ compteur.numero_serie }}</td>
+                                    <td>{{ compteur.type_compteur.nom|default:"—" }}</td>
+                                    <td>{{ compteur.type_tarification.nom|default:"—" }}</td>
+                                    <td class="text-center">
+                                        <span class="pill pill-{{ compteur.statut|lower }}">
+                                            {{ compteur.get_statut_display }}
+                                        </span>
+                                    </td>
+                                    <td class="text-right text-slate-500">
+                                        {{ compteur.derniere_consommation.date|default:"—"|date:"d/m/Y" }}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-8 text-slate-500">
+                                        <iconify-icon icon="solar:electricity-bold-duotone" width="32" class="mx-auto mb-2 text-slate-300"></iconify-icon>
+                                        <p>Aucun compteur installé</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Factures récentes & impayées -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Factures récentes -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <div>
+                                <h3 class="section-title">Factures récentes</h3>
+                                <p class="section-sub">Dernières 5 factures</p>
+                            </div>
+                            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                                <iconify-icon icon="solar:bill-bold-duotone" width="16" class="text-amber-600"></iconify-icon>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Période</th>
+                                        <th>Compteur</th>
+                                        <th class="text-right">Montant</th>
+                                        <th class="text-center">Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for facture in factures_recentes %}
+                                    <tr>
+                                        <td class="text-xs whitespace-nowrap">{{ facture.periode.nom|default:facture.periode.date_debut|date:"M Y" }}</td>
+                                        <td class="font-mono text-xs">{{ facture.compteur.numero_serie|truncatechars:8 }}</td>
+                                        <td class="text-right font-semibold">{{ facture.montant_total|floatformat:0 }} FCFA</td>
+                                        <td class="text-center">
+                                            <span class="pill pill-{{ facture.statut|lower|slice:":5" }}">
+                                                {{ facture.get_statut_display|truncatechars:12 }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="4" class="text-center py-6 text-slate-500">Aucune facture</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Factures impayées -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <div>
+                                <h3 class="section-title">Factures impayées</h3>
+                                <p class="section-sub">{{ factures_impayees|length }} en attente</p>
+                            </div>
+                            <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                                <iconify-icon icon="solar:danger-triangle-bold-duotone" width="16" class="text-red-600"></iconify-icon>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Période</th>
+                                        <th>Compteur</th>
+                                        <th class="text-right">Total</th>
+                                        <th class="text-right">Solde dû</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for facture in factures_impayees %}
+                                    <tr>
+                                        <td class="text-xs">{{ facture.periode.nom|default:facture.periode.date_debut|date:"M Y" }}</td>
+                                        <td class="font-mono text-xs">{{ facture.compteur.numero_serie|truncatechars:8 }}</td>
+                                        <td class="text-right">{{ facture.montant_total|floatformat:0 }} FCFA</td>
+                                        <td class="text-right font-semibold text-red-600">{{ facture.solde_du|floatformat:0 }} FCFA</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="4" class="text-center py-6 text-slate-500">Aucune facture impayée</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paiements récents -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <div>
+                            <h3 class="section-title">Paiements récents</h3>
+                            <p class="section-sub">Dernières 5 transactions</p>
+                        </div>
+                        <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                            <iconify-icon icon="solar:dollar-minimalistic-bold-duotone" width="16" class="text-green-600"></iconify-icon>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Facture (période)</th>
+                                    <th>Compteur</th>
+                                    <th class="text-right">Montant</th>
+                                    <th>Méthode</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for paiement in paiements_recentes %}
+                                <tr>
+                                    <td class="text-xs whitespace-nowrap">{{ paiement.date_paiement|date:"d/m/Y H:i" }}</td>
+                                    <td class="text-xs">{{ paiement.facture.periode.nom|default:paiement.facture.periode.date_debut|date:"M Y" }}</td>
+                                    <td class="font-mono text-xs">{{ paiement.facture.compteur.numero_serie|truncatechars:8 }}</td>
+                                    <td class="text-right font-semibold text-green-600">{{ paiement.montant|floatformat:0 }} FCFA</td>
+                                    <td><span class="pill pill-blue">{{ paiement.get_methode_paiement_display|truncatechars:10 }}</span></td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" class="text-center py-6 text-slate-500">Aucun paiement enregistré</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Dropdown actions (si nécessaire, réutiliser le code existant)
+    $(document).ready(function() {
+        // Vous pouvez ajouter des interactions supplémentaires ici si besoin
+    });
+</script>
+{% endblock %}

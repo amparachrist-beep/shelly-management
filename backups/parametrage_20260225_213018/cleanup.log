@@ -1,0 +1,26 @@
+[2026-02-25 21:30:18] [🔍 VÉRIFICATION DE LA CONNEXION] SECTION
+[2026-02-25 21:30:18] [✅ Connexion à la base de données OK] SUCCESS
+[2026-02-25 21:30:18] [📊 COMPTAGE DES OBJETS] SECTION
+[2026-02-25 21:30:18] [📈 État actuel:] INFO
+[2026-02-25 21:30:18] [   - Types de tarification: 10] INFO
+[2026-02-25 21:30:18] [   - Départements: 12] INFO
+[2026-02-25 21:30:18] [   - Localités: 61] INFO
+[2026-02-25 21:30:18] [   - Types d'habitation: 5] INFO
+[2026-02-25 21:30:18] [   - Compteurs avec tarif: 0] INFO
+[2026-02-25 21:30:18] [   - Factures avec tarif: 0] INFO
+[2026-02-25 21:30:18] [   - Ménages avec type d'habitation: 2] INFO
+[2026-02-25 21:30:18] [🔗 VÉRIFICATION DES DÉPENDANCES] SECTION
+[2026-02-25 21:30:18] [⚠️  2 types d'habitation sont utilisés par des ménages] WARNING
+[2026-02-25 21:30:18] [⚠️  Des dépendances existent. La suppression mettra à NULL les références.] WARNING
+[2026-02-25 21:30:18] [💾 CRÉATION DE LA SAUVEGARDE] SECTION
+[2026-02-25 21:30:19] [✅ 10 types de tarification sauvegardés] SUCCESS
+[2026-02-25 21:30:19] [✅ 12 départements sauvegardés] SUCCESS
+[2026-02-25 21:30:19] [✅ 61 localités sauvegardées] SUCCESS
+[2026-02-25 21:30:19] [✅ 5 types d'habitation sauvegardés] SUCCESS
+[2026-02-25 21:30:19] [✅ 2 ménages concernés sauvegardés] SUCCESS
+[2026-02-25 21:30:19] [✅ Sauvegarde complète dans: backups\parametrage_20260225_213018] SUCCESS
+[2026-02-25 21:30:19] [⚠️  CONFIRMATION DE SUPPRESSION] SECTION
+[2026-02-25 21:30:24] [🗑️  SUPPRESSION DES DONNÉES] SECTION
+[2026-02-25 21:30:24] [   → 2 ménages dissociés de leur type d'habitation] INFO
+[2026-02-25 21:30:24] [   → 5 types d'habitation supprimés] INFO
+[2026-02-25 21:30:24] [❌ Erreur lors de la suppression: ("Cannot delete some instances of model 'Localite' because they are referenced through protected foreign keys: 'Menage.localite'.", {<Menage: Moundzo (MEN490258)>, <Menage: Sassou (MEN-20260209210015)>})] ERROR

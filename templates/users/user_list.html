@@ -1,0 +1,406 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestion des utilisateurs - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Card & Section Styles */
+    .section-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    /* KPI Cards (Simplified for list view) */
+    .stat-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); }
+
+    /* Inputs */
+    .filter-input {
+        width: 100%;
+        padding: 9px 12px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        color: #334155;
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .filter-input:focus {
+        background-color: #fff;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        color: white;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .btn-primary:hover { box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); transform: translateY(-1px); }
+
+    .btn-secondary {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .btn-secondary:hover { background: #f8fafc; border-color: #cbd5e1; color: #1e293b; }
+
+    /* Table Styles */
+    .data-table th {
+        background: #f8fafc;
+        color: #64748b;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .data-table td {
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+    }
+    .data-table tr:hover td { background: #f8fafc; }
+
+    /* Pills */
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .pill-purple { background: #f5f3ff; color: #7c3aed; }
+    .pill-sky    { background: #f0f9ff; color: #0284c7; }
+    .pill-emerald{ background: #ecfdf5; color: #059669; }
+    .pill-slate  { background: #f1f5f9; color: #64748b; }
+    .pill-red    { background: #fef2f2; color: #dc2626; }
+    .pill-amber  { background: #fffbeb; color: #d97706; }
+
+    /* Action Icons */
+    .action-btn {
+        width: 32px; height: 32px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+    .action-btn:hover { transform: scale(1.1); }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Tableau de bord
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-medium text-slate-500 font-jakarta">Administration</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">Utilisateurs</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 p-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <iconify-icon icon="solar:users-group-two-rounded-bold-duotone" width="24" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">Gestion des utilisateurs</h1>
+                <p class="text-sm text-slate-500 mt-1">Gérez les accès et les profils</p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'users:user_create' %}"
+               class="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-full shadow-lg shadow-indigo-200">
+                <iconify-icon icon="solar:add-circle-bold" width="18"></iconify-icon>
+                <span>Nouvel utilisateur</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistiques rapides -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="stat-card border-l-4 border-l-indigo-500">
+            <div class="flex items-center gap-3 mb-1">
+                <div class="p-1.5 bg-indigo-50 rounded-lg text-indigo-600">
+                    <iconify-icon icon="solar:users-group-rounded-bold" width="18"></iconify-icon>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Total utilisateurs</p>
+            </div>
+            <p class="text-2xl font-bold text-slate-800 font-jakarta ml-1">{{ page_obj.paginator.count }}</p>
+        </div>
+
+        <div class="stat-card border-l-4 border-l-purple-500">
+            <div class="flex items-center gap-3 mb-1">
+                <div class="p-1.5 bg-purple-50 rounded-lg text-purple-600">
+                    <iconify-icon icon="solar:shield-user-bold" width="18"></iconify-icon>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Administrateurs</p>
+            </div>
+            <p class="text-2xl font-bold text-slate-800 font-jakarta ml-1">{{ admin_count|default:"0" }}</p>
+        </div>
+
+        <div class="stat-card border-l-4 border-l-sky-500">
+            <div class="flex items-center gap-3 mb-1">
+                <div class="p-1.5 bg-sky-50 rounded-lg text-sky-600">
+                    <iconify-icon icon="solar:user-id-bold" width="18"></iconify-icon>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Agents</p>
+            </div>
+            <p class="text-2xl font-bold text-slate-800 font-jakarta ml-1">{{ agent_count|default:"0" }}</p>
+        </div>
+
+        <div class="stat-card border-l-4 border-l-emerald-500">
+            <div class="flex items-center gap-3 mb-1">
+                <div class="p-1.5 bg-emerald-50 rounded-lg text-emerald-600">
+                    <iconify-icon icon="solar:user-hand-up-bold" width="18"></iconify-icon>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Clients</p>
+            </div>
+            <p class="text-2xl font-bold text-slate-800 font-jakarta ml-1">{{ client_count|default:"0" }}</p>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="section-card p-4 mb-6">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <input type="text" name="search" placeholder="Rechercher (nom, email)..."
+                       value="{{ request.GET.search|default:'' }}"
+                       class="filter-input placeholder-slate-400">
+            </div>
+            <div>
+                <select name="role" class="filter-input cursor-pointer">
+                    <option value="" class="text-slate-400">Tous les rôles</option>
+                    {% for code, label in role_choices %}
+                    <option value="{{ code }}" {% if request.GET.role == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <select name="statut" class="filter-input cursor-pointer">
+                    <option value="" class="text-slate-400">Tous les statuts</option>
+                    {% for code, label in statut_choices %}
+                    <option value="{{ code }}" {% if request.GET.statut == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary px-4 py-2 rounded-lg flex-1">
+                    Filtrer
+                </button>
+                <a href="{% url 'users:user_list' %}" class="btn-secondary px-4 py-2 rounded-lg flex items-center justify-center">
+                    <iconify-icon icon="solar:restart-bold" width="18"></iconify-icon>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tableau -->
+    <div class="section-card">
+        <div class="overflow-x-auto">
+            <table class="w-full data-table">
+                <thead>
+                    <tr>
+                        <th class="px-6 py-4 text-left">Utilisateur</th>
+                        <th class="px-6 py-4 text-left">Contact</th>
+                        <th class="px-6 py-4 text-left">Rôle</th>
+                        <th class="px-6 py-4 text-left">Statut</th>
+                        <th class="px-6 py-4 text-left">Date inscription</th>
+                        <th class="px-6 py-4 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for user_obj in users %}
+                    <tr class="transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                    {% if user_obj.profile_image %}
+                                    <img src="{{ user_obj.profile_image.url }}" alt="{{ user_obj.username }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                    <span class="text-sm font-bold text-slate-500 font-jakarta">
+                                        {{ user_obj.first_name|first|default:user_obj.username|first|upper }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-slate-900 font-jakarta">
+                                        {{ user_obj.get_full_name|default:user_obj.username }}
+                                    </div>
+                                    <div class="text-xs text-slate-500">@{{ user_obj.username }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-slate-700">{{ user_obj.email|default:"—" }}</div>
+                            <div class="text-xs text-slate-500 mt-0.5">{{ user_obj.telephone|default:"—" }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if user_obj.role == 'ADMIN' %}
+                                <span class="pill pill-purple">Administrateur</span>
+                            {% elif user_obj.role == 'AGENT_TERRAIN' %}
+                                <span class="pill pill-sky">Agent Terrain</span>
+                            {% else %}
+                                <span class="pill pill-emerald">Client</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if user_obj.statut == 'ACTIF' %}
+                                <span class="pill pill-emerald"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span>Actif</span>
+                            {% elif user_obj.statut == 'INACTIF' %}
+                                <span class="pill pill-slate"><span class="w-1.5 h-1.5 rounded-full bg-slate-400 mr-2"></span>Inactif</span>
+                            {% elif user_obj.statut == 'SUSPENDU' %}
+                                <span class="pill pill-red"><span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-2"></span>Suspendu</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-slate-600 font-medium text-sm">
+                            {{ user_obj.date_joined|date:"d/m/Y" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-1">
+                                <a href="{% url 'users:user_detail' user_obj.pk %}"
+                                   class="action-btn text-sky-600 bg-sky-50 hover:bg-sky-100"
+                                   title="Détails">
+                                    <iconify-icon icon="solar:eye-bold-duotone" width="18"></iconify-icon>
+                                </a>
+                                <a href="{% url 'users:user_update' user_obj.pk %}"
+                                   class="action-btn text-amber-600 bg-amber-50 hover:bg-amber-100"
+                                   title="Modifier">
+                                    <iconify-icon icon="solar:pen-bold-duotone" width="18"></iconify-icon>
+                                </a>
+
+                                {% if user_obj != request.user %}
+                                    <!-- Activation/Désactivation -->
+                                    {% if user_obj.statut == 'ACTIF' %}
+                                    <a href="{% url 'users:user_toggle' user_obj.pk %}"
+                                       class="action-btn text-red-600 bg-red-50 hover:bg-red-100"
+                                       title="Désactiver">
+                                        <iconify-icon icon="solar:close-circle-bold-duotone" width="18"></iconify-icon>
+                                    </a>
+                                    {% else %}
+                                    <a href="{% url 'users:user_toggle' user_obj.pk %}"
+                                       class="action-btn text-emerald-600 bg-emerald-50 hover:bg-emerald-100"
+                                       title="Activer">
+                                        <iconify-icon icon="solar:check-circle-bold-duotone" width="18"></iconify-icon>
+                                    </a>
+                                    {% endif %}
+
+                                    <!-- Suspendre / Réactiver -->
+                                    {% if user_obj.statut != 'SUSPENDU' %}
+                                    <a href="{% url 'users:user_suspend' user_obj.pk %}"
+                                       class="action-btn text-orange-600 bg-orange-50 hover:bg-orange-100"
+                                       title="Suspendre">
+                                        <iconify-icon icon="solar:forbidden-circle-bold-duotone" width="18"></iconify-icon>
+                                    </a>
+                                    {% else %}
+                                    <a href="{% url 'users:user_reactivate' user_obj.pk %}"
+                                       class="action-btn text-emerald-600 bg-emerald-50 hover:bg-emerald-100"
+                                       title="Réactiver">
+                                        <iconify-icon icon="solar:refresh-circle-bold-duotone" width="18"></iconify-icon>
+                                    </a>
+                                    {% endif %}
+
+                                    <!-- Suppression -->
+                                    <a href="{% url 'users:user_delete' user_obj.pk %}"
+                                       class="action-btn text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-red-600"
+                                       title="Supprimer">
+                                        <iconify-icon icon="solar:trash-bin-trash-bold-duotone" width="18"></iconify-icon>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                                    <iconify-icon icon="solar:users-group-rounded-linear" width="32" class="text-slate-400"></iconify-icon>
+                                </div>
+                                <p class="text-slate-900 font-semibold mb-1">Aucun utilisateur trouvé</p>
+                                <p class="text-slate-500 text-sm">Essayez de modifier vos filtres de recherche.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50">
+            <div class="text-xs font-medium text-slate-500 font-jakarta">
+                Page <span class="text-slate-900">{{ page_obj.number }}</span> sur {{ page_obj.paginator.num_pages }}
+            </div>
+            <div class="flex items-center gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}"
+                   class="p-2 bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-600 rounded-lg transition-all shadow-sm">
+                    <iconify-icon icon="solar:alt-arrow-left-linear" width="16"></iconify-icon>
+                </a>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <span class="px-3.5 py-1.5 bg-indigo-600 text-white rounded-lg text-sm font-semibold shadow-md shadow-indigo-200">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}"
+                       class="px-3.5 py-1.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
+                        {{ num }}
+                    </a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}"
+                   class="p-2 bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-600 rounded-lg transition-all shadow-sm">
+                    <iconify-icon icon="solar:alt-arrow-right-linear" width="16"></iconify-icon>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

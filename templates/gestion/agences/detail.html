@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ agence.nom }} — E2C{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Card Styles */
+    .content-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    /* KPI Card */
+    .kpi-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    }
+    .kpi-icon-box {
+        width: 56px; height: 56px;
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        font-size: 24px;
+    }
+
+    /* Buttons */
+    .btn-action {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .btn-edit {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        color: white;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+    }
+    .btn-edit:hover { transform: translateY(-1px); box-shadow: 0 8px 12px -3px rgba(79, 70, 229, 0.3); }
+
+    .btn-delete {
+        background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;
+    }
+    .btn-delete:hover { background: #fee2e2; border-color: #fca5a5; }
+
+    /* Info List */
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 0.875rem; color: #64748b; font-weight: 500; }
+    .info-value { font-size: 0.875rem; color: #1e293b; font-weight: 600; text-align: right; }
+
+    /* Table */
+    .table-header {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        color: #94a3b8;
+        padding: 12px 16px;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .table-cell {
+        padding: 14px 16px;
+        font-size: 0.875rem;
+        color: #334155;
+        border-bottom: 1px solid #f1f5f9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 pb-12">
+
+    <!-- Header -->
+    <div class="bg-white border-b border-slate-200 px-6 py-5 mb-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Breadcrumb -->
+            <nav class="flex mb-4" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="{% url 'dashboard:admin_dashboard' %}" class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors">
+                            <iconify-icon icon="solar:home-2-bold-duotone" width="16" class="mr-2"></iconify-icon>
+                            Accueil
+                        </a>
+                    </li>
+                    <li>
+                        <iconify-icon icon="solar:alt-arrow-right-linear" class="text-slate-400 mx-2"></iconify-icon>
+                    </li>
+                    <li>
+                        <a href="{% url 'menages:agence_list' %}" class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors">
+                            Agences
+                        </a>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <iconify-icon icon="solar:alt-arrow-right-linear" class="text-slate-400 mx-2"></iconify-icon>
+                            <span class="text-sm font-medium text-indigo-600">{{ agence.nom }}</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-start gap-4">
+                    <a href="{% url 'menages:agence_list' %}" class="mt-1 w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-indigo-600 transition-colors bg-white shadow-sm">
+                        <iconify-icon icon="solar:arrow-left-linear" width="20"></iconify-icon>
+                    </a>
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-900 font-jakarta flex items-center gap-2">
+                            {{ agence.nom }}
+                            {% if agence.actif %}
+                            <iconify-icon icon="solar:verified-check-bold" class="text-emerald-500" width="20"></iconify-icon>
+                            {% endif %}
+                        </h1>
+                        <div class="flex flex-wrap items-center gap-3 mt-1.5 text-sm text-slate-500">
+                            <span class="font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200 text-xs font-bold">
+                                {{ agence.code_agence }}
+                            </span>
+                            <span>&bull;</span>
+                            <span class="flex items-center gap-1">
+                                <iconify-icon icon="solar:map-point-linear"></iconify-icon>
+                                {{ agence.localite.nom }}, {{ agence.pays }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {% if can_manage %}
+                <div class="flex items-center gap-3">
+                    <a href="{% url 'menages:agence_update' agence.pk %}" class="btn-action btn-edit">
+                        <iconify-icon icon="solar:pen-new-square-bold" width="18"></iconify-icon>
+                        Modifier
+                    </a>
+                    <a href="{% url 'menages:agence_delete' agence.pk %}" class="btn-action btn-delete">
+                        <iconify-icon icon="solar:trash-bin-trash-bold" width="18"></iconify-icon>
+                        Supprimer
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6">
+
+        <!-- KPI Row -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Ménages -->
+            <div class="kpi-card">
+                <div class="kpi-icon-box bg-indigo-50 text-indigo-600">
+                    <iconify-icon icon="solar:home-smile-bold-duotone"></iconify-icon>
+                </div>
+                <div>
+                    <span class="block text-2xl font-bold text-slate-800 font-jakarta">{{ agence.nombre_menages }}</span>
+                    <span class="text-sm font-medium text-slate-500 uppercase tracking-wide">Ménages gérés</span>
+                </div>
+            </div>
+
+            <!-- Agents -->
+            <div class="kpi-card">
+                <div class="kpi-icon-box bg-amber-50 text-amber-600">
+                    <iconify-icon icon="solar:users-group-two-rounded-bold-duotone"></iconify-icon>
+                </div>
+                <div>
+                    <span class="block text-2xl font-bold text-slate-800 font-jakarta">{{ agence.nombre_agents }}</span>
+                    <span class="text-sm font-medium text-slate-500 uppercase tracking-wide">Agents actifs</span>
+                </div>
+            </div>
+
+            <!-- Année -->
+            <div class="kpi-card">
+                <div class="kpi-icon-box bg-emerald-50 text-emerald-600">
+                    <iconify-icon icon="solar:calendar-date-bold-duotone"></iconify-icon>
+                </div>
+                <div>
+                    <span class="block text-2xl font-bold text-slate-800 font-jakarta">{{ agence.date_creation|date:"Y" }}</span>
+                    <span class="text-sm font-medium text-slate-500 uppercase tracking-wide">Année création</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Column: Agency Identity -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="content-card">
+                    <div class="bg-indigo-600 px-6 py-4 flex items-center gap-3">
+                        <iconify-icon icon="solar:building-bold" class="text-white/80" width="20"></iconify-icon>
+                        <h2 class="text-white font-bold font-jakarta">Fiche d'identité</h2>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="info-row">
+                            <span class="info-label">Société Mère</span>
+                            <span class="info-value flex items-center gap-1.5">
+                                <iconify-icon icon="solar:bolt-bold" class="text-amber-500"></iconify-icon>
+                                E2C
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Statut Actuel</span>
+                            <span class="info-value">
+                                {% if agence.actif %}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+                                </span>
+                                {% else %}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-100">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Inactive
+                                </span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Département</span>
+                            <span class="info-value">{{ agence.departement.nom }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Localité</span>
+                            <span class="info-value">{{ agence.localite.nom }}</span>
+                        </div>
+
+                        <div class="mt-6 pt-4 border-t border-slate-100">
+                            <p class="text-xs text-slate-400 mb-1">Création le {{ agence.date_creation|date:"d/m/Y à H:i" }}</p>
+                            <p class="text-xs text-slate-400">Mis à jour le {{ agence.date_modification|date:"d/m/Y à H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mini Map / Location Placeholder (Visual) -->
+                <div class="content-card p-1">
+                    <div class="bg-slate-100 rounded-xl h-40 flex flex-col items-center justify-center text-slate-400 relative overflow-hidden group">
+                        <!-- Pseudo map visuals -->
+                        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                        <iconify-icon icon="solar:map-point-bold-duotone" width="40" class="text-indigo-400 mb-2 z-10 group-hover:scale-110 transition-transform"></iconify-icon>
+                        <span class="text-xs font-medium z-10">{{ agence.localite.nom }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Agents List -->
+            <div class="lg:col-span-2">
+                <div class="content-card h-full flex flex-col">
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                                <iconify-icon icon="solar:user-id-bold-duotone" width="18"></iconify-icon>
+                            </div>
+                            <h3 class="font-bold text-slate-800 font-jakarta">Agents rattachés</h3>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-bold">{{ agents_actifs|length }}</span>
+                    </div>
+
+                    <div class="flex-1 overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr>
+                                    <th class="table-header pl-6">Agent</th>
+                                    <th class="table-header">Matricule</th>
+                                    <th class="table-header">Poste</th>
+                                    <th class="table-header">Contact</th>
+                                    <th class="table-header pr-6 text-right">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for agent in agents_actifs %}
+                                <tr class="hover:bg-slate-50 transition-colors">
+                                    <td class="table-cell pl-6">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm">
+                                                {{ agent.first_name|slice:":1" }}{{ agent.last_name|slice:":1" }}
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-semibold text-slate-900">{{ agent.get_full_name|default:agent.username }}</p>
+                                                <p class="text-xs text-slate-500">@{{ agent.username }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="table-cell">
+                                        <span class="font-mono text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200">
+                                            {{ agent.matricule_agent|default:"—" }}
+                                        </span>
+                                    </td>
+                                    <td class="table-cell text-slate-600">
+                                        {{ agent.poste_agent|default:"—" }}
+                                    </td>
+                                    <td class="table-cell text-slate-600">
+                                        {% if agent.telephone %}
+                                            <div class="flex items-center gap-1.5">
+                                                <iconify-icon icon="solar:phone-linear" class="text-slate-400"></iconify-icon>
+                                                {{ agent.telephone }}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-slate-400 italic">Non renseigné</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="table-cell pr-6 text-right">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                            Actif
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="py-12 text-center">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <div class="w-14 h-14 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                                                <iconify-icon icon="solar:users-group-two-rounded-linear" width="28" class="text-slate-300"></iconify-icon>
+                                            </div>
+                                            <p class="text-slate-500 font-medium text-sm">Aucun agent de terrain assigné.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

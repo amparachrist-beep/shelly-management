@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* KPI Cards */
+    .kpi-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+    .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+
+    .kpi-purple::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+    .kpi-orange::before { background: linear-gradient(90deg, #f97316, #fb923c); }
+    .kpi-blue::before   { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+
+    /* Section & Charts */
+    .section-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        margin-bottom: 1.5rem;
+    }
+    .section-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+
+    /* Inputs */
+    .light-input {
+        background-color: #ffffff; border: 1px solid #cbd5e1;
+        color: #1e293b; border-radius: 8px; padding: 8px 12px;
+        font-size: 0.875rem; transition: all 0.2s;
+    }
+    .light-input:focus { outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1); }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Dashboard
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <a href="{% url 'dashboard_suivi:suivi_compteur' compteur.pk %}"
+       class="text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        Compteur {{ compteur.numero_compteur }}
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">Journalier</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 p-6">
+
+    <!-- En-tête avec période -->
+    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-200">
+                <iconify-icon icon="solar:calendar-date-bold-duotone" width="24" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                    Suivi Journalier
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">Analyse détaillée de la journée</p>
+            </div>
+        </div>
+
+        <!-- Filtre date -->
+        <div class="bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
+            <form method="get" class="flex items-center gap-3">
+                <div class="flex items-center gap-2 px-2 text-slate-600">
+                    <iconify-icon icon="solar:calendar-search-linear" width="18"></iconify-icon>
+                    <span class="text-sm font-medium">Date :</span>
+                </div>
+                <input type="date" name="date" value="{{ date|date:'Y-m-d' }}" class="light-input">
+                <button type="submit" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                    Voir
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Informations du compteur -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-8 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+                <iconify-icon icon="solar:smart-home-bold-duotone" width="20"></iconify-icon>
+            </div>
+            <div>
+                <h2 class="text-lg font-bold text-slate-800 font-jakarta">Compteur {{ compteur.numero_compteur }}</h2>
+                <p class="text-sm text-slate-500 font-medium">{{ compteur.menage.nom_menage }} <span class="text-slate-300">•</span> {{ compteur.menage.localite.nom }}</p>
+            </div>
+        </div>
+        <span class="px-3 py-1 bg-slate-100 text-slate-600 font-semibold rounded-full text-xs border border-slate-200 uppercase tracking-wide">
+            {{ compteur.get_statut_display }}
+        </span>
+    </div>
+
+    {% if journalier %}
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Conso Jour -->
+        <div class="kpi-card kpi-purple">
+            <p class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">Consommation du jour</p>
+            <h3 class="text-2xl font-bold text-slate-900">{{ journalier.consommation_kwh|floatformat:1 }} <span class="text-sm font-normal text-slate-500">kWh</span></h3>
+            <div class="flex items-center gap-2 mt-2">
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full {% if variation.percentage > 0 %}bg-red-50 text-red-600{% else %}bg-emerald-50 text-emerald-600{% endif %}">
+                    {% if variation.percentage > 0 %}+{% endif %}{{ variation.percentage|floatformat:1 }}%
+                </span>
+                <span class="text-xs text-slate-400">vs hier</span>
+            </div>
+        </div>
+
+        <!-- Puissance Max -->
+        <div class="kpi-card kpi-orange">
+            <p class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">Puissance Max</p>
+            <h3 class="text-2xl font-bold text-slate-900">{{ journalier.puissance_max|floatformat:1 }} <span class="text-sm font-normal text-slate-500">kW</span></h3>
+            <p class="text-xs text-orange-600 font-medium mt-2">Pic de consommation</p>
+        </div>
+
+        <!-- Mensuel Estimé -->
+        <div class="kpi-card kpi-blue">
+            <p class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">Mensuel Estimé</p>
+            <h3 class="text-2xl font-bold text-slate-900">{{ conso_mensuelle|floatformat:0|default:"-" }} <span class="text-sm font-normal text-slate-500">kWh</span></h3>
+            <p class="text-xs text-blue-600 font-medium mt-2">Projection mois en cours</p>
+        </div>
+    </div>
+
+    <!-- Graphique Horaire -->
+    <div class="section-card mb-8">
+        <div class="section-header">
+            <h2 class="text-lg font-semibold text-slate-800 font-jakarta">Courbe de charge horaire</h2>
+        </div>
+        <div class="p-6 h-80 relative">
+            <canvas id="horaireChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Analyse & Comparaison -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <!-- Heures de pointe -->
+        <div class="section-card flex flex-col h-full">
+            <div class="section-header">
+                <h3 class="text-lg font-semibold text-slate-800 font-jakarta flex items-center gap-2">
+                    <iconify-icon icon="solar:clock-circle-bold-duotone" class="text-orange-500"></iconify-icon>
+                    Heures de pointe
+                </h3>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-50">
+                    <span class="text-sm font-medium text-slate-500">Matin</span>
+                    <span class="text-slate-800 font-bold bg-orange-50 px-3 py-1 rounded-lg text-sm">{{ heures_pointe.matin }}</span>
+                </div>
+                <div class="flex items-center justify-between pb-4 border-b border-slate-50">
+                    <span class="text-sm font-medium text-slate-500">Soir</span>
+                    <span class="text-slate-800 font-bold bg-indigo-50 px-3 py-1 rounded-lg text-sm">{{ heures_pointe.soir }}</span>
+                </div>
+                <div class="flex items-center justify-between pt-1">
+                    <span class="text-sm font-medium text-slate-500">Puissance estimée en pointe</span>
+                    <span class="text-orange-600 font-bold text-lg">{{ heures_pointe.pointe_estimee|floatformat:1 }} kW</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparaison -->
+        <div class="section-card flex flex-col h-full">
+            <div class="section-header">
+                <h3 class="text-lg font-semibold text-slate-800 font-jakarta flex items-center gap-2">
+                    <iconify-icon icon="solar:graph-new-up-bold-duotone" class="text-blue-500"></iconify-icon>
+                    Comparaison
+                </h3>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-50">
+                    <span class="text-sm font-medium text-slate-500">Hier</span>
+                    <span class="text-slate-800 font-bold">{{ prev_journalier.consommation_kwh|floatformat:1|default:"-" }} kWh</span>
+                </div>
+                <div class="flex items-center justify-between pb-4 border-b border-slate-50">
+                    <span class="text-sm font-medium text-slate-500">Moyenne 7 derniers jours</span>
+                    <span class="text-slate-400 font-medium italic">-</span>
+                </div>
+                <div class="flex items-center justify-between pt-1">
+                    <span class="text-sm font-medium text-slate-500">Même jour mois dernier</span>
+                    <span class="text-slate-400 font-medium italic">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Source des données -->
+    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <iconify-icon icon="solar:info-circle-bold-duotone" width="20" class="text-indigo-600"></iconify-icon>
+        <span class="text-sm font-medium text-indigo-900">
+            Données issues du capteur <span class="font-bold">Shelly EM</span> • Source : {{ journalier.source|default:"Relevé automatique" }}
+        </span>
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="bg-white border border-slate-200 border-dashed rounded-xl p-16 text-center shadow-sm">
+        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+            <iconify-icon icon="solar:calendar-date-broken" width="32"></iconify-icon>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 mb-2">Aucune donnée pour cette date</h3>
+        <p class="text-slate-500 text-sm">Veuillez sélectionner une autre date pour visualiser les consommations.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if journalier %}
+    const ctx = document.getElementById('horaireChart').getContext('2d');
+
+    // Gradient
+    let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(139, 92, 246, 0.2)'); // Purple
+    gradient.addColorStop(1, 'rgba(139, 92, 246, 0)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 24}, (_, i) => i + 'h'),
+            datasets: [{
+                label: 'Consommation (kWh)',
+                data: {{ conso_horaire|safe }},
+                borderColor: '#8b5cf6', // Purple-500
+                backgroundColor: gradient,
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#8b5cf6',
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    titleColor: '#fff',
+                    bodyColor: '#cbd5e1',
+                    padding: 10,
+                    cornerRadius: 8,
+                    callbacks: { label: (c) => c.raw.toFixed(2) + ' kWh' }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#64748b', font: { family: 'Inter' } }
+                },
+                y: {
+                    border: { display: false },
+                    grid: { color: '#f1f5f9' },
+                    ticks: { color: '#64748b', font: { family: 'Inter' } }
+                }
+            },
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+        }
+    });
+    {% endif %}
+});
+</script>
+{% endblock %}

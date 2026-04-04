@@ -1,0 +1,399 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Surveillance en direct - SGE{% endblock %}
+
+{% block breadcrumb %}
+<li class="flex items-center">
+    <a href="{% url 'dashboard:client_dashboard' %}" class="text-slate-400 hover:text-white transition-colors">Mon Tableau de bord</a>
+    <iconify-icon icon="solar:alt-arrow-right-linear" class="mx-2 text-slate-600" width="16"></iconify-icon>
+</li>
+<li class="flex items-center">
+    <a href="{% url 'compteurs:client_mes_compteurs' %}" class="text-slate-400 hover:text-white transition-colors">Mes Compteurs</a>
+    <iconify-icon icon="solar:alt-arrow-right-linear" class="mx-2 text-slate-600" width="16"></iconify-icon>
+</li>
+<li class="flex items-center">
+    <a href="{% url 'compteurs:client_compteur_detail' pk=compteur.id %}" class="text-slate-400 hover:text-white transition-colors">{{ compteur.numero_serie }}</a>
+    <iconify-icon icon="solar:alt-arrow-right-linear" class="mx-2 text-slate-600" width="16"></iconify-icon>
+</li>
+<li class="text-white">Surveillance en direct</li>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-sky-500/10 rounded-lg">
+                <iconify-icon icon="solar:monitor-linear" width="24" class="text-sky-500"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-white">Surveillance en direct</h1>
+                <p class="text-slate-400">Compteur {{ compteur.numero_serie }}</p>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+            <a href="{% url 'compteurs:client_compteur_detail' pk=compteur.id %}"
+               class="flex items-center gap-2 px-4 py-2 border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white rounded-lg transition-colors">
+                <iconify-icon icon="solar:arrow-left-linear" width="18"></iconify-icon>
+                <span>Retour au détail</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Indicateur de connexion -->
+<div class="mb-6">
+    <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-white/5 rounded-xl p-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="w-4 h-4 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <div class="absolute inset-0 rounded-full bg-emerald-500 opacity-50 animate-ping"></div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white">Connecté en temps réel</h3>
+                    <p class="text-sm text-slate-400">Données mises à jour toutes les 10 secondes</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-sm text-slate-400">Dernière mise à jour</p>
+                <p class="text-lg font-semibold text-white" id="last-update">--:--:--</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Données en temps réel -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <div class="bg-slate-900/50 border border-white/5 rounded-xl p-6">
+        <h3 class="text-lg font-semibold text-white mb-4">Consommation instantanée</h3>
+        <div class="space-y-4">
+            <div>
+                <p class="text-sm text-slate-400 mb-2">Phase 1</p>
+                <p class="text-3xl font-bold text-white" id="phase1">--.-- W</p>
+            </div>
+            <div>
+                <p class="text-sm text-slate-400 mb-2">Phase 2</p>
+                <p class="text-3xl font-bold text-white" id="phase2">--.-- W</p>
+            </div>
+            <div>
+                <p class="text-sm text-slate-400 mb-2">Phase 3</p>
+                <p class="text-3xl font-bold text-white" id="phase3">--.-- W</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-slate-900/50 border border-white/5 rounded-xl p-6">
+        <h3 class="text-lg font-semibold text-white mb-4">Charge du compteur</h3>
+        <div class="flex flex-col items-center justify-center h-full">
+            <div class="relative w-48 h-48 mb-4">
+                <canvas id="gaugeChart"></canvas>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <p class="text-4xl font-bold text-white" id="chargePercentage">0%</p>
+                    <p class="text-sm text-slate-400">Charge</p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-400 text-center" id="chargeStatus">Chargement...</p>
+        </div>
+    </div>
+
+    <div class="bg-slate-900/50 border border-white/5 rounded-xl p-6">
+        <h3 class="text-lg font-semibold text-white mb-4">Statistiques du jour</h3>
+        <div class="space-y-4">
+            <div>
+                <p class="text-sm text-slate-400 mb-2">Consommation aujourd'hui</p>
+                <p class="text-3xl font-bold text-white" id="todayConsumption">--.-- kWh</p>
+            </div>
+            <div>
+                <p class="text-sm text-slate-400 mb-2">Puissance moyenne</p>
+                <p class="text-3xl font-bold text-white" id="avgPower">--.-- W</p>
+            </div>
+            <div>
+                <p class="text-sm text-slate-400 mb-2">Puissance maximale</p>
+                <p class="text-3xl font-bold text-white" id="maxPower">--.-- W</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Graphique en temps réel -->
+<div class="bg-slate-900/50 border border-white/5 rounded-xl p-6 mb-6">
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-semibold text-white">Évolution de la consommation (30 dernières minutes)</h3>
+        <div class="flex items-center gap-2">
+            <button id="btn-30min" class="px-3 py-1 bg-sky-500 text-white text-sm rounded-lg">30 min</button>
+            <button id="btn-1h" class="px-3 py-1 border border-white/10 text-slate-400 hover:text-white text-sm rounded-lg">1 heure</button>
+            <button id="btn-4h" class="px-3 py-1 border border-white/10 text-slate-400 hover:text-white text-sm rounded-lg">4 heures</button>
+        </div>
+    </div>
+    <div class="h-80">
+        <canvas id="liveChart"></canvas>
+    </div>
+</div>
+
+<!-- Informations techniques -->
+<div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-white/5 rounded-xl p-6">
+    <h3 class="text-lg font-semibold text-white mb-4">Informations techniques</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <h4 class="text-sm font-medium text-slate-400 mb-2">Appareil Shelly</h4>
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">ID de l'appareil</span>
+                    <span class="text-white">{{ compteur.shelly_device_id|default:"Non configuré" }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Dernière connexion</span>
+                    <span class="text-white">{{ compteur.shelly_last_seen|date:"d/m/Y H:i"|default:"Jamais" }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">État de la batterie</span>
+                    <span class="text-white" id="batteryStatus">--%</span>
+                </div>
+            </div>
+        </div>
+        <div>
+            <h4 class="text-sm font-medium text-slate-400 mb-2">Performances réseau</h4>
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Qualité du signal</span>
+                    <span class="text-white" id="signalQuality">-- dBm</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Latence</span>
+                    <span class="text-white" id="latency">-- ms</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Mises à jour/s</span>
+                    <span class="text-white" id="updateRate">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-gauge@0.3.0/dist/chartjs-gauge.min.js"></script>
+<script>
+let updateRate = 0;
+let lastUpdateTime = Date.now();
+
+function updateLiveData() {
+    fetch(`/compteurs/live/{{ compteur.id }}/`)
+        .then(response => response.json())
+        .then(data => {
+
+                document.getElementById('phase1').textContent = (data.phase1 || 0).toFixed(1) + ' W';
+                document.getElementById('phase2').textContent = (data.phase2 || 0).toFixed(1) + ' W';
+                document.getElementById('phase3').textContent = (data.phase3 || 0).toFixed(1) + ' W';
+
+                // Calculer la charge totale
+                const totalPower = (data.phase1 || 0) + (data.phase2 || 0) + (data.phase3 || 0);
+                const maxPower = {{ compteur.puissance_souscrite|default:10000 }} * 1000; // Convertir kVA en W
+                const chargePercentage = Math.min((totalPower / maxPower) * 100, 100);
+
+                document.getElementById('chargePercentage').textContent = chargePercentage.toFixed(1) + '%';
+
+                // Mettre à jour le statut de charge
+                const chargeStatus = document.getElementById('chargeStatus');
+                if (chargePercentage < 50) {
+                    chargeStatus.textContent = 'Charge normale';
+                    chargeStatus.className = 'text-sm text-emerald-400 text-center';
+                } else if (chargePercentage < 80) {
+                    chargeStatus.textContent = 'Charge modérée';
+                    chargeStatus.className = 'text-sm text-yellow-400 text-center';
+                } else {
+                    chargeStatus.textContent = 'Charge élevée';
+                    chargeStatus.className = 'text-sm text-red-400 text-center';
+                }
+
+                // Mettre à jour le jauge
+                if (window.gaugeChart) {
+                    window.gaugeChart.data.datasets[0].value = chargePercentage;
+                    window.gaugeChart.update();
+                }
+
+                // Mettre à jour les statistiques du jour
+                document.getElementById('todayConsumption').textContent = (data.today_consumption || 0).toFixed(2) + ' kWh';
+                document.getElementById('avgPower').textContent = (data.avg_power || 0).toFixed(1) + ' W';
+                document.getElementById('maxPower').textContent = (data.max_power || 0).toFixed(1) + ' W';
+                // Mettre à jour les informations techniques
+                document.getElementById('batteryStatus').textContent = (data.battery ?? '--') + '%';
+                document.getElementById('signalQuality').textContent = (data.signal_quality ?? '--') + ' dBm';
+                document.getElementById('latency').textContent = (data.latency ?? '--') + ' ms';
+
+                // Mettre à jour le graphique en temps réel
+                addDataToChart(data.timestamp, totalPower);
+
+                // Mettre à jour le taux de mise à jour
+                updateRate++;
+                document.getElementById('updateRate').textContent = updateRate;
+
+                // Mettre à jour l'heure de dernière mise à jour
+                const now = new Date();
+                document.getElementById('last-update').textContent =
+                    now.toLocaleTimeString('fr-FR', { hour12: false });
+
+        })
+        .catch(error => {
+            console.error('Erreur lors de la récupération des données:', error);
+        });
+}
+
+// Initialiser le graphique jauge
+const gaugeCtx = document.getElementById('gaugeChart').getContext('2d');
+window.gaugeChart = new Chart(gaugeCtx, {
+    type: 'gauge',
+    data: {
+        datasets: [{
+            value: 0,
+            minValue: 0,
+            data: [50, 80, 100],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
+        }]
+    },
+    options: {
+        responsive: true,
+        title: {
+            display: false
+        },
+        layout: {
+            padding: {
+                bottom: 30
+            }
+        },
+        needle: {
+            radiusPercentage: 2,
+            widthPercentage: 3.2,
+            lengthPercentage: 80,
+            color: 'rgba(255, 255, 255, 0.8)'
+        },
+        valueLabel: {
+            display: false
+        }
+    }
+});
+
+// Initialiser le graphique en temps réel
+const liveCtx = document.getElementById('liveChart').getContext('2d');
+const liveChart = new Chart(liveCtx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Consommation totale (W)',
+            data: [],
+            borderColor: '#0ea5e9',
+            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+            duration: 0
+        },
+        elements: {
+            point: {
+                radius: 0
+            }
+        },
+        scales: {
+            x: {
+                grid: {
+                    color: 'rgba(255, 255, 255, 0.05)'
+                },
+                ticks: {
+                    color: '#94a3b8',
+                    maxTicksLimit: 10
+                }
+            },
+            y: {
+                grid: {
+                    color: 'rgba(255, 255, 255, 0.05)'
+                },
+                ticks: {
+                    color: '#94a3b8',
+                    callback: function(value) {
+                        return value + ' W';
+                    }
+                }
+            }
+        }
+    }
+});
+
+function addDataToChart(timestamp, value) {
+    const now = new Date(timestamp);
+    const label = now.toLocaleTimeString('fr-FR', { hour12: false });
+
+    liveChart.data.labels.push(label);
+    liveChart.data.datasets[0].data.push(value);
+
+    // Garder seulement les 30 dernières minutes (180 points si mise à jour toutes les 10s)
+    if (liveChart.data.labels.length > 180) {
+        liveChart.data.labels.shift();
+        liveChart.data.datasets[0].data.shift();
+    }
+
+    liveChart.update();
+}
+
+// Mettre à jour toutes les 10 secondes
+setInterval(updateLiveData, 10000);
+
+// Première mise à jour
+updateLiveData();
+
+// Gestion des boutons de période
+document.getElementById('btn-30min').addEventListener('click', function() {
+    loadPeriodData('30min');
+});
+
+document.getElementById('btn-1h').addEventListener('click', function() {
+    loadPeriodData('1h');
+});
+
+document.getElementById('btn-4h').addEventListener('click', function() {
+    loadPeriodData('4h');
+});
+
+function loadPeriodData(period) {
+    // Réinitialiser le graphique
+    liveChart.data.labels = [];
+    liveChart.data.datasets[0].data = [];
+    liveChart.update();
+
+    // Charger les données historiques pour la période
+    fetch(`/compteurs/ajax/historical-data/{{ compteur.id }}/?period=${period}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                data.data.forEach(point => {
+                    addDataToChart(point.timestamp, point.value);
+                });
+
+                // Mettre à jour les boutons actifs
+                document.querySelectorAll('[id^="btn-"]').forEach(btn => {
+                    btn.classList.remove('bg-sky-500', 'text-white');
+                    btn.classList.add('border', 'border-white/10', 'text-slate-400');
+                });
+                document.getElementById(`btn-${period}`).classList.add('bg-sky-500', 'text-white');
+                document.getElementById(`btn-${period}`).classList.remove('border', 'text-slate-400');
+            }
+        });
+}
+
+// Réinitialiser le compteur de taux de mise à jour toutes les minutes
+setInterval(() => {
+    updateRate = 0;
+}, 60000);
+</script>
+{% endblock %}

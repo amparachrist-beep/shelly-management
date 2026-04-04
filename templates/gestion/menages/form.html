@@ -1,0 +1,1927 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Nouveau Ménage - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Custom Scrollbar */
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Section card */
+    .section-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .section-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .section-title {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+        line-height: 1.3;
+    }
+    .section-sub {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin: 4px 0 0;
+        font-weight: 500;
+    }
+
+    /* Pill badge */
+    .pill {
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        display: inline-block;
+        letter-spacing: 0.025em;
+    }
+    .pill-blue  { background: rgba(79, 70, 229, 0.1);  color: #4f46e5; }
+    .pill-cyan  { background: rgba(8, 145, 178, 0.1);  color: #0891b2; }
+    .pill-amber { background: rgba(217, 119, 6, 0.1); color: #d97706; }
+    .pill-red   { background: rgba(220, 38, 38, 0.1);   color: #dc2626; }
+    .pill-green { background: rgba(5, 150, 105, 0.1); color: #059669; }
+    .pill-gray  { background: #f1f5f9;           color: #64748b; }
+
+    /* Wizard Custom Styles */
+    .wizard-progress {
+        position: relative;
+    }
+
+    .wizard-progress::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: #e2e8f0;
+        z-index: 1;
+    }
+
+    .wizard-step {
+        position: relative;
+        z-index: 2;
+    }
+
+    .wizard-step-number {
+        transition: all 0.3s ease;
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5);
+    }
+
+    .wizard-step.active .wizard-step-number {
+        background-color: #f97316;
+        color: white;
+        transform: scale(1.1);
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.2);
+    }
+
+    .wizard-step.completed .wizard-step-number {
+        background-color: #10b981;
+        color: white;
+    }
+
+    .step-section {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .location-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    /* FIX: Amélioration du scroll - Suppression de max-height qui cause des problèmes */
+    .wizard-content {
+        overflow-y: visible;
+        padding: 1.5rem;
+    }
+
+    /* Map container */
+    #map {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Loading spinner */
+    .spinner {
+        border: 2px solid #f1f5f9;
+        border-top: 2px solid #f97316;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Pulse animation */
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+
+    /* Fix pour les boutons sticky au bas */
+    .wizard-navigation {
+        position: sticky;
+        bottom: 0;
+        background: #fff;
+        border-top: 1px solid #e2e8f0;
+        z-index: 10;
+    }
+
+    /* Style pour les champs en erreur */
+    input.border-rose-500,
+    select.border-rose-500,
+    textarea.border-rose-500 {
+        border-color: #f43f5e !important;
+        animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    /* Form inputs style */
+    .form-input {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 0.875rem;
+        color: #334155;
+        transition: all 0.15s;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .form-input::placeholder {
+        color: #94a3b8;
+    }
+
+    .form-label {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* Button styles */
+    .btn {
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-primary {
+        background: #4f46e5;
+        color: white;
+        border: 1px solid #4f46e5;
+    }
+
+    .btn-primary:hover {
+        background: #4338ca;
+        border-color: #4338ca;
+    }
+
+    .btn-secondary {
+        background: #fff;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #475569;
+    }
+
+    .btn-success {
+        background: #10b981;
+        color: white;
+        border: 1px solid #10b981;
+    }
+
+    .btn-success:hover {
+        background: #059669;
+        border-color: #059669;
+    }
+
+    .btn-warning {
+        background: #f97316;
+        color: white;
+        border: 1px solid #f97316;
+    }
+
+    .btn-warning:hover {
+        background: #ea580c;
+        border-color: #ea580c;
+    }
+
+    /* Alert styles */
+    .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .alert-info {
+        background: rgba(79, 70, 229, 0.1);
+        border: 1px solid rgba(79, 70, 229, 0.2);
+        color: #4f46e5;
+    }
+
+    .alert-success {
+        background: rgba(5, 150, 105, 0.1);
+        border: 1px solid rgba(5, 150, 105, 0.2);
+        color: #059669;
+    }
+
+    .alert-warning {
+        background: rgba(217, 119, 6, 0.1);
+        border: 1px solid rgba(217, 119, 6, 0.2);
+        color: #d97706;
+    }
+
+    .alert-error {
+        background: rgba(220, 38, 38, 0.1);
+        border: 1px solid rgba(220, 38, 38, 0.2);
+        color: #dc2626;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Accueil
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <a href="{% url 'menages:list' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        Ménages
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">Nouveau Ménage</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50">
+    <!-- Page Header -->
+    <div class="bg-white border-b border-slate-200 px-6 py-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                    <iconify-icon icon="solar:home-smile-bold-duotone" width="24" class="text-white"></iconify-icon>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                        Nouveau Ménage
+                    </h1>
+                    <p class="text-sm text-slate-500 mt-1">Enregistrement d'un nouveau ménage client - Processus en 3 étapes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="p-6">
+        <!-- Wizard Container -->
+        <div class="section-card">
+            <!-- Wizard Progress -->
+            <div class="wizard-progress p-6 border-b border-slate-100">
+                <div class="flex justify-between">
+                    <!-- Step 1 -->
+                    <div class="wizard-step active flex flex-col items-center" data-step="1">
+                        <div class="wizard-step-number w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center mb-2">
+                            <iconify-icon icon="solar:user-linear" width="18" class="text-slate-400"></iconify-icon>
+                        </div>
+                        <span class="text-xs font-medium text-slate-600">Informations</span>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="wizard-step flex flex-col items-center" data-step="2">
+                        <div class="wizard-step-number w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center mb-2">
+                            <iconify-icon icon="solar:map-point-wave-linear" width="18" class="text-slate-400"></iconify-icon>
+                        </div>
+                        <span class="text-xs font-medium text-slate-400">Localisation</span>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="wizard-step flex flex-col items-center" data-step="3">
+                        <div class="wizard-step-number w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center mb-2">
+                            <iconify-icon icon="solar:check-read-linear" width="18" class="text-slate-400"></iconify-icon>
+                        </div>
+                        <span class="text-xs font-medium text-slate-400">Récapitulatif</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form method="post" id="menageForm" enctype="multipart/form-data" action="{% url 'menages:create' %}" novalidate>
+                {% csrf_token %}
+
+                <div class="wizard-content">
+                    <!-- Step 1: Informations de base -->
+                    <div class="step-section space-y-6" data-step="1">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <iconify-icon icon="solar:user-linear" class="text-orange-500" width="20"></iconify-icon>
+                                <h2 class="text-lg font-semibold text-slate-900 font-jakarta">Informations du Ménage</h2>
+                            </div>
+                            <p class="text-slate-500 mb-6">Renseignez les informations générales du ménage</p>
+                        </div>
+
+                        <!-- Alert -->
+                        <div class="alert alert-info">
+                            <iconify-icon icon="solar:info-circle-linear" width="18"></iconify-icon>
+                            <div class="text-sm">
+                                <span class="font-medium">Information:</span> Les champs marqués d'un astérisque (*) sont obligatoires.
+                            </div>
+                        </div>
+
+                        <!-- ✅ AJOUT DU BLOC POUR LA SÉLECTION D'UTILISATEUR EXISTANT -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- ✅ NOUVEAU CHAMP: Sélection utilisateur existant -->
+                            <div class="col-span-full space-y-2 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <iconify-icon icon="solar:user-check-linear" class="text-blue-500" width="20"></iconify-icon>
+                                    <label class="form-label">
+                                        Lier à un compte utilisateur existant (optionnel)
+                                    </label>
+                                </div>
+                                <p class="text-xs text-blue-600 mb-3">
+                                    Si ce ménage appartient à un utilisateur déjà enregistré dans le système, sélectionnez-le ci-dessous.
+                                    Sinon, un nouveau compte sera créé automatiquement.
+                                </p>
+
+                                <div class="relative">
+                                    <iconify-icon icon="solar:users-group-rounded-linear"
+                                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                                 width="18"></iconify-icon>
+                                    <select name="utilisateur"
+                                            id="id_utilisateur"
+                                            class="w-full pl-10 pr-4 py-3 form-input appearance-none">
+                                        <option value="">-- Ajouter un utilisateur --</option>
+                                        <!-- Les options seront chargées dynamiquement via AJAX -->
+                                    </select>
+                                </div>
+
+                                <div id="selected-user-info" class="hidden mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                                    <div class="flex items-center gap-2">
+                                        <iconify-icon icon="solar:check-circle-linear" class="text-emerald-500" width="16"></iconify-icon>
+                                        <span class="text-sm text-emerald-700">Utilisateur sélectionné : <span id="selected-user-name" class="font-medium"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Agence -->
+                            <div class="col-span-full space-y-2">
+                                <label class="form-label">
+                                    <iconify-icon icon="solar:building-linear" width="16"></iconify-icon>
+                                    Agence E2C <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <iconify-icon icon="solar:buildings-linear"
+                                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                                 width="18"></iconify-icon>
+                                   <select name="agence" id="id_agence"
+                                            class="w-full pl-10 pr-4 py-3 form-input appearance-none" required>
+                                        <option value="">— Sélectionner une agence —</option>
+                                        {% for agence in agences %}
+                                        <option value="{{ agence.pk }}">{{ agence.nom }} — {{ agence.localite.nom }}</option>
+                                        {% endfor %}
+                                   </select>
+                                </div>
+                            </div>
+
+                            <!-- Nom du ménage -->
+                            <div class="space-y-2">
+                                <label class="form-label">
+                                    <iconify-icon icon="solar:home-2-linear" width="16"></iconify-icon>
+                                    Nom du ménage *
+                                </label>
+                                <div class="relative">
+                                    <iconify-icon icon="solar:users-group-two-rounded-linear"
+                                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                                 width="18"></iconify-icon>
+                                    <input type="text"
+                                           name="nom_menage"
+                                           class="w-full pl-10 pr-4 py-3 form-input"
+                                           placeholder="Ex: Famille MBEMBA"
+                                           required>
+                                </div>
+                            </div>
+
+                            <!-- Référence -->
+                            <div class="space-y-2">
+                                <label class="form-label">
+                                    <iconify-icon icon="solar:hashtag-linear" width="16"></iconify-icon>
+                                    Référence
+                                </label>
+                                <div class="relative">
+                                    <iconify-icon icon="solar:barcode-linear"
+                                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                                 width="18"></iconify-icon>
+                                    <input type="text"
+                                           name="reference_menage"
+                                           class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-500"
+                                           placeholder="Sera généré automatiquement"
+                                           readonly>
+                                </div>
+                            </div>
+
+                            <!-- Personne de contact -->
+                            <div class="space-y-2">
+                                <label class="form-label">
+                                    <iconify-icon icon="solar:user-circle-linear" width="16"></iconify-icon>
+                                    Personne de contact *
+                                </label>
+                                <div class="relative">
+                                    <iconify-icon icon="solar:user-tag-linear"
+                                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                                 width="18"></iconify-icon>
+                                    <input type="text"
+                                           name="personne_contact"
+                                           class="w-full pl-10 pr-4 py-3 form-input"
+                                           placeholder="Nom complet du contact"
+                                           required>
+                                </div>
+                            </div>
+
+                            <!-- Téléphone principal -->
+                            <div class="space-y-2">
+                                <label class="form-label">
+                                    <iconify-icon icon="solar:phone-linear" width="16"></iconify-icon>
+                                    Téléphone principal
+                                </label>
+                                <div class="relative">
+                                    <iconify-icon icon="solar:phone-calling-linear"
+                                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                                 width="18"></iconify-icon>
+                                    <input type="tel"
+                                           name="telephone_principal"
+                                           class="w-full pl-10 pr-4 py-3 form-input"
+                                           placeholder="+242 XX XXX XXXX">
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="space-y-2">
+                                <label class="form-label">
+                                    <iconify-icon icon="solar:letter-linear" width="16"></iconify-icon>
+                                    Email
+                                </label>
+                                <div class="relative">
+                                    <iconify-icon icon="solar:letter-linear"
+                                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                                 width="18"></iconify-icon>
+                                    <input type="email"
+                                           name="email"
+                                           class="w-full pl-10 pr-4 py-3 form-input"
+                                           placeholder="email@example.com">
+                                </div>
+                            </div>
+
+                            <!-- Téléphone secondaire -->
+                            <div class="space-y-2">
+                                <label class="form-label">
+                                    <iconify-icon icon="solar:smartphone-linear" width="16"></iconify-icon>
+                                    Téléphone secondaire
+                                </label>
+                                <div class="relative">
+                                    <iconify-icon icon="solar:smartphone-linear"
+                                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                                 width="18"></iconify-icon>
+                                    <input type="tel"
+                                           name="telephone_secondaire"
+                                           class="w-full pl-10 pr-4 py-3 form-input"
+                                           placeholder="+242 XX XXX XXXX">
+                                </div>
+                            </div>
+
+                            <!-- Nombre de personnes -->
+                            <div class="space-y-2">
+                                <label class="form-label">
+                                    <iconify-icon icon="solar:users-group-two-rounded-linear" width="16"></iconify-icon>
+                                    Nombre de personnes
+                                </label>
+                                <div class="relative">
+                                    <iconify-icon icon="solar:users-group-two-rounded-linear"
+                                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                                 width="18"></iconify-icon>
+                                    <input type="number"
+                                           name="nombre_personnes"
+                                           class="w-full pl-10 pr-4 py-3 form-input"
+                                           placeholder="Nombre"
+                                           min="1"
+                                           value="1">
+                                </div>
+                            </div>
+
+                            <!-- Type d'habitation -->
+                            <div class="space-y-2">
+
+                                <!-- Lignes 388-395 : Version corrigée qui puise dans la base -->
+                                <div class="space-y-2">
+                                    <label class="form-label">
+                                        <iconify-icon icon="solar:home-angle-linear" width="16"></iconify-icon>
+                                        Type d'habitation *
+                                    </label>
+                                    <select name="type_habitation"
+                                            id="type_habitation_select"
+                                            class="w-full px-4 py-3 form-input appearance-none"
+                                            required>
+                                        <option value="">Sélectionner...</option>
+                                        <!-- Les options seront chargées dynamiquement via AJAX -->
+                                    </select>
+                                    <div id="type_habitation_loading" class="hidden">
+                                        <div class="spinner mr-2"></div> Chargement...
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Surface -->
+                            <div class="space-y-2">
+                                <label class="form-label">
+                                    <iconify-icon icon="solar:square-linear" width="16"></iconify-icon>
+                                    Surface (m²)
+                                </label>
+                                <div class="relative">
+                                    <iconify-icon icon="solar:square-linear"
+                                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                                 width="18"></iconify-icon>
+                                    <input type="number"
+                                           name="surface_m2"
+                                           class="w-full pl-10 pr-4 py-3 form-input"
+                                           placeholder="Surface"
+                                           min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Localisation -->
+                    <div class="step-section space-y-6 hidden" data-step="2">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <iconify-icon icon="solar:map-point-wave-linear" class="text-orange-500" width="20"></iconify-icon>
+                                <h2 class="text-lg font-semibold text-slate-900 font-jakarta">Localisation du Ménage</h2>
+                            </div>
+                            <p class="text-slate-500 mb-6">Cliquez sur la carte pour placer le marqueur à l'emplacement exact</p>
+                        </div>
+
+                        <!-- Alert -->
+                        <div class="alert alert-info">
+                            <iconify-icon icon="solar:info-circle-linear" width="18"></iconify-icon>
+                            <div class="text-sm">
+                                <span class="font-medium">Instructions:</span> Cliquez sur la carte pour placer le marqueur. La localité et le département seront détectés automatiquement.
+                            </div>
+                        </div>
+
+                        <!-- Map Container -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2">
+                                    <iconify-icon icon="solar:map-linear" class="text-slate-500" width="20"></iconify-icon>
+                                    <h3 class="text-slate-900 font-medium font-jakarta">Carte Interactive</h3>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="button"
+                                            class="btn btn-warning"
+                                            id="btnMyLocation">
+                                        <iconify-icon icon="solar:location-linear" width="16"></iconify-icon>
+                                        Ma Position
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-primary"
+                                            id="btnCenterMap">
+                                        <iconify-icon icon="solar:aim-linear" width="16"></iconify-icon>
+                                        Centrer
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Map -->
+                            <div id="map" class="h-96 w-full"></div>
+                        </div>
+
+                        <!-- Location Info -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4" id="locationInfo">
+                            <div class="flex items-center gap-2 mb-4">
+                                <iconify-icon icon="solar:info-circle-linear" class="text-blue-500" width="20"></iconify-icon>
+                                <h3 class="text-slate-900 font-medium font-jakarta">Position Sélectionnée</h3>
+                            </div>
+
+                            <div class="location-info-grid">
+                                <div class="space-y-1">
+                                    <span class="text-xs text-slate-500">Latitude</span>
+                                    <div class="px-3 py-2 bg-white rounded-lg text-slate-900 font-medium" id="latDisplay">-</div>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="text-xs text-slate-500">Longitude</span>
+                                    <div class="px-3 py-2 bg-white rounded-lg text-slate-900 font-medium" id="lonDisplay">-</div>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="text-xs text-slate-500">Localité</span>
+                                    <div class="px-3 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg font-medium" id="localiteDisplay">Non détectée</div>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="text-xs text-slate-500">Département</span>
+                                    <div class="px-3 py-2 bg-white rounded-lg text-slate-900 font-medium" id="departementDisplay">Non détecté</div>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="text-xs text-slate-500">Méthode</span>
+                                    <div class="px-3 py-2 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg font-medium" id="methodeDisplay">-</div>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="text-xs text-slate-500">Distance</span>
+                                    <div class="px-3 py-2 bg-white rounded-lg text-slate-900 font-medium" id="distanceDisplay">-</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Fields -->
+                        <div class="grid grid-cols-1 gap-4">
+                            <div class="space-y-2">
+                                <label class="form-label">
+                                    <iconify-icon icon="solar:map-point-linear" width="16"></iconify-icon>
+                                    Adresse complète *
+                                </label>
+                                <div class="relative">
+                                    <iconify-icon icon="solar:road-linear"
+                                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                                 width="18"></iconify-icon>
+                                    <input type="text"
+                                           name="adresse_complete"
+                                           class="w-full pl-10 pr-4 py-3 form-input"
+                                           placeholder="Numéro, rue, quartier, ville..."
+                                           required>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    <iconify-icon icon="solar:info-circle-linear" width="14"></iconify-icon>
+                                    Complétez manuellement l'adresse si nécessaire
+                                </p>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="form-label">
+                                    <iconify-icon icon="solar:flag-linear" width="16"></iconify-icon>
+                                    Point de repère
+                                </label>
+                                <div class="relative">
+                                    <iconify-icon icon="solar:flag-linear"
+                                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                                 width="18"></iconify-icon>
+                                    <input type="text"
+                                           name="point_repere"
+                                           class="w-full pl-10 pr-4 py-3 form-input"
+                                           placeholder="Ex: Près de l'église Saint-Jean, face au marché...">
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    <iconify-icon icon="solar:bulb-linear" width="14"></iconify-icon>
+                                    Facultatif mais utile pour la localisation précise
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Hidden fields for coordinates -->
+                        <input type="hidden" id="id_latitude" name="latitude" value="">
+                        <input type="hidden" id="id_longitude" name="longitude" value="">
+                        <input type="hidden" id="id_localite" name="localite" value="">
+                    </div>
+
+                    <!-- Step 3: Récapitulatif -->
+                    <div class="step-section space-y-6 hidden" data-step="3">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <iconify-icon icon="solar:clipboard-list-linear" class="text-orange-500" width="20"></iconify-icon>
+                                <h2 class="text-lg font-semibold text-slate-900 font-jakarta">Récapitulatif</h2>
+                            </div>
+                            <p class="text-slate-500 mb-6">Vérifiez les informations avant validation</p>
+                        </div>
+
+                        <!-- Alert -->
+                        <div class="alert alert-success">
+                            <iconify-icon icon="solar:check-circle-linear" width="18"></iconify-icon>
+                            <div class="text-sm">
+                                <span class="font-medium">Prêt à valider !</span> Vérifiez toutes les informations ci-dessous avant de créer le ménage.
+                            </div>
+                        </div>
+
+                        <!-- Summary Grid -->
+                        <div class="summary-grid">
+                            <!-- Informations générales -->
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <iconify-icon icon="solar:user-circle-linear" class="text-orange-500" width="20"></iconify-icon>
+                                    <h3 class="text-slate-900 font-medium font-jakarta">Informations Générales</h3>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                        <span class="text-sm text-slate-500">Nom du ménage:</span>
+                                        <span class="text-slate-900 font-medium" id="summary-nom-menage">-</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                        <span class="text-sm text-slate-500">Contact:</span>
+                                        <span class="text-slate-900 font-medium" id="summary-personne-contact">-</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                        <span class="text-sm text-slate-500">Téléphone:</span>
+                                        <span class="text-slate-900 font-medium" id="summary-telephone">-</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                        <span class="text-sm text-slate-500">Email:</span>
+                                        <span class="text-slate-900 font-medium" id="summary-email">-</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                        <span class="text-sm text-slate-500">Type habitation:</span>
+                                        <span class="text-slate-900 font-medium" id="summary-type-habitation">-</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2">
+                                        <span class="text-sm text-slate-500">Nombre de personnes:</span>
+                                        <span class="text-slate-900 font-medium" id="summary-nb-personnes">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Localisation -->
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <iconify-icon icon="solar:map-point-wave-linear" class="text-orange-500" width="20"></iconify-icon>
+                                    <h3 class="text-slate-900 font-medium font-jakarta">Localisation</h3>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                        <span class="text-sm text-slate-500">Adresse:</span>
+                                        <span class="text-slate-900 font-medium truncate" id="summary-adresse">-</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                        <span class="text-sm text-slate-500">Point de repère:</span>
+                                        <span class="text-slate-900 font-medium truncate" id="summary-point-repere">-</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                        <span class="text-sm text-slate-500">Localité:</span>
+                                        <span class="text-slate-900 font-medium" id="summary-localite">-</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                        <span class="text-sm text-slate-500">Département:</span>
+                                        <span class="text-slate-900 font-medium" id="summary-departement">-</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2">
+                                        <span class="text-sm text-slate-500">Coordonnées GPS:</span>
+                                        <span class="text-slate-900 font-medium text-xs" id="summary-coordonnees">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="wizard-navigation flex items-center justify-between p-6">
+                    <button type="button"
+                            class="btn btn-secondary hidden"
+                            id="prevBtn">
+                        <iconify-icon icon="solar:arrow-left-linear" width="16"></iconify-icon>
+                        Précédent
+                    </button>
+
+                    <div class="flex gap-2 ml-auto">
+                        <button type="button"
+                                class="btn btn-secondary"
+                                id="cancelBtn">
+                            <iconify-icon icon="solar:close-circle-linear" width="16"></iconify-icon>
+                            Annuler
+                        </button>
+
+                        <button type="button"
+                                class="btn btn-warning"
+                                id="nextBtn">
+                            Suivant
+                            <iconify-icon icon="solar:arrow-right-linear" width="16"></iconify-icon>
+                        </button>
+
+                        <button type="submit"
+                                class="btn btn-success hidden"
+                                id="submitBtn">
+                            <iconify-icon icon="solar:check-circle-linear" width="16"></iconify-icon>
+                            Créer le ménage
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ============================================
+// VARIABLES GLOBALES
+// ============================================
+let map = null;
+let marker = null;
+let currentStep = 1;
+const totalSteps = 3;
+const defaultCenter = [-4.2634, 15.2429]; // Brazzaville
+const defaultZoom = 12;
+
+// ============================================
+// INITIALISATION
+// ============================================
+// ✅ CORRECTION : Déplacer l'addEventListener APRÈS le chargement du DOM
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('✅ Initialisation du formulaire ménage...');
+
+    // Initialiser les composants
+    initializeWizard();
+    setupEventListeners();
+    initMap();
+
+
+
+    // ✅ Charger les utilisateurs CLIENT disponibles
+    await loadAvailableUsers();
+
+    // ✅ Charger les types d'habitation
+    loadTypeHabitationOptions();
+
+    // ✅ Event listener pour la sélection d'utilisateur
+    setupUserSelection();
+
+    console.log('✅ Formulaire initialisé avec succès');
+});
+
+/**
+ * Charge les options de types d'habitation depuis l'API
+ */
+function loadTypeHabitationOptions() {
+    const select = document.getElementById('type_habitation_select');
+    const loading = document.getElementById('type_habitation_loading');
+
+    if (!select) {
+        console.error('❌ Élément #type_habitation_select non trouvé');
+        return;
+    }
+
+    // Afficher le chargement
+    if (loading) loading.classList.remove('hidden');
+    select.disabled = true;
+
+    // Vider les options existantes (sauf la première)
+    while (select.options.length > 1) {
+        select.remove(1);
+    }
+
+    fetch('/menages/api/types-habitation/')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ Types d\'habitation reçus:', data);
+
+            if (data.success && Array.isArray(data.data)) {
+                if (data.data.length === 0) {
+                    // Aucun type d'habitation trouvé
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = '⚠️ Aucun type disponible';
+                    option.disabled = true;
+                    select.appendChild(option);
+
+                    showNotification('Aucun type d\'habitation trouvé dans la base de données', 'warning');
+                } else {
+                    // Ajouter chaque type d'habitation
+                    data.data.forEach(type => {
+                        const option = document.createElement('option');
+                        option.value = type.id;  // IMPORTANT: utiliser l'ID, pas le code !
+                        option.textContent = type.nom;
+                        option.dataset.code = type.code || '';
+                        option.dataset.description = type.description || '';
+                        select.appendChild(option);
+                    });
+
+                    console.log(`✅ ${data.data.length} type(s) d'habitation chargé(s)`);
+                }
+            } else {
+                throw new Error('Format de réponse invalide');
+            }
+        })
+        .catch(error => {
+            console.error('❌ Erreur chargement types d\'habitation:', error);
+
+            // Afficher un message d'erreur dans le select
+            select.innerHTML = '<option value="">⚠️ Erreur de chargement</option>';
+
+            showNotification(
+                'Impossible de charger les types d\'habitation. Vérifiez votre connexion.',
+                'error'
+            );
+        })
+        .finally(() => {
+            // Cacher le chargement
+            if (loading) loading.classList.add('hidden');
+            select.disabled = false;
+        });
+}
+
+
+/**
+ * Charge les utilisateurs CLIENT disponibles (sans ménage)
+ * Adapté à votre modèle CustomUser
+ */
+async function loadAvailableUsers() {
+    console.log('📡 Chargement des utilisateurs CLIENT disponibles...');
+
+    try {
+        const response = await fetch('/menages/api/users/?role=CLIENT&available=true');
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                console.warn('⚠️ Non authentifié');
+                return;
+            }
+            if (response.status === 403) {
+                console.warn('⚠️ Permission refusée');
+                return;
+            }
+            console.warn('⚠️ Impossible de charger les utilisateurs');
+            return;
+        }
+
+        const users = await response.json();
+        const select = document.getElementById('id_utilisateur');
+
+        if (!select) {
+            console.error('❌ Select #id_utilisateur non trouvé dans le DOM');
+            return;
+        }
+
+        // ✅ Vider les options existantes (sauf la première)
+        while (select.options.length > 1) {
+            select.remove(1);
+        }
+
+        // ✅ Ajouter les utilisateurs CLIENT disponibles
+        users.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.id;
+
+            // ✅ Format d'affichage adapté à votre CustomUser
+            let displayParts = [];
+
+            // Nom complet
+            if (user.full_name) {
+                displayParts.push(user.full_name);
+            } else if (user.username) {
+                displayParts.push(user.username);
+            }
+
+            // Détails supplémentaires
+            let details = [];
+            if (user.telephone) {
+                details.push(user.telephone);
+            }
+            if (user.email) {
+                details.push(user.email);
+            }
+
+            // Construire le texte final
+            if (details.length > 0) {
+                option.textContent = `${displayParts.join(' ')} (${details.join(' • ')})`;
+            } else {
+                option.textContent = displayParts.join(' ') || user.username;
+            }
+
+            select.appendChild(option);
+        });
+
+        console.log(`✅ ${users.length} utilisateur(s) CLIENT disponible(s) chargé(s)`);
+
+        // ✅ Afficher un message si aucun utilisateur
+        if (users.length === 0) {
+            showNotification(
+                'Aucun CLIENT disponible. Tous les clients ont déjà un ménage assigné.',
+                'warning'
+            );
+        }
+
+    } catch (error) {
+        console.error('❌ Erreur chargement utilisateurs:', error);
+        showNotification(
+            'Erreur lors du chargement des clients disponibles',
+            'error'
+        );
+    }
+}
+
+/**
+ * Configure l'event listener pour la sélection d'utilisateur
+ */
+function setupUserSelection() {
+    const utilisateurSelect = document.getElementById('id_utilisateur');
+    if (!utilisateurSelect) {
+        console.warn('⚠️ Élément #id_utilisateur non trouvé');
+        return;
+    }
+
+    utilisateurSelect.addEventListener('change', function() {
+        const selectedValue = this.value;
+        const infoDiv = document.getElementById('selected-user-info');
+        const nameSpan = document.getElementById('selected-user-name');
+
+        if (!infoDiv || !nameSpan) {
+            console.warn('⚠️ Éléments d\'information utilisateur non trouvés');
+            return;
+        }
+
+        if (selectedValue) {
+            // ✅ Utilisateur CLIENT sélectionné
+            const selectedText = this.options[this.selectedIndex].textContent;
+            nameSpan.textContent = selectedText;
+            infoDiv.classList.remove('hidden');
+
+            showNotification(
+                'Utilisateur CLIENT sélectionné. Un nouveau compte ne sera pas créé.',
+                'info'
+            );
+        } else {
+            // ✅ Pas de sélection = création automatique d'un CLIENT
+            infoDiv.classList.add('hidden');
+        }
+    });
+
+    console.log('✅ Event listener de sélection configuré');
+}
+
+// ============================================
+// CARTE LEAFLET
+// ============================================
+function initMap() {
+    setTimeout(() => {
+        if (!document.getElementById('map')) {
+            console.error('Élément #map non trouvé');
+            return;
+        }
+
+        try {
+            // Initialiser la carte
+            map = L.map('map').setView(defaultCenter, defaultZoom);
+
+            // Ajouter OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Gérer les clics sur la carte
+            map.on('click', function(e) {
+                handleMapClick(e.latlng.lat, e.latlng.lng);
+            });
+
+            console.log('✅ Carte Leaflet initialisée');
+        } catch (error) {
+            console.error('Erreur initialisation carte:', error);
+            document.getElementById('map').innerHTML = `
+                <div class="alert alert-error">
+                    <div class="flex items-center gap-2">
+                        <iconify-icon icon="solar:danger-triangle-linear" width="20"></iconify-icon>
+                        <span>Erreur lors du chargement de la carte. Vérifiez votre connexion internet.</span>
+                    </div>
+                </div>
+            `;
+        }
+    }, 500);
+}
+
+// Gérer un clic sur la carte
+function handleMapClick(lat, lng) {
+    // 1. Mettre à jour les champs latitude/longitude
+    document.getElementById('id_latitude').value = lat.toFixed(6);
+    document.getElementById('id_longitude').value = lng.toFixed(6);
+
+    // 2. Afficher les coordonnées
+    document.getElementById('latDisplay').textContent = lat.toFixed(6);
+    document.getElementById('lonDisplay').textContent = lng.toFixed(6);
+
+    // 3. Placer/mettre à jour le marqueur
+    if (marker) {
+        marker.setLatLng([lat, lng]);
+    } else {
+        marker = L.marker([lat, lng], {
+            draggable: true,
+            icon: L.divIcon({
+                className: 'custom-marker',
+                html: '<div style="background:#f97316;color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:20px;border:3px solid white;box-shadow:0 0 10px rgba(0,0,0,0.5);">📍</div>',
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            })
+        }).addTo(map);
+
+        // Gérer le déplacement du marqueur
+        marker.on('dragend', function(e) {
+            const position = marker.getLatLng();
+            handleMapClick(position.lat, position.lng);
+        });
+    }
+
+    // 4. Recentrer la carte
+    map.setView([lat, lng], 15);
+
+    // 5. Appeler l'API de géocodage
+    reverseGeocode(lat, lng);
+
+    // 6. Afficher la section info
+    document.getElementById('locationInfo').classList.remove('hidden');
+}
+
+// Appel API reverse geocoding
+function reverseGeocode(lat, lng) {
+    const localiteDisplay = document.getElementById('localiteDisplay');
+    const departementDisplay = document.getElementById('departementDisplay');
+    const methodeDisplay = document.getElementById('methodeDisplay');
+    const distanceDisplay = document.getElementById('distanceDisplay');
+
+    // Afficher chargement
+    localiteDisplay.textContent = 'Recherche...';
+    localiteDisplay.className = 'px-3 py-2 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg font-medium pulse';
+    departementDisplay.textContent = 'Recherche...';
+    methodeDisplay.textContent = '-';
+    distanceDisplay.textContent = '-';
+
+    // Appel AJAX
+    fetch(`/menages/api/reverse-geocode-local/?lat=${lat}&lon=${lng}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Réponse API géocodage:', data);
+
+            if (data.success) {
+                // Mettre à jour l'affichage
+                localiteDisplay.textContent = data.localite || 'Non détectée';
+                localiteDisplay.className = 'px-3 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg font-medium';
+                departementDisplay.textContent = data.departement || 'Non détecté';
+                methodeDisplay.textContent = data.methode === 'polygone' ? 'Frontières' : 'Proximité';
+                methodeDisplay.className = `px-3 py-2 ${data.methode === 'polygone' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-amber-50 border border-amber-200 text-amber-700'} rounded-lg font-medium`;
+                distanceDisplay.textContent = data.distance_km ? `${data.distance_km} km` : '-';
+
+                // Mettre à jour le champ hidden de localité
+                const localiteIdField = document.getElementById('id_localite');
+                if (localiteIdField && data.localite_id) {
+                    localiteIdField.value = data.localite_id;
+                }
+
+                // Mettre à jour le récapitulatif si on est à l'étape 3
+                if (currentStep === 3) {
+                    updateSummary();
+                }
+            } else {
+                localiteDisplay.textContent = 'Non détectée';
+                localiteDisplay.className = 'px-3 py-2 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg font-medium';
+                departementDisplay.textContent = 'Non détecté';
+
+                if (data.error) {
+                    console.warn('Erreur de géocodage:', data.error);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Erreur géocodage:', error);
+            localiteDisplay.textContent = 'Erreur';
+            localiteDisplay.className = 'px-3 py-2 bg-red-50 border border-red-200 text-red-700 rounded-lg font-medium';
+            departementDisplay.textContent = 'Erreur';
+            methodeDisplay.textContent = '-';
+            distanceDisplay.textContent = '-';
+
+            showNotification('Impossible de détecter la localisation. Vérifiez votre connexion internet.', 'error');
+        });
+}
+
+// ============================================
+// GÉOLOCALISATION GPS
+// ============================================
+document.getElementById('btnMyLocation')?.addEventListener('click', function() {
+    if (!navigator.geolocation) {
+        showNotification('La géolocalisation n\'est pas supportée par votre navigateur.', 'error');
+        return;
+    }
+
+    const btn = this;
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner mr-2"></div> Localisation...';
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            handleMapClick(lat, lng);
+
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            showNotification('✅ Position GPS détectée avec succès !', 'success');
+        },
+        (error) => {
+            console.error('Erreur géolocalisation:', error);
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+
+            let message = 'Impossible d\'accéder à votre position GPS.';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = 'Accès à la localisation refusé. Veuillez autoriser la géolocalisation.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = 'Position indisponible. Vérifiez votre GPS.';
+                    break;
+                case error.TIMEOUT:
+                    message = 'Délai d\'attente dépassé. Réessayez.';
+                    break;
+            }
+
+            showNotification(message, 'error');
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        }
+    );
+});
+
+// ============================================
+// BOUTON CENTRE CARTE
+// ============================================
+document.getElementById('btnCenterMap')?.addEventListener('click', function() {
+    if (map) {
+        const lat = parseFloat(document.getElementById('id_latitude').value);
+        const lng = parseFloat(document.getElementById('id_longitude').value);
+
+        if (lat && lng) {
+            map.setView([lat, lng], 15);
+        } else {
+            map.setView(defaultCenter, defaultZoom);
+            showNotification('Aucune position sélectionnée', 'info');
+        }
+    }
+});
+
+// ============================================
+// WIZARD NAVIGATION
+// ============================================
+function initializeWizard() {
+    updateStepDisplay();
+}
+
+function setupEventListeners() {
+    document.getElementById('nextBtn').addEventListener('click', nextStep);
+    document.getElementById('prevBtn').addEventListener('click', prevStep);
+
+    // FIX: Corriger le bouton Annuler pour rediriger correctement
+    document.getElementById('cancelBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        cancelForm();
+    });
+
+    // FIX: Empêcher la soumission par défaut et gérer manuellement
+    document.getElementById('menageForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        handleSubmit(e);
+    });
+}
+
+function nextStep() {
+    if (validateStep(currentStep)) {
+        if (currentStep === totalSteps) return;
+        currentStep++;
+        updateStepDisplay();
+
+        // Rafraîchir la carte si on arrive à l'étape 2
+        if (currentStep === 2 && map) {
+            setTimeout(() => map.invalidateSize(), 100);
+        }
+
+        // Mettre à jour le récapitulatif si on arrive à l'étape 3
+        if (currentStep === 3) {
+            updateSummary();
+        }
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) {
+        currentStep--;
+        updateStepDisplay();
+
+        if (currentStep === 2 && map) {
+            setTimeout(() => map.invalidateSize(), 100);
+        }
+    }
+}
+
+function updateStepDisplay() {
+    // Mettre à jour les indicateurs d'étapes
+    document.querySelectorAll('.wizard-step').forEach((step, index) => {
+        const stepNum = index + 1;
+        const stepNumber = step.querySelector('.wizard-step-number');
+        const stepText = step.querySelector('span');
+
+        step.classList.remove('active', 'completed');
+        stepNumber.classList.remove('active', 'completed');
+
+        if (stepNum < currentStep) {
+            step.classList.add('completed');
+            stepNumber.classList.add('completed');
+            stepText.classList.remove('text-slate-400');
+            stepText.classList.add('text-slate-600');
+        } else if (stepNum === currentStep) {
+            step.classList.add('active');
+            stepNumber.classList.add('active');
+            stepText.classList.remove('text-slate-400');
+            stepText.classList.add('text-slate-600');
+        } else {
+            stepText.classList.remove('text-slate-600');
+            stepText.classList.add('text-slate-400');
+        }
+    });
+
+    // Afficher/masquer les sections
+    document.querySelectorAll('.step-section').forEach((section, index) => {
+        section.classList.add('hidden');
+        if (index + 1 === currentStep) {
+            section.classList.remove('hidden');
+        }
+    });
+
+    // Gérer les boutons
+    document.getElementById('prevBtn').classList.toggle('hidden', currentStep === 1);
+    document.getElementById('nextBtn').classList.toggle('hidden', currentStep === totalSteps);
+    document.getElementById('submitBtn').classList.toggle('hidden', currentStep !== totalSteps);
+
+    // FIX: Scroll vers le haut de manière plus douce
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function validateStep(step) {
+    if (step === 1) {
+        // Valider les champs obligatoires de l'étape 1
+        const requiredFields = document.querySelectorAll('.step-section[data-step="1"] [required]');
+        for (let field of requiredFields) {
+            if (!field.value.trim()) {
+                field.focus();
+                field.classList.add('border-rose-500');
+                showNotification('Veuillez remplir tous les champs obligatoires', 'warning');
+                return false;
+            } else {
+                field.classList.remove('border-rose-500');
+            }
+        }
+    }
+
+    if (step === 2) {
+        // Vérifier que les coordonnées sont définies
+        const latField = document.getElementById('id_latitude');
+        const adresseField = document.querySelector('[name="adresse_complete"]');
+
+        if (!latField.value) {
+            showNotification('Veuillez placer le marqueur sur la carte pour définir la localisation', 'warning');
+            return false;
+        }
+
+        // Valider l'adresse complète
+        if (!adresseField.value.trim()) {
+            adresseField.focus();
+            adresseField.classList.add('border-rose-500');
+            showNotification('Veuillez renseigner l\'adresse complète', 'warning');
+            return false;
+        } else {
+            adresseField.classList.remove('border-rose-500');
+        }
+    }
+
+    return true;
+}
+
+// FIX: Corriger la fonction cancelForm pour utiliser la bonne URL
+function cancelForm() {
+    if (confirm('Êtes-vous sûr de vouloir annuler ? Toutes les données seront perdues.')) {
+        // Rediriger vers la liste des ménages
+        window.location.href = '/menages/';
+    }
+}
+
+// ============================================
+// RÉCAPITULATIF
+// ============================================
+function updateSummary() {
+    // Informations générales
+    document.getElementById('summary-nom-menage').textContent = document.querySelector('[name="nom_menage"]').value || '-';
+    document.getElementById('summary-personne-contact').textContent = document.querySelector('[name="personne_contact"]').value || '-';
+    document.getElementById('summary-telephone').textContent = document.querySelector('[name="telephone_principal"]').value || '-';
+    document.getElementById('summary-email').textContent = document.querySelector('[name="email"]').value || '-';
+    document.getElementById('summary-type-habitation').textContent = document.querySelector('[name="type_habitation"] option:checked').text || '-';
+    document.getElementById('summary-nb-personnes').textContent = document.querySelector('[name="nombre_personnes"]').value || '-';
+
+    // Localisation
+    document.getElementById('summary-adresse').textContent = document.querySelector('[name="adresse_complete"]').value || '-';
+    document.getElementById('summary-point-repere').textContent = document.querySelector('[name="point_repere"]').value || '-';
+    document.getElementById('summary-localite').textContent = document.getElementById('localiteDisplay').textContent;
+    document.getElementById('summary-departement').textContent = document.getElementById('departementDisplay').textContent;
+    document.getElementById('summary-coordonnees').textContent = `${document.getElementById('id_latitude').value}, ${document.getElementById('id_longitude').value}`;
+}
+
+// ============================================
+// SOUMISSION - FIX: Soumission réelle du formulaire
+// ============================================
+async function handleSubmit(e) {
+    e.preventDefault();
+
+    // Validation finale de toutes les étapes
+    if (!validateStep(1) || !validateStep(2)) {
+        return;
+    }
+
+    // Validation finale des champs obligatoires
+    const requiredInputs = [
+        { name: 'nom_menage', label: 'Nom du ménage' },
+        { name: 'personne_contact', label: 'Personne de contact' },
+        { name: 'type_habitation', label: 'Type d\'habitation' },
+        { name: 'adresse_complete', label: 'Adresse complète' },
+        { name: 'latitude', label: 'Coordonnées GPS (latitude)' },
+        { name: 'longitude', label: 'Coordonnées GPS (longitude)' }
+    ];
+
+    let hasError = false;
+    for (const input of requiredInputs) {
+        const field = document.querySelector(`[name="${input.name}"]`);
+        if (!field || !field.value.trim()) {
+            showNotification(`Le champ "${input.label}" est obligatoire`, 'error');
+            hasError = true;
+
+            // Trouver l'étape correspondante et y naviguer
+            if (['nom_menage', 'personne_contact', 'type_habitation'].includes(input.name)) {
+                currentStep = 1;
+                updateStepDisplay();
+                field?.focus();
+            } else if (['adresse_complete', 'latitude', 'longitude'].includes(input.name)) {
+                currentStep = 2;
+                updateStepDisplay();
+            }
+
+            return;
+        }
+    }
+
+    if (hasError) return;
+
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<div class="spinner mr-2"></div> Création en cours...';
+
+    // OPTION 1: Soumission AJAX (pour plus de contrôle)
+    // Si vous préférez une soumission traditionnelle, commentez ce bloc et décommentez OPTION 2
+    try {
+        // FIX: Soumettre réellement le formulaire
+        const form = document.getElementById('menageForm');
+        const formData = new FormData(form);
+
+        // Log pour debug
+        console.log('Données du formulaire:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: ${value}`);
+        }
+
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        });
+
+        console.log('Réponse du serveur:', {
+            status: response.status,
+            statusText: response.statusText,
+            contentType: response.headers.get('content-type'),
+            redirected: response.redirected,
+            url: response.url
+        });
+
+        const contentType = response.headers.get('content-type') || '';
+
+        if (response.ok) {
+            // Si la réponse est une redirection (status 302), suivre la redirection
+            if (response.redirected) {
+                showNotification('Ménage créé avec succès !', 'success');
+                setTimeout(() => {
+                    window.location.href = response.url;
+                }, 1000);
+                return;
+            }
+
+            // Si c'est du JSON, le traiter
+            if (contentType.includes('application/json')) {
+                try {
+                    const data = await response.json();
+                    if (data.success) {
+                        showNotification('Ménage créé avec succès !', 'success');
+                        setTimeout(() => {
+                            window.location.href = data.redirect_url || '/menages/';
+                        }, 1000);
+                    } else {
+                        throw new Error(data.message || 'Erreur lors de la création');
+                    }
+                } catch (jsonError) {
+                    console.error('Erreur parsing JSON:', jsonError);
+                    // Si erreur de parsing, considérer comme succès et rediriger
+                    showNotification('Ménage créé avec succès !', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/menages/';
+                    }, 1000);
+                }
+            }
+            // Si c'est du HTML (formulaire renvoyé avec erreurs Django)
+            else if (contentType.includes('text/html')) {
+                const html = await response.text();
+
+                // Log du HTML pour débogage (limité aux 2000 premiers caractères)
+                console.log('HTML reçu:', html.substring(0, 2000));
+
+                // Vérifier si c'est une page d'erreur Django
+                if (html.includes('errorlist') || html.includes('field-error') || html.includes('non-field-errors') ||
+                    html.includes('has-error') || html.includes('invalid-feedback') || html.includes('error-message')) {
+                    console.error('🔴 Erreurs de validation Django détectées dans le HTML');
+
+                    // Essayer d'extraire les erreurs du HTML
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const errorMessages = [];
+                    const errorDetails = {};
+
+                    // Méthode 1: Chercher les errorlist Django classiques
+                    doc.querySelectorAll('.errorlist li').forEach(el => {
+                        const parent = el.closest('.field, .form-group, [class*="field"]');
+                        let fieldName = 'Erreur générale';
+
+                        if (parent) {
+                            // Essayer de trouver le nom du champ
+                            const label = parent.querySelector('label');
+                            const input = parent.querySelector('input, select, textarea');
+
+                            if (label) {
+                                fieldName = label.textContent.trim();
+                            } else if (input && input.name) {
+                                fieldName = input.name;
+                            }
+                        }
+
+                        const errorMsg = el.textContent.trim();
+                        errorMessages.push(`${fieldName}: ${errorMsg}`);
+
+                        if (!errorDetails[fieldName]) {
+                            errorDetails[fieldName] = [];
+                        }
+                        errorDetails[fieldName].push(errorMsg);
+                    });
+
+                    // Méthode 2: Chercher d'autres formats d'erreurs
+                    doc.querySelectorAll('.field-error, .invalid-feedback, .error-message, .help-block.error').forEach(el => {
+                        const errorMsg = el.textContent.trim();
+                        if (errorMsg && !errorMessages.includes(errorMsg)) {
+                            errorMessages.push(errorMsg);
+                        }
+                    });
+
+                    // Méthode 3: Chercher les erreurs non-field
+                    doc.querySelectorAll('.non-field-errors li, .alert-danger, .messages .error').forEach(el => {
+                        const errorMsg = el.textContent.trim();
+                        if (errorMsg && !errorMessages.includes(errorMsg)) {
+                            errorMessages.push(errorMsg);
+                        }
+                    });
+
+                    console.error('📋 Erreurs détaillées trouvées:', errorDetails);
+                    console.error('📝 Liste des erreurs:', errorMessages);
+
+                    if (errorMessages.length > 0) {
+                        // Afficher le panneau d'erreurs visuel
+                        showValidationErrorsPanel(errorDetails, errorMessages);
+
+                        // Afficher aussi une notification résumée
+                        showNotification(`${errorMessages.length} erreur(s) de validation détectée(s). Voir le panneau à droite.`, 'error');
+
+                        // Afficher une alerte détaillée dans la console
+                        console.group('🚨 ERREURS DE VALIDATION DÉTAILLÉES');
+                        console.table(errorDetails);
+                        console.groupEnd();
+                    } else {
+                        console.warn('⚠️ Erreurs détectées mais impossible de les extraire');
+                        showNotification('Erreur de validation du formulaire. Consultez la console pour plus de détails.', 'error');
+
+                        // Afficher le HTML brut dans la console pour analyse
+                        console.group('📄 HTML BRUT (pour débogage)');
+                        console.log(html);
+                        console.groupEnd();
+                    }
+                } else {
+                    // Pas d'erreurs détectées, considérer comme succès
+                    console.log('✅ Pas d\'erreurs détectées dans le HTML, considéré comme succès');
+                    showNotification('Ménage créé avec succès !', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/menages/';
+                    }, 1000);
+                }
+            }
+            // Autre type de contenu
+            else {
+                showNotification('Ménage créé avec succès !', 'success');
+                setTimeout(() => {
+                    window.location.href = '/menages/';
+                }, 1000);
+            }
+        } else {
+            // Gérer les erreurs HTTP (4xx, 5xx)
+            let errorMessage = `Erreur HTTP: ${response.status} ${response.statusText}`;
+
+            if (contentType.includes('application/json')) {
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData?.message || errorMessage;
+
+                    // Afficher les erreurs de validation si disponibles
+                    if (errorData.errors) {
+                        console.error('Erreurs de validation:', errorData.errors);
+                        for (const [field, errors] of Object.entries(errorData.errors)) {
+                            showNotification(`${field}: ${errors.join(', ')}`, 'error');
+                        }
+                        return; // Ne pas lancer d'exception supplémentaire
+                    }
+                } catch (jsonError) {
+                    console.error('Erreur parsing JSON:', jsonError);
+                }
+            } else if (contentType.includes('text/html')) {
+                const html = await response.text();
+                console.error('Réponse HTML en erreur:', html.substring(0, 500));
+
+                // Essayer d'extraire un message d'erreur plus spécifique
+                if (html.includes('IntegrityError')) {
+                    errorMessage = 'Erreur d\'intégrité: Un enregistrement similaire existe déjà';
+                } else if (html.includes('ValidationError')) {
+                    errorMessage = 'Erreur de validation des données';
+                } else if (html.includes('PermissionDenied')) {
+                    errorMessage = 'Permission refusée';
+                } else if (html.includes('CSRF')) {
+                    errorMessage = 'Erreur CSRF: Veuillez recharger la page';
+                }
+            }
+
+            throw new Error(errorMessage);
+        }
+
+    } catch (error) {
+        console.error('Erreur complète:', error);
+
+        // Message d'erreur plus convivial
+        let userMessage = error.message || 'Erreur inconnue lors de la création du ménage';
+
+        // Gérer les erreurs réseau
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            userMessage = 'Erreur de connexion. Vérifiez votre connexion internet.';
+        }
+
+        showNotification(userMessage, 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+}
+
+// ============================================
+// UTILITAIRES
+// ============================================
+function showNotification(message, type = 'info') {
+    const types = {
+        'success': { icon: 'solar:check-circle-linear', bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700' },
+        'error': { icon: 'solar:danger-triangle-linear', bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700' },
+        'warning': { icon: 'solar:danger-triangle-linear', bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700' },
+        'info': { icon: 'solar:info-circle-linear', bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700' }
+    };
+
+    const config = types[type] || types.info;
+
+    // Créer une notification toast
+    const toast = document.createElement('div');
+    toast.className = `${config.bg} ${config.border} ${config.text} fixed bottom-4 right-4 m-3 p-4 rounded-lg border flex items-center gap-3 max-w-sm z-50 shadow-lg`;
+    toast.style.transform = 'translateY(20px)';
+    toast.style.opacity = '0';
+    toast.style.transition = 'all 0.3s ease';
+
+    toast.innerHTML = `
+        <iconify-icon icon="${config.icon}" width="20"></iconify-icon>
+        <div class="text-sm">${message}</div>
+    `;
+
+    document.body.appendChild(toast);
+
+    // Animation d'entrée
+    setTimeout(() => {
+        toast.style.transform = 'translateY(0)';
+        toast.style.opacity = '1';
+    }, 10);
+
+    // Auto-dismiss après 5 secondes (augmenté pour les erreurs)
+    const duration = type === 'error' ? 7000 : 3000;
+    setTimeout(() => {
+        toast.style.transform = 'translateY(20px)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+function showValidationErrorsPanel(errorDetails, errorMessages) {
+    // Supprimer tout panneau d'erreurs existant
+    const existingPanel = document.getElementById('validationErrorsPanel');
+    if (existingPanel) {
+        existingPanel.remove();
+    }
+
+    // Créer le panneau d'erreurs
+    const panel = document.createElement('div');
+    panel.id = 'validationErrorsPanel';
+    panel.className = 'fixed top-20 right-4 max-w-md w-full bg-white border-2 border-red-200 rounded-xl shadow-2xl z-50 overflow-hidden';
+    panel.style.animation = 'slideInRight 0.5s ease-out';
+
+    let errorsHTML = '';
+
+    if (Object.keys(errorDetails).length > 0) {
+        for (const [field, errors] of Object.entries(errorDetails)) {
+            errorsHTML += `
+                <div class="px-4 py-3 border-b border-red-100">
+                    <div class="flex items-start gap-2">
+                        <iconify-icon icon="solar:danger-circle-bold" class="text-red-500 mt-0.5 flex-shrink-0" width="20"></iconify-icon>
+                        <div class="flex-1">
+                            <div class="font-semibold text-red-700 mb-1">${field}</div>
+                            ${errors.map(err => `<div class="text-sm text-red-600">• ${err}</div>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    } else if (errorMessages.length > 0) {
+        errorMessages.forEach(msg => {
+            errorsHTML += `
+                <div class="px-4 py-3 border-b border-red-100">
+                    <div class="flex items-start gap-2">
+                        <iconify-icon icon="solar:danger-circle-bold" class="text-red-500 mt-0.5" width="20"></iconify-icon>
+                        <div class="text-sm text-red-600">${msg}</div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    panel.innerHTML = `
+        <div class="bg-red-50 px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <iconify-icon icon="solar:shield-warning-bold" class="text-red-600" width="24"></iconify-icon>
+                <h3 class="font-semibold text-red-800">Erreurs de validation</h3>
+            </div>
+            <button onclick="document.getElementById('validationErrorsPanel').remove()"
+                    class="text-red-600 hover:text-red-800 transition-colors">
+                <iconify-icon icon="solar:close-circle-linear" width="24"></iconify-icon>
+            </button>
+        </div>
+        <div class="max-h-96 overflow-y-auto">
+            ${errorsHTML || '<div class="px-4 py-3 text-red-600 text-sm">Erreurs détectées mais impossible de les extraire. Consultez la console.</div>'}
+        </div>
+        <div class="bg-red-50 px-4 py-2 text-xs text-red-600 flex items-center gap-2">
+            <iconify-icon icon="solar:info-circle-linear" width="16"></iconify-icon>
+            <span>Corrigez les erreurs ci-dessus et réessayez</span>
+        </div>
+    `;
+
+    // Ajouter l'animation CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    document.body.appendChild(panel);
+
+    // Auto-fermeture après 15 secondes
+    setTimeout(() => {
+        if (panel && panel.parentNode) {
+            panel.style.animation = 'slideInRight 0.5s ease-out reverse';
+            setTimeout(() => panel.remove(), 500);
+        }
+    }, 15000);
+}
+
+</script>
+{% endblock %}

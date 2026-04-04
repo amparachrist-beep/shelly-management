@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ notification.title }} - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Section card */
+    .section-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.01);
+    }
+
+    /* Pill badge */
+    .pill {
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .pill-blue   { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+    .pill-green  { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .pill-red    { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+    .pill-amber  { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+    .pill-slate  { background: #f1f5f9; color: #475569; }
+
+    /* Buttons */
+    .btn-primary {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+        transition: all 0.2s;
+    }
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-outline {
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #64748b;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    .btn-outline:hover {
+        background: #f8fafc;
+        color: #1e293b;
+        border-color: #cbd5e1;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% if user.is_admin %}{% url 'dashboard:admin_dashboard' %}{% elif user.is_agent %}{% url 'dashboard:agent_dashboard' %}{% else %}{% url 'dashboard:client_dashboard' %}{% endif %}"
+       class="flex items-center gap-2 text-blue-600 text-sm font-medium font-jakarta hover:text-blue-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Tableau de bord
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <a href="{% url 'dashboard:notifications_list' %}" class="text-slate-500 hover:text-blue-600 text-sm font-medium font-jakarta">Notifications</a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">Détails</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 p-6">
+    <div class="max-w-3xl mx-auto">
+        <div class="section-card">
+            <!-- En-tête de la notification -->
+            <div class="p-8 border-b border-slate-100">
+                <div class="flex flex-col sm:flex-row sm:items-start gap-6">
+                    <!-- Grande Icône -->
+                    <div class="flex-shrink-0">
+                        {% if notification.priority == 2 %}
+                        <div class="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center text-red-500 shadow-sm border border-red-100">
+                            <iconify-icon icon="solar:danger-triangle-bold-duotone" width="32"></iconify-icon>
+                        </div>
+                        {% elif notification.notification_type == 'SUCCESS' %}
+                        <div class="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500 shadow-sm border border-emerald-100">
+                            <iconify-icon icon="solar:check-circle-bold-duotone" width="32"></iconify-icon>
+                        </div>
+                        {% elif notification.notification_type == 'WARNING' %}
+                        <div class="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 shadow-sm border border-amber-100">
+                            <iconify-icon icon="solar:exclamation-triangle-bold-duotone" width="32"></iconify-icon>
+                        </div>
+                        {% elif notification.notification_type == 'ERROR' %}
+                        <div class="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center text-red-500 shadow-sm border border-red-100">
+                            <iconify-icon icon="solar:close-circle-bold-duotone" width="32"></iconify-icon>
+                        </div>
+                        {% else %}
+                        <div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500 shadow-sm border border-blue-100">
+                            <iconify-icon icon="solar:info-circle-bold-duotone" width="32"></iconify-icon>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Titre et Badges -->
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-3 mb-2">
+                            <span class="pill
+                                {% if notification.notification_type == 'SUCCESS' %}pill-green
+                                {% elif notification.notification_type == 'WARNING' %}pill-amber
+                                {% elif notification.notification_type == 'ERROR' %}pill-red
+                                {% else %}pill-blue{% endif %}">
+                                {{ notification.get_notification_type_display }}
+                            </span>
+                            {% if notification.priority == 2 %}
+                            <span class="pill pill-red">
+                                <iconify-icon icon="solar:fire-bold" width="14"></iconify-icon>
+                                URGENT
+                            </span>
+                            {% endif %}
+                            <span class="text-sm font-medium text-slate-400 flex items-center gap-1.5 ml-auto">
+                                <iconify-icon icon="solar:clock-circle-linear" width="16"></iconify-icon>
+                                {{ notification.created_at|date:"d M Y à H:i" }}
+                            </span>
+                        </div>
+                        <h1 class="text-2xl font-bold text-slate-900 font-jakarta leading-tight">
+                            {{ notification.title }}
+                        </h1>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Corps du message -->
+            <div class="p-8">
+                <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                    <p class="text-slate-700 leading-relaxed whitespace-pre-wrap font-medium">
+                        {{ notification.message }}
+                    </p>
+                </div>
+
+                {% if notification.action_url %}
+                <div class="mt-8 flex justify-center">
+                    <a href="{{ notification.action_url }}" class="btn-primary">
+                        <iconify-icon icon="solar:plain-2-bold" width="20"></iconify-icon>
+                        {{ notification.action_label|default:"Accéder au service" }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Footer / Actions -->
+            <div class="px-8 py-6 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <a href="{% url 'dashboard:notifications_list' %}" class="btn-outline">
+                    <iconify-icon icon="solar:alt-arrow-left-linear" width="18"></iconify-icon>
+                    Retour à la liste
+                </a>
+
+                {% if not notification.read %}
+                <button onclick="markAsRead()" class="flex items-center gap-2 px-6 py-2.5 bg-white border border-blue-200 text-blue-600 rounded-xl font-bold text-sm hover:bg-blue-50 transition-all shadow-sm">
+                    <iconify-icon icon="solar:check-read-bold" width="18"></iconify-icon>
+                    Marquer comme lu
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function markAsRead() {
+    fetch(`/dashboard/ajax/notifications/{{ notification.id }}/mark-read/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCsrfToken(),
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = "{% url 'dashboard:notifications_list' %}";
+        }
+    })
+    .catch(error => console.error('Erreur:', error));
+}
+
+function getCsrfToken() {
+    const csrfCookie = document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='));
+    if (csrfCookie) {
+        return csrfCookie.split('=')[1];
+    }
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+}
+</script>
+{% endblock %}

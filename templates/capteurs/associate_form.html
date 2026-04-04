@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-link mr-2"></i>{{ page_title }}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-info-circle mr-2"></i>Capteur à associer
+                        </h5>
+                        <p class="mb-0">
+                            <strong>ID:</strong> {{ capteur.device_id }}<br>
+                            <strong>Nom:</strong> {{ capteur.device_name|default:"Non défini" }}
+                        </p>
+                    </div>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <div class="form-group">
+                            <label for="{{ form.compteur.id_for_label }}" class="form-label">
+                                {{ form.compteur.label }}
+                            </label>
+                            {{ form.compteur }}
+                            <small class="form-text text-muted">
+                                Sélectionnez le compteur (et donc le ménage) à associer
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.status.id_for_label }}" class="form-label">
+                                {{ form.status.label }}
+                            </label>
+                            {{ form.status }}
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <div class="d-flex justify-content-between">
+                                <a href="{% url 'capteur_detail' pk=capteur.pk %}"
+                                   class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left mr-2"></i>Annuler
+                                </a>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-link mr-2"></i>{{ submit_label }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Liste des ménages disponibles -->
+            <div class="card mt-3">
+                <div class="card-header bg-light">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-users mr-2"></i>
+                        Ménages disponibles
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for compteur in form.fields.compteur.queryset|slice:":5" %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ compteur.menage.nom_famille }}</h6>
+                                <small class="text-muted">{{ compteur.localite.nom }}</small>
+                            </div>
+                            <p class="mb-1">
+                                Compteur: {{ compteur.numero_contrat }}<br>
+                                Adresse: {{ compteur.adresse_installation|truncatechars:50 }}
+                            </p>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item text-muted">
+                            Aucun compteur actif disponible
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

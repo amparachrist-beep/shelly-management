@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Types de compteur - SGE{% endblock %}
+
+{% block breadcrumb %}
+<li class="flex items-center">
+    <a href="{% url 'dashboard:admin_dashboard' %}" class="text-slate-400 hover:text-white transition-colors">Tableau de bord</a>
+    <iconify-icon icon="solar:alt-arrow-right-linear" class="mx-2 text-slate-600" width="16"></iconify-icon>
+</li>
+<li class="text-white">Paramétrage</li>
+<iconify-icon icon="solar:alt-arrow-right-linear" class="mx-2 text-slate-600" width="16"></iconify-icon>
+<li class="text-white">Types de compteur</li>
+{% endblock %}
+
+{% block content %}
+<!-- Header avec titre et bouton d'ajout -->
+<div class="mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-500/10 rounded-lg">
+                <iconify-icon icon="solar:database-linear" width="24" class="text-blue-500"></iconify-icon>
+            </div>
+            <h1 class="text-2xl font-semibold text-white">Types de compteur</h1>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'compteurs:typecompteur_create' %}"
+               class="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors">
+                <iconify-icon icon="solar:add-square-linear" width="18"></iconify-icon>
+                <span>Nouveau type</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Tableau des types de compteur -->
+<div class="bg-slate-900/50 border border-white/5 rounded-xl overflow-hidden">
+    <div class="px-6 py-4 border-b border-white/5 flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-white">Liste des types de compteur</h3>
+        <span class="text-sm text-slate-400">{{ page_obj.paginator.count }} enregistrement(s)</span>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-900/80 border-b border-white/5">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase">Code</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase">Nom</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase">Marque / Modèle</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase">Technologie</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase">Phases</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase">Stock</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase">Actif</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                {% for type in types_compteur %}
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2.5 py-1 bg-slate-800 rounded-lg text-xs font-mono text-slate-300">{{ type.code }}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="font-medium text-white">{{ type.nom }}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-slate-300">
+                        {{ type.marque|default:"—" }} {{ type.modele|default:"" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-slate-300">{{ type.get_technologie_display }}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-slate-300">{{ type.get_nombre_phases_display }}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if type.en_stock %}
+                        <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs">{{ type.stock_disponible }} dispo.</span>
+                        {% else %}
+                        <span class="px-2.5 py-1 bg-slate-800 text-slate-400 rounded-full text-xs">Rupture</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if type.actif %}
+                        <span class="flex items-center text-emerald-400">
+                            <iconify-icon icon="solar:check-circle-linear" width="18" class="mr-1"></iconify-icon>
+                            Actif
+                        </span>
+                        {% else %}
+                        <span class="flex items-center text-slate-500">
+                            <iconify-icon icon="solar:clock-circle-linear" width="18" class="mr-1"></iconify-icon>
+                            Inactif
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'compteurs:typecompteur_update' type.pk %}"
+                               class="p-2 bg-sky-500/10 text-sky-400 hover:text-sky-300 rounded-lg transition-colors"
+                               title="Modifier">
+                                <iconify-icon icon="solar:pen-linear" width="18"></iconify-icon>
+                            </a>
+                            <a href="{% url 'compteurs:typecompteur_delete' type.pk %}"
+                               class="p-2 bg-red-500/10 text-red-400 hover:text-red-300 rounded-lg transition-colors"
+                               title="Supprimer">
+                                <iconify-icon icon="solar:trash-bin-trash-linear" width="18"></iconify-icon>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="p-4 bg-slate-800/50 rounded-full mb-4">
+                                <iconify-icon icon="solar:database-linear" width="48" class="text-slate-600"></iconify-icon>
+                            </div>
+                            <p class="text-slate-400">Aucun type de compteur enregistré.</p>
+                            <a href="{% url 'compteurs:typecompteur_create' %}"
+                               class="mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors">
+                                Ajouter le premier type
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="px-6 py-4 border-t border-white/5 flex items-center justify-between">
+        <div class="text-sm text-slate-400">
+            Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+        </div>
+        <div class="flex items-center gap-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}"
+               class="p-2 border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white rounded-lg transition-colors">
+                <iconify-icon icon="solar:alt-arrow-left-linear" width="18"></iconify-icon>
+            </a>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="px-3 py-2 bg-orange-500 text-white rounded-lg">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}"
+                   class="px-3 py-2 border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white rounded-lg transition-colors">
+                    {{ num }}
+                </a>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}"
+               class="p-2 border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white rounded-lg transition-colors">
+                <iconify-icon icon="solar:alt-arrow-right-linear" width="18"></iconify-icon>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

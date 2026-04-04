@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Système de Gestion Électrique{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{% static 'icons/favicon.svg' %}">
+
+    <!-- Manifest PWA -->
+    <link rel="manifest" href="{% url 'pwa-manifest' %}">
+
+    <!-- Theme color (barre Android) -->
+    <meta name="theme-color" content="#38BDF8">
+
+    <!-- iOS / Apple -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="EnergiSuivi">
+    <link rel="apple-touch-icon" href="{% static 'icons/icon-192.svg' %}">
+
+    <!-- Splash screen iOS (optionnel) -->
+    <link rel="apple-touch-startup-image" href="{% static 'icons/splash-screen.svg' %}">
+
+    <!-- Fonts: Syne + DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+    <!-- Iconify -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --blue-primary: #1d4ed8;
+            --blue-light: #3b82f6;
+            --blue-pale: #eff6ff;
+            --blue-mid: #dbeafe;
+            --accent-cyan: #0ea5e9;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: #f0f6ff; color: var(--text-main); }
+        h1,h2,h3,h4,h5,h6 { font-family: 'Syne', sans-serif; }
+
+        /* Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #bfdbfe; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #93c5fd; }
+
+        /* Sidebar */
+        #sidebar, #mobile-sidebar { background: #ffffff; border-right: 1px solid var(--border); }
+
+        .sidebar-link {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 14px; border-radius: 10px;
+            font-size: 0.875rem; color: var(--text-muted);
+            transition: all 0.18s ease; font-weight: 500;
+            text-decoration: none;
+        }
+        .sidebar-link:hover { background: var(--blue-pale); color: var(--blue-primary); }
+        .sidebar-link.active {
+            background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+            color: #fff; box-shadow: 0 4px 14px rgba(59,130,246,0.35);
+        }
+
+        .sidebar-submenu-link {
+            display: flex; align-items: center; gap: 10px;
+            padding: 7px 12px; border-radius: 8px;
+            font-size: 0.8125rem; color: var(--text-muted);
+            transition: all 0.15s ease; text-decoration: none;
+        }
+        .sidebar-submenu-link:hover { background: var(--blue-pale); color: var(--blue-primary); }
+
+        /* Navbar */
+        header { background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+
+        /* Cards */
+        .card-glass {
+            background: #fff; border: 1px solid var(--border);
+            border-radius: 16px; box-shadow: 0 2px 12px rgba(15,23,74,0.06);
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes pulse-dot {
+            0%,100% { transform: scale(1); opacity: 1; }
+            50%      { transform: scale(1.4); opacity: 0.6; }
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            25%      { transform: translateX(-5px); }
+            75%      { transform: translateX(5px); }
+        }
+        @keyframes shimmer {
+            0%   { background-position: -400px 0; }
+            100% { background-position: 400px 0; }
+        }
+
+        .animate-fade-up { animation: fadeUp 0.45s cubic-bezier(.22,.68,0,1.1) both; }
+
+        /* Staggered entrance */
+        .stagger > * { animation: fadeUp 0.45s cubic-bezier(.22,.68,0,1.1) both; }
+        .stagger > *:nth-child(1) { animation-delay: 0.05s; }
+        .stagger > *:nth-child(2) { animation-delay: 0.12s; }
+        .stagger > *:nth-child(3) { animation-delay: 0.19s; }
+        .stagger > *:nth-child(4) { animation-delay: 0.26s; }
+        .stagger > *:nth-child(5) { animation-delay: 0.33s; }
+        .stagger > *:nth-child(6) { animation-delay: 0.40s; }
+
+        /* Buttons */
+        .btn-primary-blue {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 18px;
+            background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+            color: #fff; border-radius: 999px;
+            font-size: 0.875rem; font-weight: 600;
+            font-family: 'Syne', sans-serif;
+            transition: all 0.2s;
+            box-shadow: 0 4px 14px rgba(59,130,246,0.35);
+            text-decoration: none; border: none; cursor: pointer;
+        }
+        .btn-primary-blue:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(59,130,246,0.45); }
+
+        .btn-sky {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 18px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+            color: #fff; border-radius: 999px;
+            font-size: 0.875rem; font-weight: 600;
+            font-family: 'Syne', sans-serif;
+            transition: all 0.2s;
+            box-shadow: 0 4px 14px rgba(14,165,233,0.3);
+            text-decoration: none; border: none; cursor: pointer;
+        }
+        .btn-sky:hover { transform: translateY(-1px); }
+
+        /* Sidebar section label */
+        .sidebar-section-label {
+            padding: 0 14px; margin-bottom: 6px;
+            font-size: 0.65rem; font-family: 'Syne', sans-serif;
+            font-weight: 700; letter-spacing: 0.12em;
+            text-transform: uppercase; color: #94a3b8;
+        }
+
+        /* Sidebar toggle */
+        .sidebar-toggle-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 9px 14px; border-radius: 10px;
+            font-size: 0.875rem; color: var(--text-muted); font-weight: 600;
+            font-family: 'Syne', sans-serif;
+            background: none; border: none; cursor: pointer; transition: all 0.15s;
+        }
+        .sidebar-toggle-btn:hover { background: var(--blue-pale); color: var(--blue-primary); }
+        .sidebar-toggle-btn .chevron { transition: transform 0.25s; }
+
+        /* Submenu border */
+        .submenu { margin-left: 12px; padding-left: 12px; border-left: 2px solid #dbeafe; }
+
+        /* Notification pulse */
+        .notif-dot {
+            position: absolute; top: 6px; right: 6px;
+            width: 8px; height: 8px; border-radius: 50%; background: #ef4444;
+            animation: pulse-dot 1.6s ease infinite;
+        }
+
+        /* Search */
+        .search-input {
+            background: var(--blue-pale); border: 1.5px solid #bfdbfe;
+            color: var(--text-main); border-radius: 12px;
+            padding: 8px 12px 8px 38px; font-size: 0.875rem;
+            transition: all 0.2s; width: 220px; font-family: 'DM Sans', sans-serif;
+        }
+        .search-input:focus {
+            outline: none; border-color: var(--blue-light);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15); width: 260px;
+        }
+        .search-input::placeholder { color: #93c5fd; }
+
+        /* Dropdown */
+        .dropdown-panel {
+            background: #fff; border: 1px solid var(--border);
+            border-radius: 14px; box-shadow: 0 10px 40px rgba(15,23,74,0.12);
+        }
+
+        /* Badges */
+        .badge-blue { background: #dbeafe; color: #1d4ed8; border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+        .badge-red  { background: #fee2e2; color: #dc2626; border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+
+        /* Form */
+        .field-auto-filled { background-color: #f0fdf4 !important; border-color: #86efac !important; transition: all 0.3s ease; }
+        .field-error { background-color: #fef2f2 !important; border-color: #fca5a5 !important; animation: shake 0.5s; }
+
+        /* Spinner */
+        .btn-spinner { border: 2px solid rgba(255,255,255,0.25); border-top: 2px solid #fff; border-radius: 50%; width: 16px; height: 16px; animation: spin 0.8s linear infinite; display: inline-block; }
+
+        /* Overlay */
+        .overlay { position: fixed; inset: 0; background: rgba(15,23,74,0.5); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .overlay-content { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 2rem; max-width: 400px; width: 90%; }
+
+        /* Leaflet */
+        .leaflet-container { font-family: 'DM Sans', sans-serif; }
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: #fff; color: var(--text-main); border: 1px solid var(--border); }
+
+        /* Main area */
+        main { background: #f0f6ff; }
+
+        /* Decorative gradient blob on sidebar header */
+        .sidebar-blob {
+            position: absolute; width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="h-full overflow-hidden">
+
+    <div class="flex h-screen w-full relative">
+
+        <!-- Sidebar Desktop -->
+        <aside id="sidebar" class="hidden lg:flex flex-col h-full shrink-0 transition-all duration-300 z-30" style="width:260px;">
+            {% include 'layout/_sidebar.html' %}
+        </aside>
+
+        <!-- Mobile Backdrop -->
+        <div id="mobile-sidebar-backdrop" onclick="toggleSidebar()"
+             class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden lg:hidden opacity-0 transition-opacity duration-300"></div>
+
+        <!-- Mobile Sidebar -->
+        <aside id="mobile-sidebar"
+               class="fixed inset-y-0 left-0 bg-white border-r border-gray-100 z-50 transform -translate-x-full transition-transform duration-300 lg:hidden flex flex-col"
+               style="width:260px;">
+            <div class="flex justify-end p-4 border-b border-gray-100">
+                <button onclick="toggleSidebar()" class="p-2 rounded-lg hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition-colors">
+                    <iconify-icon icon="solar:close-circle-linear" width="22"></iconify-icon>
+                </button>
+            </div>
+            {% include 'layout/_sidebar.html' %}
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col min-w-0 h-full relative">
+
+            <header class="h-16 sticky top-0 z-20 flex items-center px-4 sm:px-6">
+                <button onclick="toggleSidebar()" class="lg:hidden mr-4 p-2 rounded-lg hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition-colors">
+                    <iconify-icon icon="solar:hamburger-menu-linear" width="22"></iconify-icon>
+                </button>
+                <div class="flex-1 w-full">{% include 'layout/_navbar.html' %}</div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto custom-scroll p-4 sm:p-6 lg:p-8 relative">
+
+                <nav class="mb-5" aria-label="breadcrumb">
+                    <ol class="flex items-center gap-2 text-sm">
+                        {% block breadcrumb %}{% endblock %}
+                    </ol>
+                </nav>
+
+                <div class="mb-5 space-y-2">{% include 'layout/_messages.html' %}</div>
+
+                <div class="animate-fade-up w-full max-w-7xl mx-auto stagger">
+                    {% block content %}{% endblock %}
+                </div>
+
+                <footer class="mt-12 py-5 border-t border-blue-100">{% include 'layout/_footer.html' %}</footer>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        function toggleSidebar() {
+            const s = document.getElementById('mobile-sidebar');
+            const b = document.getElementById('mobile-sidebar-backdrop');
+            if (s.classList.contains('-translate-x-full')) {
+                s.classList.remove('-translate-x-full');
+                b.classList.remove('hidden');
+                setTimeout(() => b.classList.remove('opacity-0'), 10);
+            } else {
+                s.classList.add('-translate-x-full');
+                b.classList.add('opacity-0');
+                setTimeout(() => b.classList.add('hidden'), 300);
+            }
+        }
+
+        {% if user.dashboard_layout.auto_refresh %}
+        setInterval(() => window.location.reload(), {{ user.dashboard_layout.refresh_interval|default:300 }} * 1000);
+        {% endif %}
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof Chart !== 'undefined') {
+                Chart.defaults.color = '#64748b';
+                Chart.defaults.borderColor = '#e2e8f0';
+                Chart.defaults.font.family = "'DM Sans', sans-serif";
+                window.chartColors = {
+                    primary: '#1d4ed8', secondary: '#0ea5e9',
+                    success: '#10b981', danger: '#ef4444',
+                    warning: '#f59e0b', info: '#6366f1'
+                };
+            }
+            if (typeof L !== 'undefined') L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
+        });
+    </script>
+
+    <script src="{% static 'js/sidebar.js' %}"></script>
+
+    <!-- Service Worker PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('SW enregistré :', reg.scope))
+                    .catch(err => console.error('SW erreur :', err));
+            });
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

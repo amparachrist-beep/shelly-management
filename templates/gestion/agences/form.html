@@ -1,0 +1,399 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ action }} une agence — E2C{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Custom Form Styles matching Dashboard */
+    .form-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    /* Input Fields */
+    .custom-input {
+        width: 100%;
+        padding: 10px 16px;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        font-size: 0.925rem;
+        color: #1e293b;
+        transition: all 0.2s ease;
+        outline: none;
+    }
+    .custom-input:focus {
+        border-color: #6366f1; /* Indigo 500 */
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+    .custom-input.is-invalid {
+        border-color: #ef4444; /* Red 500 */
+        background-color: #fef2f2;
+    }
+
+    /* Labels */
+    .custom-label {
+        display: block;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 6px;
+    }
+    .required-star { color: #ef4444; margin-left: 2px; }
+
+    /* Buttons */
+    .btn-primary-gradient {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        color: white;
+        transition: all 0.2s;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+    }
+    .btn-primary-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+    }
+
+    /* Toggle Switch Custom */
+    .toggle-checkbox:checked {
+        right: 0;
+        border-color: #4f46e5;
+    }
+    .toggle-checkbox:checked + .toggle-label {
+        background-color: #4f46e5;
+    }
+    .toggle-checkbox:checked + .toggle-label:before {
+        transform: translateX(100%);
+    }
+
+    .toggle-label {
+        width: 48px;
+        height: 26px;
+        position: relative;
+        display: block;
+        background: #cbd5e1;
+        border-radius: 9999px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .toggle-label:before {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 20px;
+        height: 20px;
+        background: #fff;
+        border-radius: 50%;
+        transition: 0.3s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 pb-12">
+    <!-- Header / Breadcrumb -->
+    <div class="bg-white border-b border-slate-200 px-6 py-5 mb-8">
+        <div class="max-w-5xl mx-auto">
+            <!-- Breadcrumb -->
+            <nav class="flex mb-4" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="{% url 'menages:agence_list' %}" class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors">
+                            <iconify-icon icon="solar:building-bold-duotone" width="16" class="mr-2"></iconify-icon>
+                            Agences
+                        </a>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <iconify-icon icon="solar:alt-arrow-right-linear" class="text-slate-400 mx-2"></iconify-icon>
+                            <span class="text-sm font-medium text-indigo-600">{{ action }}</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <a href="{% url 'menages:agence_list' %}" class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-indigo-600 transition-colors bg-white shadow-sm">
+                    <iconify-icon icon="solar:arrow-left-linear" width="20"></iconify-icon>
+                </a>
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900 font-jakarta">{{ action }} une agence</h1>
+                    <p class="text-sm text-slate-500 mt-1">Énergie Électrique du Congo (E2C)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Form Content -->
+    <div class="px-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="form-card relative">
+                <!-- Decorative Top Bar -->
+                <div class="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-cyan-500 to-indigo-500"></div>
+
+                <div class="p-8">
+                    <div class="flex items-center gap-3 mb-8 pb-4 border-b border-slate-100">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+                            <iconify-icon icon="solar:pen-new-square-bold-duotone" width="24" class="text-indigo-600"></iconify-icon>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800 font-jakarta">Informations de l'agence</h2>
+                            <p class="text-sm text-slate-500">Remplissez les informations ci-dessous pour continuer</p>
+                        </div>
+                    </div>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Read-only Society -->
+                        <div class="mb-8">
+                            <label class="custom-label">Société de rattachement</label>
+                            <div class="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                                <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                    <iconify-icon icon="solar:bolt-bold" class="text-amber-600"></iconify-icon>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-800">Énergie Électrique du Congo (E2C)</p>
+                                    <p class="text-xs text-slate-500">Entité parente par défaut</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section: Identification -->
+                        <div class="mb-8">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                <iconify-icon icon="solar:card-id-linear"></iconify-icon> Identification
+                            </h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Nom Agence -->
+                                <div>
+                                    <label for="nom" class="custom-label">Nom de l'agence <span class="required-star">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <iconify-icon icon="solar:building-linear" class="text-slate-400"></iconify-icon>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            id="nom"
+                                            name="nom"
+                                            class="custom-input pl-10 {% if errors.nom %}is-invalid{% endif %}"
+                                            value="{% if form_data %}{{ form_data.nom }}{% elif agence %}{{ agence.nom }}{% endif %}"
+                                            placeholder="Ex : Agence Centre-Ville"
+                                            required>
+                                    </div>
+                                    {% if errors.nom %}
+                                        <p class="text-red-500 text-xs mt-1.5 flex items-center gap-1 font-medium">
+                                            <iconify-icon icon="solar:danger-circle-bold"></iconify-icon> {{ errors.nom }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Code Agence -->
+                                <div>
+                                    <label for="code_agence" class="custom-label">Code Agence <span class="required-star">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <iconify-icon icon="solar:qr-code-linear" class="text-slate-400"></iconify-icon>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            id="code_agence"
+                                            name="code_agence"
+                                            class="custom-input pl-10 font-mono uppercase {% if errors.code_agence %}is-invalid{% endif %}"
+                                            value="{% if form_data %}{{ form_data.code_agence }}{% elif agence %}{{ agence.code_agence }}{% endif %}"
+                                            placeholder="AGC-001"
+                                            required>
+                                    </div>
+                                    {% if errors.code_agence %}
+                                        <p class="text-red-500 text-xs mt-1.5 flex items-center gap-1 font-medium">
+                                            <iconify-icon icon="solar:danger-circle-bold"></iconify-icon> {{ errors.code_agence }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section: Localisation -->
+                        <div class="mb-8">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                <iconify-icon icon="solar:map-point-linear"></iconify-icon> Localisation
+                            </h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <!-- Département -->
+                                <div>
+                                    <label for="departement" class="custom-label">Département <span class="required-star">*</span></label>
+                                    <div class="relative">
+                                        <select id="departement" name="departement" class="custom-input appearance-none bg-white {% if errors.departement %}is-invalid{% endif %}" required>
+                                            <option value="">Sélectionner...</option>
+                                            {% for dept in departements %}
+                                                <option value="{{ dept.pk }}"
+                                                    {% if form_data.departement == dept.pk|stringformat:"s" %}selected
+                                                    {% elif agence and agence.departement_id == dept.pk %}selected{% endif %}>
+                                                    {{ dept.nom }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-slate-500">
+                                            <iconify-icon icon="solar:alt-arrow-down-linear"></iconify-icon>
+                                        </div>
+                                    </div>
+                                    {% if errors.departement %}
+                                        <p class="text-red-500 text-xs mt-1.5 flex items-center gap-1 font-medium">
+                                            <iconify-icon icon="solar:danger-circle-bold"></iconify-icon> {{ errors.departement }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Localité -->
+                                <div>
+                                    <label for="localite" class="custom-label">Localité <span class="required-star">*</span></label>
+                                    <div class="relative">
+                                        <select id="localite" name="localite" class="custom-input appearance-none bg-white {% if errors.localite %}is-invalid{% endif %}" required>
+                                            <option value="">Sélectionner...</option>
+                                            {% for loc in localites %}
+                                                <option value="{{ loc.pk }}" data-dept="{{ loc.departement_id }}"
+                                                    {% if form_data.localite == loc.pk|stringformat:"s" %}selected
+                                                    {% elif agence and agence.localite_id == loc.pk %}selected{% endif %}>
+                                                    {{ loc.nom }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-slate-500">
+                                            <iconify-icon icon="solar:alt-arrow-down-linear"></iconify-icon>
+                                        </div>
+                                    </div>
+                                    {% if errors.localite %}
+                                        <p class="text-red-500 text-xs mt-1.5 flex items-center gap-1 font-medium">
+                                            <iconify-icon icon="solar:danger-circle-bold"></iconify-icon> {{ errors.localite }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Pays (Hidden/Default) -->
+                            <div>
+                                <label for="pays" class="custom-label">Pays</label>
+                                <input type="text" id="pays" name="pays"
+                                    class="custom-input bg-slate-50 text-slate-500"
+                                    value="{% if form_data %}{{ form_data.pays }}{% elif agence %}{{ agence.pays }}{% else %}Congo-Brazzaville{% endif %}"
+                                    readonly>
+                            </div>
+                        </div>
+
+                        <!-- Section: Statut -->
+                        <div class="mb-10 bg-indigo-50/50 border border-indigo-100 rounded-xl p-5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <label for="actif" class="font-bold text-slate-800 font-jakarta block mb-1">État de l'agence</label>
+                                    <p class="text-xs text-slate-500">Si désactivée, l'agence ne pourra plus recevoir de nouveaux ménages.</p>
+                                </div>
+                                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                    <input type="checkbox" name="actif" id="actif" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                                        {% if form_data %}
+                                            {% if form_data.actif == 'on' %}checked{% endif %}
+                                        {% elif agence %}
+                                            {% if agence.actif %}checked{% endif %}
+                                        {% else %}
+                                            checked
+                                        {% endif %}/>
+                                    <label for="actif" class="toggle-label overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions Buttons -->
+                        <div class="flex items-center gap-4 pt-6 border-t border-slate-100">
+                            <button type="submit" class="btn-primary-gradient px-8 py-3 rounded-xl text-sm font-semibold flex items-center gap-2">
+                                <iconify-icon icon="solar:diskette-bold-duotone" width="18"></iconify-icon>
+                                {% if action == 'Créer' %}Créer l'agence{% else %}Sauvegarder{% endif %}
+                            </button>
+
+                            <a href="{% url 'menages:agence_list' %}" class="px-6 py-3 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-colors">
+                                Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filtrage dynamique Localité selon Département
+        const deptSelect = document.getElementById('departement');
+        const locSelect  = document.getElementById('localite');
+
+        // Sauvegarde des options originales
+        const allOptions = Array.from(locSelect.options);
+
+        function filterLocalites() {
+            const deptId  = deptSelect.value;
+            const current = locSelect.value;
+            let firstValid = null;
+
+            // Réinitialiser le select (sauf le placeholder)
+            locSelect.innerHTML = '';
+
+            allOptions.forEach(opt => {
+                if (opt.value === "") {
+                    locSelect.appendChild(opt); // Garder le placeholder
+                    return;
+                }
+
+                // Logique: Afficher si aucun dept sélectionné OU si match ID
+                // Note: Dans ton code original, tu semblais vouloir filtrer strictement.
+                // Ici je filtre strictement : on ne montre les localités que si elles appartiennent au dept choisi.
+                const match = !deptId || opt.dataset.dept === deptId;
+
+                if (match) {
+                    locSelect.appendChild(opt);
+                    if (!firstValid) firstValid = opt.value;
+                }
+            });
+
+            // Si la valeur actuelle n'est plus dans la liste visible, reset
+            const currentStillValid = Array.from(locSelect.options).some(o => o.value === current);
+            if (current && currentStillValid) {
+                locSelect.value = current;
+            } else {
+                locSelect.value = "";
+            }
+        }
+
+        deptSelect.addEventListener('change', filterLocalites);
+
+        // Init au chargement
+        filterLocalites();
+    });
+</script>
+{% endblock %}

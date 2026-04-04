@@ -1,0 +1,503 @@
+<!-- templates/layout/_sidebar.html -->
+{% load static %}
+
+<div class="h-full flex flex-col bg-slate-50 border-r border-slate-200">
+    <!-- Header gradient -->
+    <div class="relative px-5 pt-6 pb-5 overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-500 to-cyan-500">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/7 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+
+        <div class="relative flex items-center gap-3">
+            <div class="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+                <iconify-icon icon="solar:bolt-bold" width="22" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h4 class="font-jakarta text-xl font-bold text-white tracking-tight">SHELLY</h4>
+                <p class="text-xs text-white/80 mt-0.5">Gestion Électrique</p>
+            </div>
+        </div>
+
+        <div class="relative mt-4 flex items-center gap-3 p-3 rounded-xl bg-white/15 backdrop-blur-sm">
+            <div class="w-10 h-10 rounded-full bg-white/30 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                {% if user.profile_image %}
+                    <img src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}" class="w-full h-full object-cover">
+                {% else %}
+                    <span class="font-jakarta text-sm font-bold text-white">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
+                {% endif %}
+            </div>
+            <div class="min-w-0">
+                <p class="text-sm font-semibold text-white truncate">{{ user.get_full_name|default:user.username }}</p>
+                <p class="text-xs text-white/70">{{ user.get_role_display }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nav Menu -->
+    <div class="flex-1 overflow-y-auto custom-scroll py-4 px-3">
+        {# 1. ACCUEIL #}
+        <div class="mb-5">
+            <p class="sidebar-section-label">Accueil</p>
+            {% if user.is_admin %}
+            <a href="{% url 'dashboard:admin_dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                <iconify-icon icon="solar:chart-2-bold-duotone" width="18"></iconify-icon>
+                <span>Dashboard Admin</span>
+            </a>
+            {% elif user.is_agent %}
+            <a href="{% url 'dashboard:agent_dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'agent_dashboard' %}active{% endif %}">
+                <iconify-icon icon="solar:user-tie-bold-duotone" width="18"></iconify-icon>
+                <span>Dashboard Agent</span>
+            </a>
+            {% elif user.is_client %}
+            <a href="{% url 'dashboard:client_dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'client_dashboard' %}active{% endif %}">
+                <iconify-icon icon="solar:user-circle-bold-duotone" width="18"></iconify-icon>
+                <span>Mon Dashboard</span>
+            </a>
+            {% endif %}
+        </div>
+
+        {# 2. AGENCES #}
+        <div class="mb-3">
+            <button class="sidebar-toggle w-full sidebar-toggle-btn" data-target="agences-menu">
+                <div class="flex items-center gap-3">
+                    <iconify-icon icon="solar:building-bold-duotone" width="18"></iconify-icon>
+                    <span>Agences</span>
+                </div>
+                <iconify-icon icon="solar:alt-arrow-down-linear" width="16" class="chevron transition-transform"></iconify-icon>
+            </button>
+            <div id="agences-menu" class="submenu hidden mt-1 space-y-1">
+                <a href="{% url 'menages:agence_list' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:buildings-linear" width="16"></iconify-icon>
+                    <span>
+                        {% if user.is_admin %}Toutes les agences{% else %}Mon agence{% endif %}
+                    </span>
+                </a>
+                {% if user.is_admin %}
+                <a href="{% url 'menages:agence_create' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:add-circle-linear" width="16"></iconify-icon>
+                    <span>Nouvelle agence</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {# 3. PARAMÉTRAGE #}
+        {% if user.is_admin %}
+        <div class="mb-3">
+            <button class="sidebar-toggle w-full sidebar-toggle-btn" data-target="parametrage-menu">
+                <div class="flex items-center gap-3">
+                    <iconify-icon icon="solar:settings-bold-duotone" width="18"></iconify-icon>
+                    <span>Paramétrage</span>
+                </div>
+                <iconify-icon icon="solar:alt-arrow-down-linear" width="16" class="chevron transition-transform"></iconify-icon>
+            </button>
+            <div id="parametrage-menu" class="submenu hidden mt-1 space-y-1">
+                <a href="{% url 'parametrage:tarification_list' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:bill-linear" width="16"></iconify-icon>
+                    <span>Type Tarification</span>
+                </a>
+                <a href="{% url 'parametrage:departements_list' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:map-linear" width="16"></iconify-icon>
+                    <span>Département</span>
+                </a>
+                <a href="{% url 'parametrage:localites_list' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:point-on-map-linear" width="16"></iconify-icon>
+                    <span>Localité</span>
+                </a>
+                <a href="{% url 'parametrage:typehabitation_list' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:home-linear" width="16"></iconify-icon>
+                    <span>Type habitation</span>
+                </a>
+                <a href="{% url 'compteurs:typecompteur_list' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:database-linear" width="16"></iconify-icon>
+                    <span>Type compteur</span>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        {# 4. MÉNAGES #}
+        <div class="mb-3">
+            <button class="sidebar-toggle w-full sidebar-toggle-btn" data-target="menages-menu">
+                <div class="flex items-center gap-3">
+                    <iconify-icon icon="solar:users-group-two-rounded-bold-duotone" width="18"></iconify-icon>
+                    <span>Ménages</span>
+                </div>
+                <iconify-icon icon="solar:alt-arrow-down-linear" width="16" class="chevron transition-transform"></iconify-icon>
+            </button>
+            <div id="menages-menu" class="submenu hidden mt-1 space-y-1">
+                <div class="space-y-1 pt-1">
+                    <p class="sidebar-section-label" style="padding-left:0;font-size:0.65rem;">Ménages</p>
+                    {% if user.is_admin %}
+                    <a href="{% url 'menages:list' %}" class="sidebar-submenu-link">
+                        <iconify-icon icon="solar:users-group-two-rounded-linear" width="16"></iconify-icon>
+                        <span>Tous les ménages</span>
+                    </a>
+                    {% elif user.is_agent %}
+                    <a href="{% url 'menages:list' %}" class="sidebar-submenu-link">
+                        <iconify-icon icon="solar:users-group-two-rounded-linear" width="16"></iconify-icon>
+                        <span>Mes ménages</span>
+                    </a>
+                    <a href="{% url 'menages:create' %}" class="sidebar-submenu-link">
+                        <iconify-icon icon="solar:user-plus-linear" width="16"></iconify-icon>
+                        <span>Nouveau ménage</span>
+                    </a>
+                    {% elif user.is_client %}
+                    <div class="space-y-1 pt-1">
+                        {% if user.menage %}
+                        <a href="{% url 'menages:detail' user.menage.pk %}" class="sidebar-submenu-link">
+                            <iconify-icon icon="solar:home-linear" width="16"></iconify-icon>
+                            <span>Mon ménage</span>
+                        </a>
+                        {% else %}
+                        <span class="sidebar-submenu-link text-gray-400 cursor-not-allowed">
+                            <iconify-icon icon="solar:home-linear" width="16"></iconify-icon>
+                            <span>Aucun ménage</span>
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="space-y-1">
+                    <p class="sidebar-section-label" style="padding-left:0;font-size:0.65rem;">Compteurs</p>
+                    {% if user.is_admin %}
+                    <a href="{% url 'compteurs:compteur_list' %}" class="sidebar-submenu-link">
+                        <iconify-icon icon="solar:electricity-linear" width="16"></iconify-icon>
+                        <span>Tous les compteurs</span>
+                    </a>
+                    {% elif user.is_agent %}
+                    <a href="{% url 'compteurs:compteur_list' %}" class="sidebar-submenu-link">
+                        <iconify-icon icon="solar:electricity-linear" width="16"></iconify-icon>
+                        <span>Liste des compteurs</span>
+                    </a>
+                    <a href="{% url 'compteurs:compteur_create' %}" class="sidebar-submenu-link">
+                        <iconify-icon icon="solar:add-circle-linear" width="16"></iconify-icon>
+                        <span>Ajouter un compteur</span>
+                    </a>
+                    {% elif user.is_client %}
+                    <a href="{% url 'compteurs:client_mes_compteurs' %}" class="sidebar-submenu-link">
+                        <iconify-icon icon="solar:electricity-linear" width="16"></iconify-icon>
+                        <span>Mon compteur</span>
+                    </a>
+                    {% endif %}
+                </div>
+               <div class="space-y-1">
+                    <p class="sidebar-section-label" style="padding-left:0;font-size:0.65rem;">Capteurs</p>
+
+                    <!-- Admin : voit tous les capteurs (lecture seule) -->
+                    {% if user.is_admin %}
+                    <a href="{% url 'compteurs:capteur_list' %}" class="sidebar-submenu-link">
+                        <iconify-icon icon="solar:sensor-linear" width="16"></iconify-icon>
+                        <span>Tous les capteurs</span>
+                    </a>
+                    <!-- Admin n'a PAS de bouton "Ajouter un capteur" -->
+
+                    <!-- Agent de terrain : voit tous les capteurs + peut ajouter -->
+                    {% elif user.is_agent %}
+                    <a href="{% url 'compteurs:capteur_list' %}" class="sidebar-submenu-link">
+                        <iconify-icon icon="solar:sensor-linear" width="16"></iconify-icon>
+                        <span>Liste des capteurs</span>
+                    </a>
+                    <a href="{% url 'compteurs:capteur_create' %}" class="sidebar-submenu-link">
+                        <iconify-icon icon="solar:add-circle-linear" width="16"></iconify-icon>
+                        <span>Ajouter un capteur</span>
+                    </a>
+
+                    <!-- Client : voit seulement ses capteurs (lecture seule) -->
+                    {% elif user.is_client %}
+                    <a href="{% url 'compteurs:client_mes_capteurs' %}" class="sidebar-submenu-link">
+                        <iconify-icon icon="solar:sensor-linear" width="16"></iconify-icon>
+                        <span>Mon capteur</span>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {# 5. CONSOMMATION #}
+        <div class="mb-3">
+            <button class="sidebar-toggle w-full sidebar-toggle-btn" data-target="consommation-menu">
+                <div class="flex items-center gap-3">
+                    <iconify-icon icon="solar:bolt-circle-bold-duotone" width="18"></iconify-icon>
+                    <span>Consommation</span>
+                </div>
+                <iconify-icon icon="solar:alt-arrow-down-linear" width="16" class="chevron transition-transform"></iconify-icon>
+            </button>
+            <div id="consommation-menu" class="submenu hidden mt-1 space-y-1">
+                <a href="{% url 'consommation:consommation_list' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:list-linear" width="16"></iconify-icon>
+                    <span>
+                        {% if user.is_client %}
+                            Ma consommation
+                        {% else %}
+                            Liste consommations
+                        {% endif %}
+                    </span>
+                </a>
+            </div>
+        </div>
+
+        {# 6. FACTURATION - CORRIGÉ #}
+        <div class="mb-3">
+            <button class="sidebar-toggle w-full sidebar-toggle-btn" data-target="facturation-menu">
+                <div class="flex items-center gap-3">
+                    <iconify-icon icon="solar:bill-bold-duotone" width="18"></iconify-icon>
+                    <span>Facturation</span>
+                </div>
+                <iconify-icon icon="solar:alt-arrow-down-linear" width="16" class="chevron transition-transform"></iconify-icon>
+            </button>
+            <div id="facturation-menu" class="submenu hidden mt-1 space-y-1">
+                {% if user.is_admin %}
+                <a href="{% url 'facturation:list' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:bill-list-linear" width="16"></iconify-icon>
+                    <span>Toutes les factures</span>
+                </a>
+                {% elif user.is_agent %}
+                <a href="{% url 'facturation:list' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:bill-list-linear" width="16"></iconify-icon>
+                    <span>Factures des ménages</span>
+                </a>
+                {% elif user.is_client %}
+                <a href="{% url 'facturation:client_factures_list' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:bill-list-linear" width="16"></iconify-icon>
+                    <span>Mes factures</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {# 7. SUIVIS #}
+        <div class="mb-3">
+            <button class="sidebar-toggle w-full sidebar-toggle-btn" data-target="suivi-menu">
+                <div class="flex items-center gap-3">
+                    <iconify-icon icon="solar:chart-line-bold-duotone" width="18"></iconify-icon>
+                    <span>Suivis</span>
+                </div>
+                <iconify-icon icon="solar:alt-arrow-down-linear" width="16" class="chevron transition-transform"></iconify-icon>
+            </button>
+            <div id="suivi-menu" class="submenu hidden mt-1 space-y-1">
+                {% if user.is_admin %}
+                <a href="{% url 'dashboard_suivi:suivi_global' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:chart-2-linear" width="16"></iconify-icon>
+                    <span>Vue globale</span>
+                </a>
+                <a href="{% url 'dashboard_suivi:suivi_departement_list' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:map-linear" width="16"></iconify-icon>
+                    <span>Par département</span>
+                </a>
+                <a href="{% url 'dashboard_suivi:suivi_localite_list' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:point-on-map-linear" width="16"></iconify-icon>
+                    <span>Par localité</span>
+                </a>
+                {% elif user.is_agent %}
+                <a href="{% url 'dashboard_suivi:suivi_agent_menages' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:users-group-two-rounded-linear" width="16"></iconify-icon>
+                    <span>Mes ménages</span>
+                </a>
+                {% if user.agent_profile.localites.exists %}
+                    {% for localite in user.agent_profile.localites.all %}
+                    <a href="{% url 'dashboard_suivi:suivi_localite' localite.pk %}" class="sidebar-submenu-link">
+                        <iconify-icon icon="solar:point-on-map-linear" width="16"></iconify-icon>
+                        <span>{{ localite.nom }}</span>
+                    </a>
+                    {% endfor %}
+                {% endif %}
+                {% elif user.is_client %}
+                    {% if user.menage %}
+                    <a href="{% url 'dashboard_suivi:suivi_menage' user.menage.pk %}" class="sidebar-submenu-link">
+                        <iconify-icon icon="solar:home-linear" width="16"></iconify-icon>
+                        <span>Mon ménage</span>
+                    </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        {# 8. UTILISATEURS #}
+        {% if user.is_admin %}
+        <div class="mb-3">
+            <button class="sidebar-toggle w-full sidebar-toggle-btn" data-target="utilisateurs-menu">
+                <div class="flex items-center gap-3">
+                    <iconify-icon icon="solar:users-group-two-rounded-bold-duotone" width="18"></iconify-icon>
+                    <span>Utilisateurs</span>
+                </div>
+                <iconify-icon icon="solar:alt-arrow-down-linear" width="16" class="chevron transition-transform"></iconify-icon>
+            </button>
+            <div id="utilisateurs-menu" class="submenu hidden mt-1 space-y-1">
+                <a href="{% url 'users:user_list' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:users-group-two-rounded-linear" width="16"></iconify-icon>
+                    <span>Tous les utilisateurs</span>
+                </a>
+                <a href="{% url 'users:user_create' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:user-plus-linear" width="16"></iconify-icon>
+                    <span>Ajouter un utilisateur</span>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        {# 9. PARAMÈTRES #}
+        <div class="mb-3">
+            <button class="sidebar-toggle w-full sidebar-toggle-btn" data-target="settings-menu">
+                <div class="flex items-center gap-3">
+                    <iconify-icon icon="solar:settings-bold-duotone" width="18"></iconify-icon>
+                    <span>Paramètres</span>
+                </div>
+                <iconify-icon icon="solar:alt-arrow-down-linear" width="16" class="chevron transition-transform"></iconify-icon>
+            </button>
+            <div id="settings-menu" class="submenu hidden mt-1 space-y-1">
+                <a href="{% url 'users:profile' %}" class="sidebar-submenu-link">
+                    <iconify-icon icon="solar:user-circle-linear" width="16"></iconify-icon>
+                    <span>Mon profil</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Sidebar Styles */
+.sidebar-section-label {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 6px 12px;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    margin: 0 0 4px 0;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #475569;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.sidebar-link:hover {
+    background-color: rgba(79, 70, 229, 0.08);
+    color: #4f46e5;
+}
+
+.sidebar-link.active {
+    background-color: rgba(79, 70, 229, 0.16);
+    color: #1e40af;
+    font-weight: 600;
+    border-left: 3px solid #3b82f6;
+}
+
+.sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    margin: 0 0 4px 0;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #475569;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sidebar-toggle:hover {
+    background-color: rgba(79, 70, 229, 0.08);
+    color: #4f46e5;
+}
+
+.sidebar-submenu-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px 8px 32px;
+    margin: 0 0 2px 0;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.825rem;
+    font-weight: 500;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.sidebar-submenu-link:hover {
+    background-color: rgba(79, 70, 229, 0.05);
+    color: #4f46e5;
+}
+
+.sidebar-submenu-link.text-gray-400 {
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.chevron {
+    transition: transform 0.2s;
+}
+
+/* Custom Scrollbar */
+.custom-scroll::-webkit-scrollbar { width: 4px; }
+.custom-scroll::-webkit-scrollbar-track { background: transparent; }
+.custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+</style>
+
+<script>
+document.querySelectorAll('.sidebar-toggle').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const target = document.getElementById(this.dataset.target);
+        if (!target) return;
+        target.classList.toggle('hidden');
+        const chevron = this.querySelector('.chevron');
+        if (chevron) {
+            chevron.style.transform = target.classList.contains('hidden') ? '' : 'rotate(180deg)';
+        }
+    });
+});
+
+// Pour préserver l'état des menus ouverts
+document.addEventListener('DOMContentLoaded', function() {
+    // Récupérer les menus ouverts depuis localStorage
+    const openMenus = JSON.parse(localStorage.getItem('openSidebarMenus') || '[]');
+    openMenus.forEach(menuId => {
+        const menu = document.getElementById(menuId);
+        const btn = document.querySelector(`[data-target="${menuId}"]`);
+        if (menu && btn) {
+            menu.classList.remove('hidden');
+            const chevron = btn.querySelector('.chevron');
+            if (chevron) chevron.style.transform = 'rotate(180deg)';
+        }
+    });
+
+    // Sauvegarder l'état des menus lors du clic
+    document.querySelectorAll('.sidebar-toggle').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.dataset.target;
+            let openMenus = JSON.parse(localStorage.getItem('openSidebarMenus') || '[]');
+            const menu = document.getElementById(targetId);
+
+            if (menu.classList.contains('hidden')) {
+                // Fermeture du menu
+                openMenus = openMenus.filter(id => id !== targetId);
+            } else {
+                // Ouverture du menu
+                if (!openMenus.includes(targetId)) {
+                    openMenus.push(targetId);
+                }
+            }
+            localStorage.setItem('openSidebarMenus', JSON.stringify(openMenus));
+        });
+    });
+});
+</script>

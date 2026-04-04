@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - SGE{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+    .detail-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; }
+    .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+    .badge-ouvert { background: rgba(245, 158, 11, 0.1); color: #d97706; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; }
+    .btn-primary { background: #3b82f6; color: white; padding: 8px 16px; border-radius: 8px; }
+    .btn-secondary { background: #f1f5f9; color: #475569; padding: 8px 16px; border-radius: 8px; }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{% url 'dashboard:admin_dashboard' %}" class="text-indigo-600 text-sm">Accueil</a></li>
+<li class="text-slate-400 px-2">›</li>
+<li><a href="{% url 'facturation:impaye_list' %}" class="text-indigo-600 text-sm">Impayés</a></li>
+<li class="text-slate-400 px-2">›</li>
+<li class="text-sm font-semibold">{{ title }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 p-6">
+    <div class="max-w-4xl mx-auto">
+        <div class="detail-card">
+            <div class="p-6 border-b">
+                <h1 class="text-xl font-bold text-slate-900">{{ title }}</h1>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <div class="info-row"><span class="font-medium">Facture</span><span>#{{ dossier.facture.numero_facture }}</span></div>
+                        <div class="info-row"><span class="font-medium">Client</span><span>{{ dossier.client.get_full_name }}</span></div>
+                        <div class="info-row"><span class="font-medium">Montant dû</span><span class="text-red-600 font-bold">{{ dossier.montant_du|floatformat:0 }} FCFA</span></div>
+                        <div class="info-row"><span class="font-medium">Date création</span><span>{{ dossier.date_creation|date:"d/m/Y H:i" }}</span></div>
+                    </div>
+                    <div>
+                        <div class="info-row"><span class="font-medium">Statut</span><span class="badge-ouvert">{{ dossier.get_statut_display }}</span></div>
+                        <div class="info-row"><span class="font-medium">Motif</span><span>{{ dossier.motif|default:"-" }}</span></div>
+                        {% if dossier.date_resolution %}
+                        <div class="info-row"><span class="font-medium">Date résolution</span><span>{{ dossier.date_resolution|date:"d/m/Y H:i" }}</span></div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-6 border-t">
+                    <h3 class="font-semibold mb-4">Actions</h3>
+                    <form method="post" action="{% url 'facturation:traiter_impaye' dossier.id %}" class="space-y-4">
+                        {% csrf_token %}
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Motif / Notes</label>
+                            <textarea name="motif" rows="3" class="w-full border rounded-lg p-2"></textarea>
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="submit" name="action" value="resoudre" class="bg-emerald-600 text-white px-4 py-2 rounded-lg">Résoudre</button>
+                            <button type="submit" name="action" value="relancer" class="bg-amber-600 text-white px-4 py-2 rounded-lg">Relancer</button>
+                            <button type="submit" name="action" value="cloturer" class="bg-red-600 text-white px-4 py-2 rounded-lg">Clôturer</button>
+                            <a href="{% url 'facturation:impaye_list' %}" class="border px-4 py-2 rounded-lg">Annuler</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

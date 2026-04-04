@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Détail du compteur - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .detail-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.2s;
+    }
+    .detail-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .info-value {
+        color: #1e293b;
+        font-weight: 500;
+    }
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    .badge-active { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .badge-inactive { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+    .badge-suspended { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+    .badge-connected { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .badge-disconnected { background: rgba(100, 116, 139, 0.1); color: #64748b; }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% if user.is_admin %}{% url 'dashboard:admin_dashboard' %}{% elif user.is_agent %}{% url 'dashboard:agent_dashboard' %}{% else %}{% url 'dashboard:client_dashboard' %}{% endif %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Accueil
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <a href="{% if user.is_client %}{% url 'compteurs:client_mes_compteurs' %}{% else %}{% url 'compteurs:compteur_list' %}{% endif %}"
+       class="text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700">
+        Compteurs
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">{{ compteur.numero_contrat }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-slate-200 px-6 py-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                    <iconify-icon icon="solar:electrification-bold-duotone" width="24" class="text-white"></iconify-icon>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                        Compteur {{ compteur.numero_contrat }}
+                    </h1>
+                    <p class="text-sm text-slate-500 mt-1">
+                        {% if compteur.menage %}
+                            Ménage: {{ compteur.menage.nom_menage }}
+                        {% else %}
+                            Non associé
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <a href="{% if user.is_client %}{% url 'compteurs:client_mes_compteurs' %}{% else %}{% url 'compteurs:compteur_list' %}{% endif %}"
+                   class="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors">
+                    <iconify-icon icon="solar:arrow-left-linear" width="18"></iconify-icon>
+                    <span>Retour</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Colonne gauche - Informations générales -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="detail-card">
+                    <div class="p-6 border-b border-slate-100">
+                        <h2 class="text-lg font-semibold text-slate-900">Informations générales</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:hashtag-linear" width="16"></iconify-icon>
+                                Numéro de contrat
+                            </span>
+                            <span class="info-value font-mono">{{ compteur.numero_contrat }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:qr-code-linear" width="16"></iconify-icon>
+                                Matricule compteur
+                            </span>
+                            <span class="info-value font-mono">{{ compteur.matricule_compteur }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:home-smile-linear" width="16"></iconify-icon>
+                                Ménage
+                            </span>
+                            <span class="info-value">
+                                {% if compteur.menage %}
+                                    <a href="{% url 'menages:detail' compteur.menage.pk %}" class="text-indigo-600 hover:text-indigo-700">
+                                        {{ compteur.menage.nom_menage }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-slate-400">Non associé</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:building-linear" width="16"></iconify-icon>
+                                Type de tarification
+                            </span>
+                            <span class="info-value">{{ compteur.type_tarification.nom|default:"-" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:point-on-map-linear" width="16"></iconify-icon>
+                                Localité
+                            </span>
+                            <span class="info-value">{{ compteur.localite.nom|default:"-" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <div class="p-6 border-b border-slate-100">
+                        <h2 class="text-lg font-semibold text-slate-900">Caractéristiques techniques</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:database-linear" width="16"></iconify-icon>
+                                Type de compteur
+                            </span>
+                            <span class="info-value">{{ compteur.type_compteur_detail.nom|default:"Standard" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:flash-linear" width="16"></iconify-icon>
+                                Puissance souscrite
+                            </span>
+                            <span class="info-value">{{ compteur.puissance_souscrite }} kVA</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:chart-linear" width="16"></iconify-icon>
+                                Tension
+                            </span>
+                            <span class="info-value">{{ compteur.get_tension_display }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:bolt-linear" width="16"></iconify-icon>
+                                Phase
+                            </span>
+                            <span class="info-value">{{ compteur.get_phase_display }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:calendar-linear" width="16"></iconify-icon>
+                                Date d'installation
+                            </span>
+                            <span class="info-value">{{ compteur.date_installation|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne droite - Statut et index -->
+            <div class="space-y-6">
+                <div class="detail-card">
+                    <div class="p-6 border-b border-slate-100">
+                        <h2 class="text-lg font-semibold text-slate-900">État du compteur</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="info-row">
+                            <span class="info-label">Statut</span>
+                            <span class="info-value">
+                                {% if compteur.statut == 'ACTIF' %}
+                                <span class="badge badge-active">
+                                    <iconify-icon icon="solar:check-circle-linear" width="12"></iconify-icon>
+                                    {{ compteur.get_statut_display }}
+                                </span>
+                                {% elif compteur.statut == 'INACTIF' %}
+                                <span class="badge badge-inactive">
+                                    <iconify-icon icon="solar:close-circle-linear" width="12"></iconify-icon>
+                                    {{ compteur.get_statut_display }}
+                                </span>
+                                {% else %}
+                                <span class="badge badge-suspended">
+                                    <iconify-icon icon="solar:clock-circle-linear" width="12"></iconify-icon>
+                                    {{ compteur.get_statut_display }}
+                                </span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Index initial</span>
+                            <span class="info-value font-mono">{{ compteur.index_initial|floatformat:2 }} kWh</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Index actuel</span>
+                            <span class="info-value font-mono text-indigo-600 font-bold">{{ compteur.index_actuel|floatformat:2 }} kWh</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Consommation totale</span>
+                            <span class="info-value font-mono">{{ compteur.index_actuel|add:compteur.index_initial|floatformat:2 }} kWh</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <div class="p-6 border-b border-slate-100">
+                        <h2 class="text-lg font-semibold text-slate-900">Connectivité Shelly</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="info-row">
+                            <span class="info-label">Statut</span>
+                            <span class="info-value">
+                                {% if compteur.shelly_status == 'CONNECTE' %}
+                                <span class="badge badge-connected">
+                                    <iconify-icon icon="solar:wifi-linear" width="12"></iconify-icon>
+                                    {{ compteur.get_shelly_status_display }}
+                                </span>
+                                {% else %}
+                                <span class="badge badge-disconnected">
+                                    <iconify-icon icon="solar:wifi-linear" width="12"></iconify-icon>
+                                    {{ compteur.get_shelly_status_display }}
+                                </span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% if compteur.shelly_device_id %}
+                        <div class="info-row">
+                            <span class="info-label">Device ID</span>
+                            <span class="info-value font-mono text-sm">{{ compteur.shelly_device_id }}</span>
+                        </div>
+                        {% endif %}
+                        {% if compteur.shelly_ip %}
+                        <div class="info-row">
+                            <span class="info-label">IP Address</span>
+                            <span class="info-value font-mono text-sm">{{ compteur.shelly_ip }}</span>
+                        </div>
+                        {% endif %}
+                        {% if compteur.derniere_sync_shelly %}
+                        <div class="info-row">
+                            <span class="info-label">Dernière synchronisation</span>
+                            <span class="info-value">{{ compteur.derniere_sync_shelly|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <div class="p-6 border-b border-slate-100">
+                        <h2 class="text-lg font-semibold text-slate-900">Facturation</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="info-row">
+                            <span class="info-label">Période de facturation</span>
+                            <span class="info-value">{{ compteur.get_periode_facturation_display }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Jour de relevé</span>
+                            <span class="info-value">{{ compteur.jour_releve }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Jour de paiement</span>
+                            <span class="info-value">{{ compteur.jour_paiement }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Capteurs associés -->
+        {% if capteurs %}
+        <div class="mt-6 detail-card">
+            <div class="p-6 border-b border-slate-100">
+                <h2 class="text-lg font-semibold text-slate-900">Capteurs associés</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Nom</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Statut</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Dernière comm.</th>
+                        </thead>
+                    <tbody>
+                        {% for capteur in capteurs %}
+                        <tr class="border-b border-slate-100 hover:bg-slate-50">
+                            <td class="px-6 py-4 font-mono text-sm">{{ capteur.device_id|truncatechars:15 }}</td>
+                            <td class="px-6 py-4">{{ capteur.device_name|default:"-" }}</td>
+                            <td class="px-6 py-4">
+                                {% if capteur.status == 'ACTIF' %}
+                                <span class="badge badge-active">Actif</span>
+                                {% else %}
+                                <span class="badge badge-inactive">Inactif</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-sm">{{ capteur.derniere_communication|date:"d/m/Y H:i"|default:"Jamais" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="mt-6 flex gap-3">
+            <a href="{% if user.is_client %}{% url 'compteurs:client_mes_compteurs' %}{% else %}{% url 'compteurs:compteur_list' %}{% endif %}"
+               class="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors">
+                <iconify-icon icon="solar:arrow-left-linear" width="16" class="inline mr-2"></iconify-icon>
+                Retour à la liste
+            </a>
+            {% if compteur.shelly_status == 'CONNECTE' %}
+            <a href="{% url 'compteurs:live_data' compteur.pk %}"
+               class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors">
+                <iconify-icon icon="solar:chart-linear" width="16" class="inline mr-2"></iconify-icon>
+                Surveillance en direct
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

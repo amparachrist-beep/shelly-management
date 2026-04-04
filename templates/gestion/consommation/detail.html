@@ -1,0 +1,543 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Détail de consommation - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .detail-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.2s;
+    }
+    .detail-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .detail-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        background: #fff;
+    }
+    .detail-body {
+        padding: 24px;
+    }
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .info-value {
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .badge-success { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .badge-warning { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+    .badge-danger { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+    .badge-info { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+
+    .phase-card {
+        text-align: center;
+        padding: 16px;
+        background: #f8fafc;
+        border-radius: 12px;
+        transition: all 0.2s;
+    }
+    .phase-card:hover {
+        background: #f1f5f9;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% if user.is_client %}{% url 'dashboard:client_dashboard' %}{% else %}{% url 'dashboard:admin_dashboard' %}{% endif %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon>
+        {% if user.is_client %}Mon tableau de bord{% else %}Tableau de bord{% endif %}
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <!-- ✅ CORRIGÉ : utilisation du bon nom d'URL 'consommation_list' -->
+    <a href="{% url 'consommation:consommation_list' %}" class="text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700">
+        Consommations
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">Détail</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50">
+    <!-- Page Header -->
+    <div class="bg-white border-b border-slate-200 px-6 py-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                    <iconify-icon icon="solar:chart-square-bold-duotone" width="24" class="text-white"></iconify-icon>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                        Détail de la consommation
+                    </h1>
+                    <p class="text-sm text-slate-500 mt-1">
+                        Période : {{ consommation.periode|date:"F Y" }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <a href="{% url 'consommation:consommation_list' %}"
+                   class="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors">
+                    <iconify-icon icon="solar:arrow-left-linear" width="18"></iconify-icon>
+                    <span>Retour</span>
+                </a>
+                {% if consommation.facture_consommation %}
+                <a href="{% url 'facturation:detail' consommation.facture_consommation.id %}"
+                   class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
+                    <iconify-icon icon="solar:file-invoice-dollar-linear" width="18"></iconify-icon>
+                    <span>Voir la facture</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Colonne de gauche - Informations générales -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Informations principales -->
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div class="flex items-center gap-2">
+                            <iconify-icon icon="solar:info-circle-linear" width="20" class="text-indigo-500"></iconify-icon>
+                            <h2 class="text-lg font-semibold text-slate-900">Informations générales</h2>
+                        </div>
+                    </div>
+                    <div class="detail-body">
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:electrification-linear" width="16"></iconify-icon>
+                                Compteur
+                            </span>
+                            <span class="info-value">{{ consommation.compteur.numero_serie }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:home-smile-linear" width="16"></iconify-icon>
+                                Ménage
+                            </span>
+                            <span class="info-value">{{ consommation.compteur.menage.nom_menage|default:"-" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:calendar-linear" width="16"></iconify-icon>
+                                Période de consommation
+                            </span>
+                            <span class="info-value">{{ consommation.periode|date:"F Y" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:clock-circle-linear" width="16"></iconify-icon>
+                                Date de relevé
+                            </span>
+                            <span class="info-value">{{ consommation.date_releve|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:database-linear" width="16"></iconify-icon>
+                                Source
+                            </span>
+                            <span class="info-value">{{ consommation.get_source_display }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:flag-linear" width="16"></iconify-icon>
+                                Statut
+                            </span>
+                            <span class="info-value">
+                                {% if consommation.statut == 'VALIDÉ' %}
+                                <span class="badge badge-success">
+                                    <iconify-icon icon="solar:check-circle-linear" width="12"></iconify-icon>
+                                    {{ consommation.get_statut_display }}
+                                </span>
+                                {% elif consommation.statut == 'ANOMALIE' %}
+                                <span class="badge badge-danger">
+                                    <iconify-icon icon="solar:danger-triangle-linear" width="12"></iconify-icon>
+                                    {{ consommation.get_statut_display }}
+                                </span>
+                                {% else %}
+                                <span class="badge badge-warning">
+                                    <iconify-icon icon="solar:clock-circle-linear" width="12"></iconify-icon>
+                                    {{ consommation.get_statut_display }}
+                                </span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% if consommation.notes %}
+                        <div class="info-row">
+                            <span class="info-label">
+                                <iconify-icon icon="solar:chat-square-linear" width="16"></iconify-icon>
+                                Notes
+                            </span>
+                            <span class="info-value">{{ consommation.notes }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Détail des index -->
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div class="flex items-center gap-2">
+                            <iconify-icon icon="solar:chart-linear" width="20" class="text-indigo-500"></iconify-icon>
+                            <h2 class="text-lg font-semibold text-slate-900">Détail des index</h2>
+                        </div>
+                    </div>
+                    <div class="detail-body">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <div class="info-row">
+                                    <span class="info-label">Index début période</span>
+                                    <span class="info-value font-mono">{{ consommation.index_debut_periode|floatformat:2 }} kWh</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Index fin période</span>
+                                    <span class="info-value font-mono">{{ consommation.index_fin_periode|floatformat:2 }} kWh</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="info-row">
+                                    <span class="info-label">Consommation totale</span>
+                                    <span class="info-value text-xl font-bold text-indigo-600">
+                                        {% with total=consommation.phase_1_kwh|add:consommation.phase_2_kwh|add:consommation.phase_3_kwh %}
+                                            {{ total|floatformat:2 }} kWh
+                                        {% endwith %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Anomalies éventuelles -->
+                {% if consommation.anomalie %}
+                <div class="detail-card border-red-200">
+                    <div class="detail-header bg-red-50">
+                        <div class="flex items-center gap-2">
+                            <iconify-icon icon="solar:danger-triangle-linear" width="20" class="text-red-500"></iconify-icon>
+                            <h2 class="text-lg font-semibold text-red-700">Anomalie détectée</h2>
+                        </div>
+                    </div>
+                    <div class="detail-body">
+                        <div class="info-row">
+                            <span class="info-label">Type d'anomalie</span>
+                            <span class="info-value">{{ consommation.get_anomalie_display }}</span>
+                        </div>
+                        {% if consommation.anomalie_detail %}
+                        <div class="info-row">
+                            <span class="info-label">Détails</span>
+                            <span class="info-value">{{ consommation.anomalie_detail }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Colonne de droite - Consommation par phase -->
+            <div class="space-y-6">
+                <!-- Consommation par phase -->
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div class="flex items-center gap-2">
+                            <iconify-icon icon="solar:chart-line-linear" width="20" class="text-indigo-500"></iconify-icon>
+                            <h2 class="text-lg font-semibold text-slate-900">Consommation par phase</h2>
+                        </div>
+                    </div>
+                    <div class="detail-body">
+                        <div class="grid grid-cols-1 gap-4">
+                            <div class="phase-card">
+                                <iconify-icon icon="solar:flash-linear" width="24" class="text-orange-500 mb-2"></iconify-icon>
+                                <p class="text-sm text-slate-500 mb-1">Phase 1</p>
+                                <p class="text-2xl font-bold text-slate-900">{{ consommation.phase_1_kwh|default:0|floatformat:2 }} kWh</p>
+                                {% with total=consommation.phase_1_kwh|add:consommation.phase_2_kwh|add:consommation.phase_3_kwh %}
+                                {% if total > 0 %}
+                                <p class="text-xs text-slate-400 mt-1">Soit {{ consommation.phase_1_kwh|default:0|divisibleby:total|floatformat:0 }}% du total</p>
+                                {% endif %}
+                                {% endwith %}
+                            </div>
+                            <div class="phase-card">
+                                <iconify-icon icon="solar:flash-linear" width="24" class="text-yellow-500 mb-2"></iconify-icon>
+                                <p class="text-sm text-slate-500 mb-1">Phase 2</p>
+                                <p class="text-2xl font-bold text-slate-900">{{ consommation.phase_2_kwh|default:0|floatformat:2 }} kWh</p>
+                                {% with total=consommation.phase_1_kwh|add:consommation.phase_2_kwh|add:consommation.phase_3_kwh %}
+                                {% if total > 0 %}
+                                <p class="text-xs text-slate-400 mt-1">Soit {{ consommation.phase_2_kwh|default:0|divisibleby:total|floatformat:0 }}% du total</p>
+                                {% endif %}
+                                {% endwith %}
+                            </div>
+                            <div class="phase-card">
+                                <iconify-icon icon="solar:flash-linear" width="24" class="text-green-500 mb-2"></iconify-icon>
+                                <p class="text-sm text-slate-500 mb-1">Phase 3</p>
+                                <p class="text-2xl font-bold text-slate-900">{{ consommation.phase_3_kwh|default:0|floatformat:2 }} kWh</p>
+                                {% with total=consommation.phase_1_kwh|add:consommation.phase_2_kwh|add:consommation.phase_3_kwh %}
+                                {% if total > 0 %}
+                                <p class="text-xs text-slate-400 mt-1">Soit {{ consommation.phase_3_kwh|default:0|divisibleby:total|floatformat:0 }}% du total</p>
+                                {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-4 border-t border-slate-100">
+                            <div class="phase-card bg-indigo-50">
+                                <iconify-icon icon="solar:chart-square-bold-duotone" width="24" class="text-indigo-500 mb-2"></iconify-icon>
+                                <p class="text-sm text-slate-500 mb-1">Consommation totale</p>
+                                <p class="text-3xl font-bold text-indigo-600">
+                                    {% with total=consommation.phase_1_kwh|add:consommation.phase_2_kwh|add:consommation.phase_3_kwh %}
+                                        {{ total|floatformat:2 }} kWh
+                                    {% endwith %}
+                                </p>
+                                <p class="text-xs text-slate-400 mt-1">Pour la période</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coût estimé -->
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div class="flex items-center gap-2">
+                            <iconify-icon icon="solar:wallet-linear" width="20" class="text-indigo-500"></iconify-icon>
+                            <h2 class="text-lg font-semibold text-slate-900">Coût estimé</h2>
+                        </div>
+                    </div>
+                    <div class="detail-body">
+                        <div class="text-center py-4">
+                            <p class="text-sm text-slate-500 mb-2">Montant estimé de la facture</p>
+                            <p class="text-4xl font-bold text-indigo-600">{{ cout_estime|floatformat:0 }} FCFA</p>
+                            <p class="text-xs text-slate-400 mt-2">Basé sur le tarif en vigueur</p>
+                        </div>
+                        {% if consommation.facture_consommation %}
+                        <div class="mt-4 pt-4 border-t border-slate-100">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-slate-500">Montant facturé</span>
+                                <span class="text-lg font-bold text-emerald-600">{{ consommation.facture_consommation.total_ttc|floatformat:0 }} FCFA</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Comparaison avec période précédente -->
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div class="flex items-center gap-2">
+                            <iconify-icon icon="solar:graph-up-linear" width="20" class="text-indigo-500"></iconify-icon>
+                            <h2 class="text-lg font-semibold text-slate-900">Évolution</h2>
+                        </div>
+                    </div>
+                    <div class="detail-body">
+                        {% if variation_mensuelle %}
+                        <div class="text-center py-4">
+                            <p class="text-sm text-slate-500 mb-2">Comparé au mois précédent</p>
+                            <div class="flex items-center justify-center gap-2">
+                                {% if variation_mensuelle > 0 %}
+                                <iconify-icon icon="solar:arrow-up-linear" width="32" class="text-red-500"></iconify-icon>
+                                <p class="text-3xl font-bold text-red-600">+{{ variation_mensuelle|floatformat:1 }}%</p>
+                                {% elif variation_mensuelle < 0 %}
+                                <iconify-icon icon="solar:arrow-down-linear" width="32" class="text-emerald-500"></iconify-icon>
+                                <p class="text-3xl font-bold text-emerald-600">{{ variation_mensuelle|floatformat:1 }}%</p>
+                                {% else %}
+                                <iconify-icon icon="solar:minus-linear" width="32" class="text-slate-500"></iconify-icon>
+                                <p class="text-3xl font-bold text-slate-600">0%</p>
+                                {% endif %}
+                            </div>
+                            <p class="text-xs text-slate-400 mt-2">
+                                {% if variation_mensuelle > 0 %}
+                                Consommation en hausse
+                                {% elif variation_mensuelle < 0 %}
+                                Consommation en baisse
+                                {% else %}
+                                Consommation stable
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4 text-slate-400">
+                            <iconify-icon icon="solar:graph-down-linear" width="32" class="mb-2"></iconify-icon>
+                            <p class="text-sm">Données non disponibles</p>
+                            <p class="text-xs">Pour la période précédente</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphique d'historique -->
+        <div class="mt-6 detail-card">
+            <div class="detail-header">
+                <div class="flex items-center gap-2">
+                    <iconify-icon icon="solar:graph-new-linear" width="20" class="text-indigo-500"></iconify-icon>
+                    <h2 class="text-lg font-semibold text-slate-900">Historique des consommations</h2>
+                </div>
+                <p class="text-sm text-slate-500 mt-1">Évolution sur les 6 derniers mois</p>
+            </div>
+            <div class="detail-body">
+                <div class="h-80">
+                    <canvas id="historiqueChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="mt-6 flex gap-3">
+            <a href="{% url 'consommation:consommation_list' %}"
+               class="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors">
+                <iconify-icon icon="solar:arrow-left-linear" width="16" class="inline mr-2"></iconify-icon>
+                Retour à la liste
+            </a>
+
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#94a3b8';
+
+    // Graphique d'historique
+    const historiqueCtx = document.getElementById('historiqueChart');
+    if (historiqueCtx) {
+        const historiqueData = {{ historique_json|safe }};
+
+        if (historiqueData && historiqueData.labels && historiqueData.labels.length > 0) {
+            new Chart(historiqueCtx, {
+                type: 'line',
+                data: {
+                    labels: historiqueData.labels,
+                    datasets: [{
+                        label: 'Consommation (kWh)',
+                        data: historiqueData.data,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.05)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#6366f1',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#cbd5e1',
+                            borderColor: '#e2e8f0',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Consommation: ${context.raw.toFixed(1)} kWh`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: function(value) {
+                                    return value + ' kWh';
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Consommation (kWh)',
+                                color: '#64748b'
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            historiqueCtx.style.display = 'none';
+            const parent = historiqueCtx.parentElement;
+            parent.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full py-8">
+                    <iconify-icon icon="solar:chart-line-linear" width="48" class="text-slate-400 mb-3"></iconify-icon>
+                    <p class="text-slate-500">Aucune donnée d'historique disponible</p>
+                    <p class="text-sm text-slate-400">Les données seront disponibles après 2 mois de suivi</p>
+                </div>
+            `;
+        }
+    }
+});
+</script>
+{% endblock %}

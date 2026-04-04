@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes Notifications - SGE{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Tableau de bord</a></li>
+<li class="breadcrumb-item active" aria-current="page">Notifications</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card dashboard-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-bell me-2"></i>Mes Notifications
+                    {% if non_lues_count > 0 %}
+                    <span class="badge bg-danger ms-2">{{ non_lues_count }}</span>
+                    {% endif %}
+                </h5>
+
+                <div class="btn-group">
+                    <form method="post" action="{% url 'marquer_toutes_lues' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-check-double me-1"></i>Tout marquer comme lu
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Filtres -->
+            <div class="card-body border-bottom">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        {{ form.read_status.label_tag }}
+                        {{ form.read_status }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.notification_type.label_tag }}
+                        {{ form.notification_type }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.date_debut.label_tag }}
+                        {{ form.date_debut }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.date_fin.label_tag }}
+                        {{ form.date_fin }}
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter me-1"></i>Filtrer
+                        </button>
+                        <a href="{% url 'notifications' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Réinitialiser
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Liste des notifications -->
+            <div class="card-body p-0">
+                {% if notifications %}
+                <div class="list-group list-group-flush">
+                    {% for notification in notifications %}
+                    <div class="list-group-item {% if not notification.read %}bg-light{% endif %}">
+                        <div class="d-flex">
+                            <!-- Icône type -->
+                            <div class="flex-shrink-0 me-3">
+                                {% if notification.notification_type == 'SUCCESS' %}
+                                <i class="fas fa-check-circle fa-2x text-success"></i>
+                                {% elif notification.notification_type == 'WARNING' %}
+                                <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
+                                {% elif notification.notification_type == 'ERROR' %}
+                                <i class="fas fa-times-circle fa-2x text-danger"></i>
+                                {% else %}
+                                <i class="fas fa-info-circle fa-2x text-info"></i>
+                                {% endif %}
+                            </div>
+
+                            <!-- Contenu -->
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="mb-1 {% if not notification.read %}fw-bold{% endif %}">
+                                        {{ notification.title }}
+                                    </h6>
+                                    <small class="text-muted">{{ notification.created_at|timesince }}</small>
+                                </div>
+
+                                <p class="mb-1">{{ notification.message }}</p>
+
+                                <!-- Badges -->
+                                <div class="mb-2">
+                                    <span class="badge bg-{{ notification.notification_type|lower }}">
+                                        {{ notification.get_notification_type_display }}
+                                    </span>
+                                    {% if not notification.read %}
+                                    <span class="badge bg-primary">Non lu</span>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="btn-group btn-group-sm">
+                                    {% if not notification.read %}
+                                    <a href="{% url 'marquer_notification_lue' notification.id %}"
+                                       class="btn btn-outline-success">
+                                        <i class="fas fa-check me-1"></i>Marquer comme lu
+                                    </a>
+                                    {% endif %}
+
+                                    {% if notification.action_url %}
+                                    <a href="{{ notification.action_url }}" class="btn btn-outline-primary">
+                                        <i class="fas fa-external-link-alt me-1"></i>{{ notification.action_label|default:"Ouvrir" }}
+                                    </a>
+                                    {% endif %}
+
+                                    {% if notification.expires_at %}
+                                    <button class="btn btn-outline-secondary" disabled>
+                                        <i class="fas fa-clock me-1"></i>
+                                        Expire {{ notification.expires_at|timeuntil }}
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <!-- Aucune notification -->
+                <div class="text-center py-5">
+                    <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Aucune notification</h5>
+                    <p class="text-muted">Vous n'avez pas de notifications pour le moment.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Pagination -->
+            {% if notifications.has_other_pages %}
+            <div class="card-footer">
+                <nav aria-label="Pagination">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if notifications.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ notifications.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in notifications.paginator.page_range %}
+                            {% if notifications.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > notifications.number|add:'-3' and num < notifications.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    {{ num }}
+                                </a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if notifications.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ notifications.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

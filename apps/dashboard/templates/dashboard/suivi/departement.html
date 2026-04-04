@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Suivi {{ departement.nom }} - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Custom Scrollbar */
+    .custom-scroll::-webkit-scrollbar { width: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* KPI Cards */
+    .kpi-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+    .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+
+    .kpi-orange::before { background: linear-gradient(90deg, #f97316, #fb923c); }
+    .kpi-blue::before   { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .kpi-emerald::before { background: linear-gradient(90deg, #10b981, #34d399); }
+    .kpi-red::before    { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+    /* Section & Charts */
+    .section-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        margin-bottom: 1.5rem;
+        display: flex; flex-direction: column;
+    }
+    .section-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+
+    /* Table */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+        padding: 12px 24px; text-align: left;
+        font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+        color: #64748b; background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .data-table td {
+        padding: 16px 24px; font-size: 0.875rem; color: #334155;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .data-table tr:hover td { background: #f8fafc; }
+
+    /* Inputs */
+    .light-input {
+        background-color: #ffffff; border: 1px solid #cbd5e1;
+        color: #1e293b; border-radius: 8px; padding: 8px 12px;
+        font-size: 0.875rem; transition: all 0.2s;
+    }
+    .light-input:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Dashboard
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <a href="{% url 'dashboard_suivi:suivi_global' %}"
+       class="text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        Suivi
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">{{ departement.nom }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 p-6">
+
+    <!-- En-tête avec période -->
+    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-200">
+                <iconify-icon icon="solar:map-point-wave-bold-duotone" width="24" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                    Département {{ departement.nom }}
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">Analyse détaillée du département</p>
+            </div>
+        </div>
+
+        <!-- Filtre période -->
+        <div class="bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
+            <form method="get" class="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+                <div class="flex items-center gap-2 px-2 text-slate-600">
+                    <iconify-icon icon="solar:calendar-linear" width="18"></iconify-icon>
+                    <span class="text-sm font-medium">Période :</span>
+                </div>
+                <input type="date" name="date_debut" value="{{ date_debut|date:'Y-m-d' }}" class="light-input">
+                <span class="text-slate-400 text-sm">au</span>
+                <input type="date" name="date_fin" value="{{ date_fin|date:'Y-m-d' }}" class="light-input">
+                <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                    Appliquer
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Conso Totale -->
+        <div class="kpi-card kpi-orange">
+            <p class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">Consommation Totale</p>
+            <h3 class="text-2xl font-bold text-slate-900">{{ stats.total_consommation|floatformat:0 }} <span class="text-sm font-normal text-slate-500">kWh</span></h3>
+            <div class="flex items-center gap-2 mt-2">
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full {% if variation.percentage > 0 %}bg-red-50 text-red-600{% else %}bg-emerald-50 text-emerald-600{% endif %}">
+                    {% if variation.percentage > 0 %}+{% endif %}{{ variation.percentage|floatformat:1 }}%
+                </span>
+                <span class="text-xs text-slate-400">vs période préc.</span>
+            </div>
+        </div>
+
+        <!-- Ménages -->
+        <div class="kpi-card kpi-blue">
+            <p class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">Ménages</p>
+            <h3 class="text-2xl font-bold text-slate-900">{{ total_menages }}</h3>
+            <p class="text-xs text-blue-600 font-medium mt-2">Enregistrés dans la zone</p>
+        </div>
+
+        <!-- Compteurs Actifs -->
+        <div class="kpi-card kpi-emerald">
+            <p class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">Compteurs Actifs</p>
+            <h3 class="text-2xl font-bold text-slate-900">{{ stats.nombre_compteurs|default:"0" }}</h3>
+            <p class="text-xs text-emerald-600 font-medium mt-2">Connectés au réseau</p>
+        </div>
+
+        <!-- Anomalies -->
+        <div class="kpi-card kpi-red">
+            <p class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">Anomalies</p>
+            <h3 class="text-2xl font-bold text-slate-900">{{ stats.nombre_anomalies|default:"0" }}</h3>
+            <p class="text-xs text-red-600 font-medium mt-2">Requiert attention</p>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Evolution Chart -->
+        <div class="section-card h-96">
+            <div class="section-header">
+                <h2 class="text-lg font-semibold text-slate-800 font-jakarta">Évolution mensuelle</h2>
+            </div>
+            <div class="p-6 flex-1 relative">
+                <canvas id="evolutionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Top Localités Chart -->
+        <div class="section-card h-96">
+            <div class="section-header">
+                <h2 class="text-lg font-semibold text-slate-800 font-jakarta">Top localités (Conso.)</h2>
+            </div>
+            <div class="p-6 flex-1 relative">
+                <canvas id="localiteChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des Localités -->
+    <div class="section-card">
+        <div class="section-header">
+            <h2 class="text-lg font-semibold text-slate-800 font-jakarta">Localités du département</h2>
+            <button class="text-sm text-emerald-600 font-medium hover:text-emerald-800 transition-colors">Voir tout</button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Localité</th>
+                        <th>Consommation</th>
+                        <th class="text-center">Ménages</th>
+                        <th class="text-center">Moyenne / Ménage</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for localite in localites %}
+                    <tr>
+                        <td class="font-medium text-slate-900">{{ localite.nom }}</td>
+                        <td>
+                            <span class="font-bold text-orange-600">{{ localite.total_consommation|floatformat:0|default:"0" }} kWh</span>
+                        </td>
+                        <td class="text-center text-slate-600">{{ localite.nombre_menages }}</td>
+                        <td class="text-center text-slate-600 font-medium">{{ localite.consommation_moyenne|floatformat:0|default:"0" }} kWh</td>
+                        <td class="text-right">
+                            <a href="{% url 'dashboard_suivi:suivi_localite' localite.id %}"
+                               class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
+                                <iconify-icon icon="solar:eye-bold-duotone" width="16"></iconify-icon>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-slate-500 italic">Aucune localité trouvée pour ce département.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- Graphique Evolution (Line Chart) ---
+    const ctxEvo = document.getElementById('evolutionChart').getContext('2d');
+    let gradientEvo = ctxEvo.createLinearGradient(0, 0, 0, 300);
+    gradientEvo.addColorStop(0, 'rgba(249, 115, 22, 0.2)'); // Orange
+    gradientEvo.addColorStop(1, 'rgba(249, 115, 22, 0)');
+
+    new Chart(ctxEvo, {
+        type: 'line',
+        data: {
+            labels: {{ evolution_labels|safe }},
+            datasets: [{
+                label: 'Consommation (kWh)',
+                data: {{ evolution_values|safe }},
+                borderColor: '#f97316',
+                backgroundColor: gradientEvo,
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#f97316',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    titleColor: '#fff',
+                    bodyColor: '#cbd5e1',
+                    padding: 10,
+                    cornerRadius: 8,
+                    callbacks: { label: (c) => c.raw.toLocaleString() + ' kWh' }
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#64748b', font: { family: 'Inter' } } },
+                y: { border: { display: false }, grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }
+            }
+        }
+    });
+
+    // --- Graphique Localités (Bar Chart) ---
+    const ctxLoc = document.getElementById('localiteChart').getContext('2d');
+    new Chart(ctxLoc, {
+        type: 'bar',
+        data: {
+            labels: {{ localite_labels|safe }},
+            datasets: [{
+                label: 'Consommation (kWh)',
+                data: {{ localite_values|safe }},
+                backgroundColor: '#10b981', // Emerald
+                borderRadius: 6,
+                hoverBackgroundColor: '#059669'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    titleColor: '#fff',
+                    bodyColor: '#cbd5e1',
+                    padding: 10,
+                    cornerRadius: 8,
+                    callbacks: { label: (c) => c.raw.toLocaleString() + ' kWh' }
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#64748b', font: { family: 'Inter' } } },
+                y: { border: { display: false }, grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

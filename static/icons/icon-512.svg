@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Fond carré arrondi -->
+  <rect width="512" height="512" rx="96" fill="#0F172A"/>
+  
+  <!-- Anneau extérieur -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="#38BDF8" stroke-width="8"/>
+  
+  <!-- Arc accent supérieur lumineux -->
+  <path d="M118 180 A180 180 0 0 1 394 180" fill="none" stroke="#0EA5E9" stroke-width="16" stroke-linecap="round" opacity="0.4"/>
+  
+  <!-- Points circuit gauche -->
+  <circle cx="110" cy="248" r="10" fill="#38BDF8" opacity="0.6"/>
+  <line x1="110" y1="248" x2="148" y2="248" stroke="#38BDF8" stroke-width="4" opacity="0.4"/>
+  <circle cx="148" cy="248" r="6" fill="#38BDF8" opacity="0.4"/>
+
+  <!-- Points circuit droit -->
+  <circle cx="402" cy="268" r="10" fill="#38BDF8" opacity="0.6"/>
+  <line x1="364" y1="268" x2="402" y2="268" stroke="#38BDF8" stroke-width="4" opacity="0.4"/>
+  <circle cx="364" cy="268" r="6" fill="#38BDF8" opacity="0.4"/>
+
+  <!-- Éclair principal -->
+  <path d="M276 148 L232 258 L262 258 L236 364 L302 262 L268 262 Z" fill="#38BDF8"/>
+  <!-- Reflet éclair -->
+  <path d="M276 148 L260 190 L272 190 L264 222 L284 196 L270 196 Z" fill="#BAE6FD" opacity="0.6"/>
+</svg>

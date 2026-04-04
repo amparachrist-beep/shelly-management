@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shelly SGE — Connexion</title>
+
+    <!-- Fonts: Plus Jakarta Sans + Inter (cohérent avec le dashboard) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <style>
+        :root {
+            --indigo:      #4f46e5;
+            --indigo-mid:  #6366f1;
+            --indigo-lt:   #eef2ff;
+            --indigo-bd:   #c7d2fe;
+            --cyan:        #0891b2;
+            --text-main:   #1e293b;
+            --text-muted:  #64748b;
+            --border:      #e2e8f0;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        h1, h2, h3, h4, .font-display { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* ── Left panel: gradient indigo ── */
+        .left-panel {
+            background: linear-gradient(145deg, #1e1b4b 0%, #4f46e5 40%, #0891b2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative circles */
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            top: -120px; right: -120px;
+            width: 420px; height: 420px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .left-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -80px; left: -80px;
+            width: 300px; height: 300px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Grid overlay */
+        .grid-overlay {
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 56px 56px;
+            pointer-events: none;
+        }
+
+        /* ── Right panel ── */
+        .right-panel {
+            background: #fff;
+        }
+
+        /* ── Input styling ── */
+        .form-group { position: relative; }
+
+        .form-input {
+            width: 100%;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 16px 14px 44px;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            transition: all 0.2s;
+            outline: none;
+        }
+        .form-input::placeholder { color: #94a3b8; }
+        .form-input:hover { border-color: #c7d2fe; background: #fff; }
+        .form-input:focus {
+            border-color: var(--indigo);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Autofill reset */
+        .form-input:-webkit-autofill,
+        .form-input:-webkit-autofill:hover,
+        .form-input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px #fff inset;
+            -webkit-text-fill-color: var(--text-main);
+            caret-color: var(--text-main);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a5b4fc;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+        .form-group:focus-within .input-icon { color: var(--indigo); }
+
+        .toggle-pw {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            display: flex;
+            transition: color 0.15s;
+        }
+        .toggle-pw:hover { color: var(--indigo); }
+
+        /* ── Form label ── */
+        .form-label {
+            display: block;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        /* ── Submit button ── */
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            transition: all 0.22s;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.4);
+        }
+        .btn-submit:active { transform: translateY(0); }
+        .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        /* ── Checkbox ── */
+        .custom-checkbox {
+            appearance: none;
+            width: 18px; height: 18px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 6px;
+            background: #fff;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.15s;
+            position: relative;
+        }
+        .custom-checkbox:checked {
+            background: var(--indigo);
+            border-color: var(--indigo);
+        }
+        .custom-checkbox:checked::after {
+            content: '';
+            position: absolute;
+            top: 2px; left: 5px;
+            width: 5px; height: 9px;
+            border: 2px solid #fff;
+            border-top: none;
+            border-left: none;
+            transform: rotate(45deg);
+        }
+        .custom-checkbox:focus { box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); outline: none; }
+
+        /* ── Tab switcher ── */
+        .tab-pill {
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            text-decoration: none;
+            transition: all 0.18s;
+            color: var(--text-muted);
+        }
+        .tab-pill.active {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(79, 70, 229, 0.25);
+        }
+        .tab-pill:not(.active):hover { color: var(--indigo); background: var(--indigo-lt); }
+
+        /* ── Feature item ── */
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .feature-icon {
+            width: 48px; height: 48px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .feature-item:hover .feature-icon {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        /* ── Alert boxes ── */
+        .alert-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+        .alert-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #15803d;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        /* ── Stat chip ── */
+        .stat-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 16px;
+            text-align: center;
+            backdrop-filter: blur(6px);
+            transition: all 0.2s;
+        }
+        .stat-chip:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+        .stat-chip-num {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+        }
+        .stat-chip-label {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.7);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideRight {
+            from { opacity: 0; transform: translateX(-20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .anim-fade-up { animation: fadeUp 0.6s cubic-bezier(.22,.68,0,1.1) both; }
+        .anim-slide   { animation: slideRight 0.6s cubic-bezier(.22,.68,0,1.1) both; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.18s; }
+        .delay-3 { animation-delay: 0.26s; }
+        .delay-4 { animation-delay: 0.34s; }
+
+        @keyframes pulse-blob {
+            0%,100% { transform: scale(1); opacity: 0.5; }
+            50%      { transform: scale(1.08); opacity: 0.7; }
+        }
+        .blob-pulse { animation: pulse-blob 4s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;overflow:hidden;">
+
+    <!-- ══ LEFT PANEL ══════════════════════════════════════════════ -->
+    <div class="left-panel hidden lg:flex lg:w-1/2 flex-col justify-between p-12 xl:p-16">
+        <div class="grid-overlay"></div>
+
+        <!-- Extra decorative blobs -->
+        <div class="blob-pulse" style="position:absolute;top:15%;left:10%;width:220px;height:220px;background:rgba(255,255,255,0.04);border-radius:50%;pointer-events:none;"></div>
+        <div class="blob-pulse" style="position:absolute;bottom:25%;right:8%;width:160px;height:160px;background:rgba(255,255,255,0.05);border-radius:50%;pointer-events:none;animation-delay:2s;"></div>
+
+        <!-- Logo -->
+        <div class="relative anim-slide">
+            <div style="display:inline-flex;align-items:center;gap:12px;">
+                <div style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.25);padding:10px;border-radius:14px;backdrop-filter:blur(8px);">
+                    <iconify-icon icon="solar:bolt-bold" width="24" style="color:#fff;"></iconify-icon>
+                </div>
+                <div>
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.25rem;font-weight:800;color:#fff;letter-spacing:-0.01em;">SHELLY</span>
+                    <span style="display:block;font-size:0.7rem;color:rgba(255,255,255,0.7);font-weight:500;letter-spacing:0.05em;margin-top:1px;">Système de Gestion Électrique</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Headline -->
+        <div class="relative" style="margin-top:60px;">
+            <div class="anim-fade-up delay-1">
+                <p style="font-size:0.8rem;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.1em;margin:0 0 16px;">
+                    Gestion intelligente
+                </p>
+                <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(2.2rem,3.5vw,3rem);font-weight:800;color:#fff;line-height:1.1;letter-spacing:-0.03em;margin:0 0 20px;">
+                    Maîtrisez votre<br>
+                    <span style="color:rgba(255,255,255,0.6);">consommation électrique</span><br>
+                    en temps immédiat.
+                </h1>
+                <p style="font-size:0.95rem;color:rgba(255,255,255,0.7);line-height:1.6;max-width:380px;margin:0;">
+                    Surveillez, analysez et optimisez la consommation électrique de vos ménages depuis une seule interface intuitive.
+                </p>
+            </div>
+
+            <!-- Feature list -->
+            <div style="margin-top:36px;display:flex;flex-direction:column;gap:16px;" class="anim-fade-up delay-2">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <iconify-icon icon="solar:graph-up-bold-duotone" width="22" style="color:#fff;"></iconify-icon>
+                    </div>
+                    <div>
+                        <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:0.95rem;font-weight:700;color:#fff;margin:0;">Suivi en temps réel</p>
+                        <p style="font-size:0.8rem;color:rgba(255,255,255,0.6);margin:2px 0 0;">Données live par compteur et ménage</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <iconify-icon icon="solar:bill-bold-duotone" width="22" style="color:#fff;"></iconify-icon>
+                    </div>
+                    <div>
+                        <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:0.95rem;font-weight:700;color:#fff;margin:0;">Facturation automatisée</p>
+                        <p style="font-size:0.8rem;color:rgba(255,255,255,0.6);margin:2px 0 0;">Génération et suivi des factures</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats bottom row -->
+        <div class="relative anim-fade-up delay-3">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+
+            </div>
+            <p style="font-size:0.75rem;color:rgba(255,255,255,0.5);text-align:center;">
+                © {% now "Y" %} SHELLY SGE · Tous droits réservés
+            </p>
+        </div>
+    </div>
+
+
+    <!-- ══ RIGHT PANEL ═══════════════════════════════════════════ -->
+    <div class="right-panel w-full lg:w-1/2 flex flex-col" style="background:#fff;">
+
+        <!-- Top bar -->
+        <div style="padding:24px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f1f5f9;">
+            <!-- Mobile logo -->
+            <div class="lg:hidden" style="display:inline-flex;align-items:center;gap:10px;">
+                <div style="background:linear-gradient(135deg,#4f46e5,#6366f1);padding:8px;border-radius:10px;box-shadow:0 4px 12px rgba(79, 70, 229, 0.3);">
+                    <iconify-icon icon="solar:bolt-bold" width="18" style="color:#fff;"></iconify-icon>
+                </div>
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.1rem;font-weight:800;color:#1e293b;">SHELLY</span>
+            </div>
+
+            <!-- Tab switcher -->
+            <div style="margin-left:auto;display:flex;gap:4px;background:#f8fafc;border:1px solid #e2e8f0;padding:4px;border-radius:999px;">
+                <span class="tab-pill active">Connexion</span>
+                <a href="{% url 'users:register' %}" class="tab-pill">Demande d'accès</a>
+            </div>
+        </div>
+
+        <!-- Scrollable form area -->
+        <div style="flex:1;overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:40px 32px;" class="anim-fade-up">
+
+            <div style="width:100%;max-width:420px;">
+
+                <!-- Form header -->
+                <div style="margin-bottom:32px;">
+                    <div style="display:inline-flex;align-items:center;gap:8px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:999px;padding:5px 14px;margin-bottom:16px;">
+                        <iconify-icon icon="solar:lock-keyhole-bold-duotone" width="16" style="color:#4f46e5;"></iconify-icon>
+                        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:0.7rem;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.08em;">Espace sécurisé</span>
+                    </div>
+                    <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:2rem;font-weight:800;color:#1e293b;margin:0 0 8px;letter-spacing:-0.03em;line-height:1.1;">
+                        Bon retour 👋
+                    </h2>
+                    <p style="font-size:0.95rem;color:#64748b;margin:0;line-height:1.5;">
+                        Connectez-vous à votre tableau de bord SHELLY SGE.
+                    </p>
+                </div>
+
+                <!-- Django messages -->
+                {% if form.errors or messages %}
+                <div style="margin-bottom:24px;display:flex;flex-direction:column;gap:8px;">
+                    {% if form.errors %}
+                    <div class="alert-error">
+                        <iconify-icon icon="solar:danger-triangle-bold-duotone" width="18" style="flex-shrink:0;"></iconify-icon>
+                        <span>Identifiant ou mot de passe incorrect.</span>
+                    </div>
+                    {% endif %}
+                    {% for message in messages %}
+                    <div class="{% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
+                        <iconify-icon icon="{% if message.tags == 'error' %}solar:danger-triangle-bold-duotone{% else %}solar:check-circle-bold-duotone{% endif %}" width="18" style="flex-shrink:0;"></iconify-icon>
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Login form -->
+                <form method="post" id="loginForm" action="{% url 'users:login' %}" style="display:flex;flex-direction:column;gap:20px;">
+                    {% csrf_token %}
+
+                    <!-- Username -->
+                    <div>
+                        <label for="id_username" class="form-label">Nom d'utilisateur</label>
+                        <div class="form-group">
+                            <iconify-icon icon="solar:user-bold-duotone" width="20" class="input-icon"></iconify-icon>
+                            <input type="text"
+                                   name="username"
+                                   id="id_username"
+                                   required autofocus
+                                   placeholder="Votre identifiant"
+                                   class="form-input">
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label for="id_password" class="form-label">Mot de passe</label>
+                        <div class="form-group">
+                            <iconify-icon icon="solar:lock-password-bold-duotone" width="20" class="input-icon"></iconify-icon>
+                            <input type="password"
+                                   name="password"
+                                   id="id_password"
+                                   required
+                                   placeholder="Votre mot de passe"
+                                   class="form-input"
+                                   style="padding-right:44px;">
+                            <button type="button" class="toggle-pw" id="togglePw" aria-label="Afficher le mot de passe">
+                                <iconify-icon icon="solar:eye-bold-duotone" width="20" id="eyeIcon"></iconify-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Remember + Forgot -->
+                    <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="checkbox" name="remember_me" id="remember_me" class="custom-checkbox">
+                            <span style="font-size:0.875rem;color:#475569;font-weight:500;user-select:none;">Se souvenir de moi</span>
+                        </label>
+                    </div>
+
+                    <!-- Submit -->
+                    <div style="margin-top:8px;">
+                        <button type="submit" id="loginBtn" class="btn-submit">
+                            <span id="btnText">Se connecter</span>
+                            <iconify-icon icon="solar:login-2-bold-duotone" width="20" id="btnIcon"></iconify-icon>
+                        </button>
+                    </div>
+
+                    <!-- Divider -->
+                    <div style="display:flex;align-items:center;gap:12px;margin:8px 0;">
+                        <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+                        <span style="font-size:0.8rem;color:#94a3b8;font-weight:500;white-space:nowrap;">Pas encore de compte ?</span>
+                        <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+                    </div>
+
+                    <!-- Register link -->
+                    <a href="{% url 'users:register' %}"
+                       style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:12px;border:1px solid #c7d2fe;background:#eef2ff;color:#4f46e5;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.9rem;font-weight:600;text-decoration:none;transition:all 0.18s;"
+                       onmouseover="this.style.background='#e0e7ff';this.style.borderColor='#a5b4fc';this.style.boxShadow='0 4px 12px rgba(79, 70, 229, 0.1)'"
+                       onmouseout="this.style.background='#eef2ff';this.style.borderColor='#c7d2fe';this.style.boxShadow='none'">
+                        <iconify-icon icon="solar:user-plus-bold-duotone" width="18"></iconify-icon>
+                        Demander un accès
+                    </a>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- Footer right -->
+        <div style="padding:20px 32px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <p style="font-size:0.75rem;color:#94a3b8;margin:0;">
+                © {% now "Y" %} SHELLY SGE · Tous droits réservés
+            </p>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:8px;height:8px;border-radius:50%;background:#10b981;"></div>
+                <span style="font-size:0.75rem;color:#64748b;font-weight:500;">Système opérationnel</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    /* ── Password toggle ── */
+    const togglePw = document.getElementById('togglePw');
+    const pwInput  = document.getElementById('id_password');
+    const eyeIcon  = document.getElementById('eyeIcon');
+
+    togglePw.addEventListener('click', function() {
+        const isHidden = pwInput.type === 'password';
+        pwInput.type = isHidden ? 'text' : 'password';
+        eyeIcon.setAttribute('icon', isHidden ? 'solar:eye-closed-bold-duotone' : 'solar:eye-bold-duotone');
+    });
+
+    /* ── Submit loading state ── */
+    document.getElementById('loginForm').addEventListener('submit', function() {
+        const btn     = document.getElementById('loginBtn');
+        const btnText = document.getElementById('btnText');
+        const btnIcon = document.getElementById('btnIcon');
+
+        btn.disabled = true;
+        btn.style.opacity = '0.75';
+        btn.style.cursor  = 'not-allowed';
+        btnText.textContent = 'Connexion en cours…';
+        btnIcon.setAttribute('icon', 'solar:spinner-bold-duotone');
+        btnIcon.style.animation = 'spin 0.8s linear infinite';
+    });
+</script>
+</body>
+</html>

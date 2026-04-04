@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ma Consommation - SGE{% endblock %}
+
+{% block breadcrumb %}
+<li class="flex items-center">
+    <a href="{% url 'dashboard:client_dashboard' %}" class="text-slate-400 hover:text-white transition-colors">Mon Tableau de bord</a>
+    <iconify-icon icon="solar:alt-arrow-right-linear" class="mx-2 text-slate-600" width="16"></iconify-icon>
+</li>
+<li class="text-white">Ma Consommation</li>
+{% endblock %}
+
+{% block content %}
+<!-- Header avec boutons d'action -->
+<div class="mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-orange-500/10 rounded-lg">
+                <iconify-icon icon="solar:chart-line-linear" width="24" class="text-orange-500"></iconify-icon>
+            </div>
+            <h1 class="text-2xl font-semibold text-white">Ma Consommation</h1>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+            <a href="{% url 'dashboard:client_dashboard' %}"
+               class="flex items-center gap-2 px-4 py-2 border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white rounded-lg transition-colors">
+                <iconify-icon icon="solar:home-linear" width="18"></iconify-icon>
+                <span>Retour au tableau de bord</span>
+            </a>
+            <a href="{% url 'dashboard:client_conseils' %}"
+               class="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors">
+                <iconify-icon icon="solar:lightbulb-linear" width="18"></iconify-icon>
+                <span>Conseils d'économie</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Statistiques principales -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-white/5 rounded-xl p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h6 class="text-sm font-medium text-slate-400">Consommation ce mois</h6>
+            <div class="p-2 bg-orange-500/10 rounded-lg">
+                <iconify-icon icon="solar:bolt-linear" width="20" class="text-orange-500"></iconify-icon>
+            </div>
+        </div>
+        <h3 class="text-3xl font-bold text-white mb-1">{{ consommation_mois|floatformat:0 }} kWh</h3>
+        <p class="text-sm text-slate-500">
+            {% if variation %}
+            <span class="{% if variation > 0 %}text-red-400{% else %}text-emerald-400{% endif %}">
+                <iconify-icon icon="solar:{% if variation > 0 %}arrow-up-linear{% else %}arrow-down-linear{% endif %}" width="16" class="inline"></iconify-icon>
+                {{ variation|floatformat:1 }}% vs mois dernier
+            </span>
+            {% else %}
+            Données en cours de collecte
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-white/5 rounded-xl p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h6 class="text-sm font-medium text-slate-400">Coût estimé</h6>
+            <div class="p-2 bg-sky-500/10 rounded-lg">
+                <iconify-icon icon="solar:wallet-linear" width="20" class="text-sky-500"></iconify-icon>
+            </div>
+        </div>
+        <h3 class="text-3xl font-bold text-white mb-1">{{ cout_estime|floatformat:0 }} FCFA</h3>
+        <p class="text-sm text-slate-500">Basé sur votre tarif actuel</p>
+    </div>
+
+    <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-white/5 rounded-xl p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h6 class="text-sm font-medium text-slate-400">Consommation moyenne</h6>
+            <div class="p-2 bg-purple-500/10 rounded-lg">
+                <iconify-icon icon="solar:chart-linear" width="20" class="text-purple-500"></iconify-icon>
+            </div>
+        </div>
+        <h3 class="text-3xl font-bold text-white mb-1">{{ consommation_moyenne|floatformat:0 }} kWh</h3>
+        <p class="text-sm text-slate-500">Moyenne sur 6 mois</p>
+    </div>
+</div>
+
+<!-- Graphique d'historique -->
+<div class="bg-slate-900/50 border border-white/5 rounded-xl p-6 mb-6">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-semibold text-white">Historique de consommation (6 derniers mois)</h2>
+        <div class="flex items-center gap-2">
+            <button id="btn-6m" class="px-3 py-1 bg-orange-500 text-white text-sm rounded-lg">6 mois</button>
+            <button id="btn-1y" class="px-3 py-1 border border-white/10 text-slate-400 hover:text-white text-sm rounded-lg">1 an</button>
+            <button id="btn-2y" class="px-3 py-1 border border-white/10 text-slate-400 hover:text-white text-sm rounded-lg">2 ans</button>
+        </div>
+    </div>
+    <div class="h-80">
+        <canvas id="consommationChart"></canvas>
+    </div>
+</div>
+
+<!-- Comparaison et analyse -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Comparaison avec la moyenne -->
+    <div class="bg-slate-900/50 border border-white/5 rounded-xl p-6">
+        <h3 class="text-lg font-semibold text-white mb-4">Comparaison avec la moyenne du quartier</h3>
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <p class="text-slate-400 text-sm">Votre consommation</p>
+                <p class="text-2xl font-bold text-white">{{ consommation_mois|floatformat:0 }} kWh</p>
+            </div>
+            <div>
+                <p class="text-slate-400 text-sm">Moyenne quartier</p>
+                <p class="text-2xl font-bold text-white">{{ moyenne_quartier|floatformat:0 }} kWh</p>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-slate-400">Votre position</span>
+                {% if position_quartier == 'inférieure' %}
+                <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-sm rounded-full">
+                    <iconify-icon icon="solar:arrow-down-linear" width="16" class="inline mr-1"></iconify-icon>
+                    {{ difference_quartier|floatformat:1 }}% moins que la moyenne
+                </span>
+                {% elif position_quartier == 'supérieure' %}
+                <span class="px-3 py-1 bg-red-500/10 text-red-400 text-sm rounded-full">
+                    <iconify-icon icon="solar:arrow-up-linear" width="16" class="inline mr-1"></iconify-icon>
+                    {{ difference_quartier|floatformat:1 }}% plus que la moyenne
+                </span>
+                {% else %}
+                <span class="px-3 py-1 bg-slate-500/10 text-slate-400 text-sm rounded-full">Dans la moyenne</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Consommation par plage horaire -->
+    <div class="bg-slate-900/50 border border-white/5 rounded-xl p-6">
+        <h3 class="text-lg font-semibold text-white mb-4">Répartition par plage horaire</h3>
+        <div class="space-y-4">
+            {% for plage in repartition_plages %}
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-sm text-slate-400">{{ plage.nom }}</span>
+                    <span class="text-sm font-medium text-white">{{ plage.pourcentage }}%</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-2">
+                    <div class="bg-orange-500 h-2 rounded-full" style="width: {{ plage.pourcentage }}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Tableau des consommations détaillées -->
+<div class="bg-slate-900/50 border border-white/5 rounded-xl overflow-hidden">
+    <div class="px-6 py-4 border-b border-white/5">
+        <h3 class="text-lg font-semibold text-white">Détails des consommations mensuelles</h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-900/80 border-b border-white/5">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Période</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Consommation (kWh)</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Coût (FCFA)</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Évolution</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Facture</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                {% for consommation in consommations_detaillees %}
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-slate-300">{{ consommation.periode|date:"F Y" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="font-semibold text-orange-400">{{ consommation.total_kwh|floatformat:2 }} kWh</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-slate-300">{{ consommation.cout|floatformat:0 }} FCFA</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if consommation.evolution %}
+                        <span class="flex items-center {% if consommation.evolution > 0 %}text-red-400{% else %}text-emerald-400{% endif %}">
+                            <iconify-icon icon="solar:{% if consommation.evolution > 0 %}arrow-up-linear{% else %}arrow-down-linear{% endif %}" width="16" class="mr-1"></iconify-icon>
+                            {{ consommation.evolution|floatformat:1 }}%
+                        </span>
+                        {% else %}
+                        <span class="text-slate-500">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if consommation.facture_id %}
+                        <a href="{% url 'facturation:detail' consommation.facture_id %}"
+                           class="flex items-center gap-2 text-sky-400 hover:text-sky-300 transition-colors">
+                            <iconify-icon icon="solar:document-linear" width="16"></iconify-icon>
+                            Voir la facture
+                        </a>
+                        {% else %}
+                        <span class="text-slate-500">En attente</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="p-4 bg-slate-800/50 rounded-full mb-4">
+                                <iconify-icon icon="solar:chart-line-linear" width="48" class="text-slate-600"></iconify-icon>
+                            </div>
+                            <p class="text-slate-400">Aucune donnée de consommation disponible</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Conseils personnalisés -->
+<div class="mt-6 bg-gradient-to-br from-slate-900 to-slate-950 border border-white/5 rounded-xl p-6">
+    <h3 class="text-lg font-semibold text-white mb-4">Conseils personnalisés pour réduire votre consommation</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {% for conseil in conseils_economie %}
+        <div class="bg-slate-800/50 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+                <div class="p-2 bg-{{ conseil.couleur }}-500/10 rounded-lg">
+                    <iconify-icon icon="{{ conseil.icone }}" width="20" class="text-{{ conseil.couleur }}-500"></iconify-icon>
+                </div>
+                <div>
+                    <h4 class="font-medium text-white mb-1">{{ conseil.titre }}</h4>
+                    <p class="text-sm text-slate-400">{{ conseil.description }}</p>
+                    {% if conseil.economie %}
+                    <div class="mt-2">
+                        <span class="text-xs px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded-full">Économie: {{ conseil.economie }} FCFA/mois</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Données du graphique
+    const historique = {{ historique_json|safe }};
+
+    const ctx = document.getElementById('consommationChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: historique.labels,
+            datasets: [{
+                label: 'Consommation (kWh)',
+                data: historique.data,
+                borderColor: '#f97316',
+                backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    titleColor: '#f1f5f9',
+                    bodyColor: '#cbd5e1',
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.parsed.y.toFixed(1)} kWh`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.05)'
+                    },
+                    ticks: {
+                        color: '#94a3b8'
+                    }
+                },
+                y: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.05)'
+                    },
+                    ticks: {
+                        color: '#94a3b8',
+                        callback: function(value) {
+                            return value + ' kWh';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Boutons de période
+    document.getElementById('btn-6m').addEventListener('click', function() {
+        loadData('6m');
+    });
+
+    document.getElementById('btn-1y').addEventListener('click', function() {
+        loadData('1y');
+    });
+
+    document.getElementById('btn-2y').addEventListener('click', function() {
+        loadData('2y');
+    });
+
+    function loadData(period) {
+        fetch(`/dashboard/client/consumption-data/?period=${period}`)
+            .then(response => response.json())
+            .then(data => {
+                chart.data.labels = data.labels;
+                chart.data.datasets[0].data = data.data;
+                chart.update();
+
+                // Mettre à jour les boutons actifs
+                document.querySelectorAll('[id^="btn-"]').forEach(btn => {
+                    btn.classList.remove('bg-orange-500', 'text-white');
+                    btn.classList.add('border', 'border-white/10', 'text-slate-400');
+                });
+                document.getElementById(`btn-${period}`).classList.add('bg-orange-500', 'text-white');
+                document.getElementById(`btn-${period}`).classList.remove('border', 'text-slate-400');
+            });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if object %}Modifier{% else %}Nouveau{% endif %} type de compteur - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Section card */
+    .section-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        color: white;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex; align-items: center; gap: 8px;
+        box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2);
+        transition: all 0.2s;
+        border: none; cursor: pointer;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #64748b;
+        border: 1px solid #cbd5e1;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+        display: inline-flex; align-items: center;
+    }
+    .btn-secondary:hover {
+        background: #f8fafc;
+        color: #334155;
+        border-color: #94a3b8;
+    }
+
+    /* Form Labels & Help text */
+    label {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 600;
+        color: #334155;
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .help-text {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Tableau de bord
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <a href="{% url 'compteurs:typecompteur_list' %}"
+       class="text-slate-500 text-sm font-medium font-jakarta hover:text-slate-700 transition-colors">
+        Types de compteur
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">{% if object %}Modifier{% else %}Nouveau{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 pb-12">
+    <!-- Page Header -->
+    <div class="bg-white border-b border-slate-200 px-6 py-6 mb-8">
+        <div class="max-w-5xl mx-auto flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                {% if object %}
+                <iconify-icon icon="solar:pen-new-square-bold-duotone" width="24" class="text-white"></iconify-icon>
+                {% else %}
+                <iconify-icon icon="solar:add-square-bold-duotone" width="24" class="text-white"></iconify-icon>
+                {% endif %}
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                    {% if object %}Modifier le type de compteur{% else %}Nouveau type de compteur{% endif %}
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">
+                    {% if object %}Mise à jour des spécifications techniques{% else %}Enregistrement d'un nouveau modèle d'équipement{% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Content -->
+    <div class="max-w-5xl mx-auto px-6">
+        <div class="section-card p-8">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3">
+                    <iconify-icon icon="solar:danger-triangle-bold" class="text-red-500 mt-0.5" width="20"></iconify-icon>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-red-800 mb-1">Erreur de validation</h4>
+                        {% for error in form.non_field_errors %}
+                        <p class="text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Colonne Gauche : Identification -->
+                    <div class="space-y-6">
+                        <div class="pb-2 border-b border-slate-100 mb-4">
+                            <h3 class="text-lg font-semibold text-slate-800 font-jakarta">Identification & Marque</h3>
+                        </div>
+
+                        <div>
+                            <label for="{{ form.code.id_for_label }}">
+                                {{ form.code.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.code }}
+                            {% if form.code.errors %}
+                            <p class="mt-1 text-sm text-red-500">{{ form.code.errors.0 }}</p>
+                            {% endif %}
+                            <p class="help-text">Code unique (ex: CMP-TRI-001)</p>
+                        </div>
+
+                        <div>
+                            <label for="{{ form.nom.id_for_label }}">
+                                {{ form.nom.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.nom }}
+                            {% if form.nom.errors %}
+                            <p class="mt-1 text-sm text-red-500">{{ form.nom.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="{{ form.marque.id_for_label }}">
+                                    {{ form.marque.label }}
+                                </label>
+                                {{ form.marque }}
+                            </div>
+                            <div>
+                                <label for="{{ form.modele.id_for_label }}">
+                                    {{ form.modele.label }}
+                                </label>
+                                {{ form.modele }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="{{ form.technologie.id_for_label }}">
+                                {{ form.technologie.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.technologie }}
+                            {% if form.technologie.errors %}
+                            <p class="mt-1 text-sm text-red-500">{{ form.technologie.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Colonne Droite : Technique -->
+                    <div class="space-y-6">
+                        <div class="pb-2 border-b border-slate-100 mb-4">
+                            <h3 class="text-lg font-semibold text-slate-800 font-jakarta">Spécifications Techniques</h3>
+                        </div>
+
+                        <div>
+                            <label for="{{ form.tension_compatibilite.id_for_label }}">
+                                {{ form.tension_compatibilite.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.tension_compatibilite }}
+                            {% if form.tension_compatibilite.errors %}
+                            <p class="mt-1 text-sm text-red-500">{{ form.tension_compatibilite.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.nombre_phases.id_for_label }}">
+                                {{ form.nombre_phases.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.nombre_phases }}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.prix_unitaire_fcfa.id_for_label }}">
+                                {{ form.prix_unitaire_fcfa.label }}
+                            </label>
+                            <div class="relative">
+                                {{ form.prix_unitaire_fcfa }}
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-slate-500 text-sm font-medium">FCFA</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="{{ form.stock_disponible.id_for_label }}">
+                                {{ form.stock_disponible.label }}
+                            </label>
+                            {{ form.stock_disponible }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration & Options -->
+                <div class="mt-8 pt-8 border-t border-slate-100 bg-slate-50/50 rounded-xl p-6">
+                    <h3 class="text-sm font-semibold text-slate-500 font-jakarta uppercase tracking-wider mb-4">Options de configuration</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Switch: Compatible Shelly -->
+                        <div class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl">
+                            <div class="flex h-6 items-center">
+                                {{ form.compatible_shelly }}
+                            </div>
+                            <div class="text-sm">
+                                <label for="{{ form.compatible_shelly.id_for_label }}" class="font-medium text-slate-900 !mb-0 cursor-pointer">
+                                    {{ form.compatible_shelly.label }}
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Switch: En Stock -->
+                        <div class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl">
+                            <div class="flex h-6 items-center">
+                                {{ form.en_stock }}
+                            </div>
+                            <div class="text-sm">
+                                <label for="{{ form.en_stock.id_for_label }}" class="font-medium text-slate-900 !mb-0 cursor-pointer">
+                                    {{ form.en_stock.label }}
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Switch: Actif -->
+                        <div class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl">
+                            <div class="flex h-6 items-center">
+                                {{ form.actif }}
+                            </div>
+                            <div class="text-sm">
+                                <label for="{{ form.actif.id_for_label }}" class="font-medium text-slate-900 !mb-0 cursor-pointer">
+                                    {{ form.actif.label }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-10 pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <a href="{% url 'compteurs:typecompteur_list' %}" class="btn-secondary">
+                        Annuler
+                    </a>
+                    <button type="submit" class="btn-primary">
+                        <iconify-icon icon="solar:check-circle-bold" width="18"></iconify-icon>
+                        {% if object %}Mettre à jour{% else %}Enregistrer{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Style des champs standards
+    const formControls = document.querySelectorAll('input:not([type=checkbox]), select, textarea');
+    formControls.forEach(field => {
+        field.classList.add(
+            'w-full', 'px-4', 'py-2.5', 'bg-white', 'border', 'border-slate-200',
+            'rounded-xl', 'text-slate-700', 'text-sm', 'font-medium',
+            'placeholder-slate-400', 'focus:outline-none', 'focus:border-blue-500',
+            'focus:ring-4', 'focus:ring-blue-500/10', 'transition-all', 'duration-200'
+        );
+    });
+
+    // Style spécifique pour les checkboxes
+    const checkboxes = document.querySelectorAll('input[type=checkbox]');
+    checkboxes.forEach(cb => {
+        cb.classList.add(
+            'w-5', 'h-5', 'rounded', 'border-slate-300', 'text-blue-600',
+            'focus:ring-blue-500', 'cursor-pointer'
+        );
+    });
+});
+</script>
+{% endblock %}

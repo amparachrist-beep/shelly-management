@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Alerte #{{ alerte.id }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'alertes:liste' %}">Alertes</a></li>
+                    <li class="breadcrumb-item active">Alerte #{{ alerte.id }}</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0">
+                Alerte #{{ alerte.id }}
+                {% if alerte.niveau == 'CRITIQUE' %}
+                    <span class="badge bg-danger">{{ alerte.get_niveau_display }}</span>
+                {% elif alerte.niveau == 'WARNING' %}
+                    <span class="badge bg-warning text-dark">{{ alerte.get_niveau_display }}</span>
+                {% else %}
+                    <span class="badge bg-info">{{ alerte.get_niveau_display }}</span>
+                {% endif %}
+            </h1>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'alertes:modifier' alerte.pk %}" class="btn btn-outline-primary">
+                <i class="fas fa-edit"></i> Modifier
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Détails de l'alerte -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Détails de l'alerte</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Type:</strong> {{ alerte.get_type_alerte_display }}</p>
+                            <p><strong>Message:</strong></p>
+                            <div class="alert alert-{% if alerte.niveau == 'CRITIQUE' %}danger{% elif alerte.niveau == 'WARNING' %}warning{% else %}info{% endif %}">
+                                {{ alerte.message }}
+                            </div>
+
+                            {% if alerte.valeur_mesuree %}
+                            <p>
+                                <strong>Valeur mesurée:</strong>
+                                {{ alerte.valeur_mesuree }} {{ alerte.unite|default:'' }}
+                            </p>
+                            {% endif %}
+
+                            {% if alerte.valeur_seuil %}
+                            <p>
+                                <strong>Seuil:</strong>
+                                {{ alerte.valeur_seuil }} {{ alerte.unite|default:'' }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Compteur:</strong> {{ alerte.compteur.numero_serie }}</p>
+                            <p><strong>Ménage:</strong> {{ alerte.compteur.menage.nom }}</p>
+                            <p><strong>Adresse:</strong> {{ alerte.compteur.menage.adresse }}</p>
+                            <p><strong>Statut:</strong>
+                                {% if alerte.statut == 'ACTIVE' %}
+                                    <span class="badge bg-danger">{{ alerte.get_statut_display }}</span>
+                                {% elif alerte.statut == 'LU' %}
+                                    <span class="badge bg-primary">{{ alerte.get_statut_display }}</span>
+                                {% elif alerte.statut == 'TRAITEE' %}
+                                    <span class="badge bg-success">{{ alerte.get_statut_display }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ alerte.get_statut_display }}</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Détectée le:</strong> {{ alerte.date_detection|date:"d/m/Y H:i" }}</p>
+                            {% if alerte.date_traitement %}
+                            <p><strong>Traitée le:</strong> {{ alerte.date_traitement|date:"d/m/Y H:i" }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Traitement de l'alerte -->
+            {% if alerte.statut == 'ACTIVE' or alerte.statut == 'LU' %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Traiter l'alerte</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.statut.label_tag }}
+                                    {{ form.statut }}
+                                    {% if form.statut.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.statut.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    {{ form.notes_traitement.label_tag }}
+                                    {{ form.notes_traitement }}
+                                    {% if form.notes_traitement.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.notes_traitement.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Enregistrer le traitement
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Actions rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if alerte.statut == 'ACTIVE' %}
+                        <a href="{% url 'alertes:marquer_lue' alerte.pk %}"
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-check-circle"></i> Marquer comme lue
+                        </a>
+                        {% endif %}
+
+                        <a href="{% url 'compteurs:detail' alerte.compteur.pk %}"
+                           class="btn btn-outline-info">
+                            <i class="fas fa-tachometer-alt"></i> Voir le compteur
+                        </a>
+
+                        <a href="{% url 'menages:detail' alerte.compteur.menage.pk %}"
+                           class="btn btn-outline-info">
+                            <i class="fas fa-home"></i> Voir le ménage
+                        </a>
+
+                        {% if alerte.consommation %}
+                        <a href="{% url 'consommation:detail' alerte.consommation.pk %}"
+                           class="btn btn-outline-info">
+                            <i class="fas fa-chart-line"></i> Voir la consommation
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations traitement -->
+            {% if alerte.traite_par or alerte.notes_traitement %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Informations de traitement</h5>
+                </div>
+                <div class="card-body">
+                    {% if alerte.traite_par %}
+                    <p><strong>Traité par:</strong> {{ alerte.traite_par.get_full_name|default:alerte.traite_par.email }}</p>
+                    {% endif %}
+
+                    {% if alerte.notes_traitement %}
+                    <p><strong>Notes:</strong></p>
+                    <div class="alert alert-light">
+                        {{ alerte.notes_traitement|linebreaks }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

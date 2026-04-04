@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Liste des Agences — E2C{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Card & Table Styles */
+    .content-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    /* Stat Cards */
+    .stat-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 20px;
+        position: relative;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Table Styles */
+    .data-table th {
+        background-color: #f8fafc;
+        color: #64748b;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 12px 24px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .data-table td {
+        padding: 16px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+        font-size: 0.875rem;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background-color: #f8fafc; }
+
+    /* Buttons */
+    .btn-create {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        color: white;
+        transition: all 0.2s;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+    }
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+    }
+
+    .action-btn {
+        width: 32px; height: 32px;
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        transition: all 0.2s;
+    }
+    .action-btn:hover { transform: scale(1.1); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 pb-12">
+
+    <!-- Breadcrumb & Header -->
+    <div class="bg-white border-b border-slate-200 px-6 py-5 mb-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Breadcrumb -->
+            <nav class="flex mb-4" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="{% url 'dashboard:admin_dashboard' %}" class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors">
+                            <iconify-icon icon="solar:home-2-bold-duotone" width="16" class="mr-2"></iconify-icon>
+                            Accueil
+                        </a>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <iconify-icon icon="solar:alt-arrow-right-linear" class="text-slate-400 mx-2"></iconify-icon>
+                            <span class="text-sm font-medium text-indigo-600">Agences</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900 font-jakarta flex items-center gap-2">
+                        <iconify-icon icon="solar:buildings-bold-duotone" class="text-indigo-600"></iconify-icon>
+                        Agences E2C
+                    </h1>
+                    <p class="text-sm text-slate-500 mt-1">Gestion du réseau de distribution et des points de service</p>
+                </div>
+
+                {% if can_manage %}
+                <a href="{% url 'menages:agence_create' %}" class="btn-create inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold">
+                    <iconify-icon icon="solar:add-circle-bold" width="18"></iconify-icon>
+                    Nouvelle Agence
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6">
+
+        <!-- Stats Cards (Admin Only) -->
+        {% if can_manage %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Total -->
+            <div class="stat-card group">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <iconify-icon icon="solar:city-bold-duotone" width="24"></iconify-icon>
+                    </div>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total</span>
+                </div>
+                <div>
+                    <span class="text-3xl font-bold text-slate-800 font-jakarta">{{ agences.count }}</span>
+                    <p class="text-sm text-slate-500 mt-1">Agences enregistrées</p>
+                </div>
+            </div>
+
+            <!-- Actives -->
+            <div class="stat-card group">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                        <iconify-icon icon="solar:verified-check-bold-duotone" width="24"></iconify-icon>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded-lg">Opérationnel</span>
+                </div>
+                <div>
+                    <!-- Note: Logic adjusted to count active in loop or passed context. Assuming `agences` is QuerySet -->
+                    <!-- ✅ Après — passé depuis la vue -->
+                    <span class="text-3xl font-bold text-slate-800 font-jakarta">{{ agences_actives_count }}</span>
+                    <p class="text-sm text-slate-500 mt-1">Agences actives</p>
+                </div>
+            </div>
+
+            <!-- Agents (Placeholder logic) -->
+            <div class="stat-card group">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                        <iconify-icon icon="solar:users-group-two-rounded-bold-duotone" width="24"></iconify-icon>
+                    </div>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">RH</span>
+                </div>
+                <div>
+                    <span class="text-3xl font-bold text-slate-800 font-jakarta">—</span>
+                    <p class="text-sm text-slate-500 mt-1">Agents rattachés</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Table Card -->
+        <div class="content-card">
+            <!-- Table Header / Filters (Visual only) -->
+            <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white">
+                <h2 class="text-lg font-bold text-slate-800 font-jakarta">Liste des établissements</h2>
+                <div class="relative">
+                    <iconify-icon icon="solar:magnifer-linear" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" width="18"></iconify-icon>
+                    <input type="text" placeholder="Rechercher une agence..." class="pl-10 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 w-full sm:w-64 transition-all">
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full data-table text-left border-collapse">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Nom de l'agence</th>
+                            <th>Localisation</th>
+                            <th class="text-center">Ménages</th>
+                            <th class="text-center">Agents</th>
+                            <th>Statut</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for agence in agences %}
+                        <tr class="group">
+                            <td>
+                                <span class="inline-block px-2.5 py-1 rounded bg-slate-100 text-slate-600 text-xs font-mono font-bold border border-slate-200">
+                                    {{ agence.code_agence }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded bg-indigo-50 flex items-center justify-center text-indigo-600 flex-shrink-0">
+                                        <iconify-icon icon="solar:building-bold" width="16"></iconify-icon>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-slate-800">{{ agence.nom }}</p>
+                                        <p class="text-xs text-slate-500">E2C — {{ agence.pays }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-medium text-slate-700">{{ agence.localite.nom }}</span>
+                                    <span class="text-xs text-slate-500">{{ agence.departement.nom }}</span>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                                    {{ agence.nombre_menages }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
+                                    {{ agence.nombre_agents }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if agence.actif %}
+                                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                    <span class="relative flex h-2 w-2">
+                                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                    </span>
+                                    Active
+                                </div>
+                                {% else %}
+                                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-500 border border-slate-200">
+                                    <span class="h-2 w-2 rounded-full bg-slate-400"></span>
+                                    Inactive
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td class="text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{% url 'menages:agence_detail' agence.pk %}" class="action-btn bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white" title="Voir">
+                                        <iconify-icon icon="solar:eye-bold" width="16"></iconify-icon>
+                                    </a>
+
+                                    {% if can_manage %}
+                                    <a href="{% url 'menages:agence_update' agence.pk %}" class="action-btn bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white" title="Modifier">
+                                        <iconify-icon icon="solar:pen-bold" width="16"></iconify-icon>
+                                    </a>
+                                    <a href="{% url 'menages:agence_delete' agence.pk %}" class="action-btn bg-red-50 text-red-600 hover:bg-red-500 hover:text-white" title="Supprimer">
+                                        <iconify-icon icon="solar:trash-bin-trash-bold" width="16"></iconify-icon>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="py-12 text-center">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                                        <iconify-icon icon="solar:city-linear" width="32" class="text-slate-400"></iconify-icon>
+                                    </div>
+                                    <h3 class="text-lg font-medium text-slate-900">Aucune agence trouvée</h3>
+                                    <p class="text-slate-500 text-sm mt-1 max-w-sm mx-auto">Il n'y a pas encore d'agences configurées dans le système.</p>
+
+                                    {% if can_manage %}
+                                    <a href="{% url 'menages:agence_create' %}" class="mt-4 text-indigo-600 font-medium hover:text-indigo-700 text-sm flex items-center gap-1">
+                                        <iconify-icon icon="solar:add-circle-bold"></iconify-icon>
+                                        Créer la première agence
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination (Visual Placeholder) -->
+            <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+                <p class="text-xs text-slate-500">Affichage de <span class="font-bold text-slate-700">{{ agences|length }}</span> résultats</p>
+                <div class="flex gap-2">
+                    <button class="px-3 py-1 rounded border border-slate-200 text-xs font-medium text-slate-500 hover:bg-slate-50 disabled:opacity-50" disabled>Précédent</button>
+                    <button class="px-3 py-1 rounded border border-slate-200 text-xs font-medium text-slate-500 hover:bg-slate-50 disabled:opacity-50" disabled>Suivant</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

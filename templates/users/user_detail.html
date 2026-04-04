@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ user_obj.get_full_name|default:user_obj.username }} - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Cards */
+    .detail-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    /* Pills/Badges */
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.025em;
+    }
+    .pill-purple { background: #f5f3ff; color: #7c3aed; }
+    .pill-sky    { background: #f0f9ff; color: #0284c7; }
+    .pill-emerald{ background: #ecfdf5; color: #059669; }
+    .pill-slate  { background: #f1f5f9; color: #64748b; }
+    .pill-red    { background: #fef2f2; color: #dc2626; }
+    .pill-amber  { background: #fffbeb; color: #d97706; }
+
+    /* Action Buttons */
+    .btn-action {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+    .btn-edit {
+        background: #fff; border-color: #e2e8f0; color: #334155;
+    }
+    .btn-edit:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+    .btn-danger-soft { background: #fef2f2; color: #dc2626; }
+    .btn-danger-soft:hover { background: #fee2e2; }
+
+    .btn-warning-soft { background: #fffbeb; color: #d97706; }
+    .btn-warning-soft:hover { background: #fef3c7; }
+
+    .btn-success-soft { background: #ecfdf5; color: #059669; }
+    .btn-success-soft:hover { background: #d1fae5; }
+
+    /* Info Row */
+    .info-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+        color: #475569;
+        font-size: 0.875rem;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-icon { color: #94a3b8; flex-shrink: 0; }
+
+    /* Stat Box */
+    .stat-box {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Accueil
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <a href="{% url 'users:user_list' %}" class="text-slate-500 hover:text-slate-700 text-sm font-medium font-jakarta transition-colors">Utilisateurs</a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">{{ user_obj.username }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 p-6">
+    <div class="max-w-7xl mx-auto">
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Colonne gauche : Profil -->
+            <div class="lg:col-span-1">
+                <div class="detail-card p-6">
+                    <!-- Avatar & Nom -->
+                    <div class="text-center mb-6">
+                        <div class="w-28 h-28 mx-auto rounded-full bg-slate-100 p-1 mb-4 relative shadow-sm">
+                            <div class="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-white border border-slate-200">
+                                {% if user_obj.profile_image %}
+                                <img src="{{ user_obj.profile_image.url }}" alt="{{ user_obj.username }}" class="w-full h-full object-cover">
+                                {% else %}
+                                <span class="text-3xl font-bold text-indigo-600 font-jakarta">
+                                    {{ user_obj.first_name|first|default:user_obj.username|first|upper }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            <!-- Petit badge role absolute -->
+                            <div class="absolute bottom-1 right-1 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center border border-slate-100"
+                                 title="{{ user_obj.get_role_display }}">
+                                {% if user_obj.role == 'ADMIN' %}
+                                    <iconify-icon icon="solar:shield-user-bold" class="text-purple-600" width="16"></iconify-icon>
+                                {% elif user_obj.role == 'AGENT_TERRAIN' %}
+                                    <iconify-icon icon="solar:user-id-bold" class="text-sky-600" width="16"></iconify-icon>
+                                {% else %}
+                                    <iconify-icon icon="solar:user-rounded-bold" class="text-emerald-600" width="16"></iconify-icon>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <h2 class="text-xl font-bold text-slate-900 font-jakarta mb-1">
+                            {{ user_obj.get_full_name|default:user_obj.username }}
+                        </h2>
+                        <p class="text-slate-500 text-sm font-medium mb-4">@{{ user_obj.username }}</p>
+
+                        <div class="flex justify-center flex-wrap gap-2">
+                            <!-- Role Badge -->
+                            {% if user_obj.role == 'ADMIN' %}
+                                <span class="pill pill-purple">Administrateur</span>
+                            {% elif user_obj.role == 'AGENT_TERRAIN' %}
+                                <span class="pill pill-sky">Agent Terrain</span>
+                            {% else %}
+                                <span class="pill pill-emerald">Client</span>
+                            {% endif %}
+
+                            <!-- Status Badge -->
+                            {% if user_obj.statut == 'ACTIF' %}
+                                <span class="pill pill-emerald">Actif</span>
+                            {% elif user_obj.statut == 'INACTIF' %}
+                                <span class="pill pill-slate">Inactif</span>
+                            {% elif user_obj.statut == 'SUSPENDU' %}
+                                <span class="pill pill-red">Suspendu</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Informations détaillées -->
+                    <div class="mb-6 px-1">
+                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 font-jakarta">Coordonnées & Infos</h3>
+
+                        <div class="info-row">
+                            <iconify-icon icon="solar:letter-bold-duotone" width="18" class="info-icon"></iconify-icon>
+                            <span class="truncate">{{ user_obj.email|default:"Non renseigné" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <iconify-icon icon="solar:phone-bold-duotone" width="18" class="info-icon"></iconify-icon>
+                            <span>{{ user_obj.telephone|default:"Non renseigné" }}</span>
+                        </div>
+
+                        {% if user_obj.role == 'AGENT_TERRAIN' %}
+                        <div class="info-row">
+                            <iconify-icon icon="solar:id-card-bold-duotone" width="18" class="info-icon"></iconify-icon>
+                            <span>Matricule: <span class="font-medium text-slate-700">{{ user_obj.matricule_agent|default:"N/A" }}</span></span>
+                        </div>
+                        <div class="info-row">
+                            <iconify-icon icon="solar:case-bold-duotone" width="18" class="info-icon"></iconify-icon>
+                            <span>Poste: <span class="font-medium text-slate-700">{{ user_obj.poste_agent|default:"N/A" }}</span></span>
+                        </div>
+                        {% endif %}
+
+                        <div class="info-row">
+                            <iconify-icon icon="solar:calendar-date-bold-duotone" width="18" class="info-icon"></iconify-icon>
+                            <span>Inscrit le: {{ user_obj.date_joined|date:"d/m/Y" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <iconify-icon icon="solar:clock-circle-bold-duotone" width="18" class="info-icon"></iconify-icon>
+                            <span>Dernière connexion: {{ user_obj.last_login|date:"d/m/Y H:i"|default:"Jamais" }}</span>
+                        </div>
+                        {% if user_obj.cree_par %}
+                        <div class="info-row">
+                            <iconify-icon icon="solar:user-plus-bold-duotone" width="18" class="info-icon"></iconify-icon>
+                            <span>Créé par: <a href="#" class="text-indigo-600 hover:underline">{{ user_obj.cree_par.get_full_name|default:user_obj.cree_par.username }}</a></span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="space-y-2 pt-4 border-t border-slate-100">
+                        <a href="{% url 'users:user_update' user_obj.pk %}" class="btn-action btn-edit">
+                            <iconify-icon icon="solar:pen-bold-duotone" width="18"></iconify-icon>
+                            Modifier le profil
+                        </a>
+
+                        {% if user_obj != request.user %}
+                            {% if user_obj.statut == 'ACTIF' %}
+                            <a href="{% url 'users:user_toggle' user_obj.pk %}" class="btn-action btn-danger-soft">
+                                <iconify-icon icon="solar:close-circle-bold-duotone" width="18"></iconify-icon>
+                                Désactiver le compte
+                            </a>
+                            {% else %}
+                            <a href="{% url 'users:user_toggle' user_obj.pk %}" class="btn-action btn-success-soft">
+                                <iconify-icon icon="solar:check-circle-bold-duotone" width="18"></iconify-icon>
+                                Activer le compte
+                            </a>
+                            {% endif %}
+
+                            {% if user_obj.statut != 'SUSPENDU' %}
+                            <a href="{% url 'users:user_suspend' user_obj.pk %}" class="btn-action btn-warning-soft">
+                                <iconify-icon icon="solar:forbidden-circle-bold-duotone" width="18"></iconify-icon>
+                                Suspendre temporairement
+                            </a>
+                            {% else %}
+                            <a href="{% url 'users:user_reactivate' user_obj.pk %}" class="btn-action btn-success-soft">
+                                <iconify-icon icon="solar:refresh-circle-bold-duotone" width="18"></iconify-icon>
+                                Réactiver le compte
+                            </a>
+                            {% endif %}
+
+                            <a href="{% url 'users:user_delete' user_obj.pk %}"
+                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');"
+                               class="btn-action bg-white text-red-600 border border-slate-200 hover:bg-red-50 hover:border-red-200 mt-4">
+                                <iconify-icon icon="solar:trash-bin-trash-bold-duotone" width="18"></iconify-icon>
+                                Supprimer définitivement
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne droite : Activités et statistiques -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Statistiques -->
+                <div class="detail-card p-6">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="p-2 bg-indigo-50 rounded-lg">
+                            <iconify-icon icon="solar:chart-square-bold-duotone" width="20" class="text-indigo-600"></iconify-icon>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 font-jakarta">Aperçu des statistiques</h3>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="stat-box">
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Ménages</p>
+                            <p class="text-2xl font-bold text-slate-800 font-jakarta">{{ user_obj.menage_set.count|default:"0" }}</p>
+                        </div>
+                        <div class="stat-box">
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Factures</p>
+                            <p class="text-2xl font-bold text-slate-800 font-jakarta">0</p>
+                        </div>
+                        <div class="stat-box">
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Paiements</p>
+                            <p class="text-2xl font-bold text-slate-800 font-jakarta">0</p>
+                        </div>
+                        <div class="stat-box">
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Alertes</p>
+                            <p class="text-2xl font-bold text-slate-800 font-jakarta">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dernières activités -->
+                <div class="detail-card flex flex-col h-full max-h-[500px]">
+                    <div class="p-6 border-b border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <div class="p-2 bg-cyan-50 rounded-lg">
+                                <iconify-icon icon="solar:history-bold-duotone" width="20" class="text-cyan-600"></iconify-icon>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-900 font-jakarta">Dernières activités</h3>
+                        </div>
+                    </div>
+
+                    <div class="p-6 overflow-y-auto">
+                        <div class="relative pl-6 border-l-2 border-slate-100 space-y-8">
+                            <!-- Activité: Connexion -->
+                            <div class="relative">
+                                <div class="absolute -left-[31px] top-0 w-8 h-8 rounded-full bg-slate-50 border-2 border-slate-200 flex items-center justify-center">
+                                    <iconify-icon icon="solar:login-3-bold-duotone" width="14" class="text-slate-500"></iconify-icon>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-800">Dernière connexion</p>
+                                    <p class="text-xs text-slate-500 mt-1">
+                                        {{ user_obj.last_login|date:"d F Y à H:i"|default:"Aucune connexion enregistrée" }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Exemple d'activité statique (à dynamiser plus tard) -->
+                            <div class="relative">
+                                <div class="absolute -left-[31px] top-0 w-8 h-8 rounded-full bg-emerald-50 border-2 border-emerald-100 flex items-center justify-center">
+                                    <iconify-icon icon="solar:user-plus-bold-duotone" width="14" class="text-emerald-600"></iconify-icon>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-800">Création du compte</p>
+                                    <p class="text-xs text-slate-500 mt-1">
+                                        {{ user_obj.date_joined|date:"d F Y" }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if object %}Modifier{% else %}Nouveau{% endif %} type d'habitation - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Section card */
+    .section-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        color: white;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex; align-items: center; gap: 8px;
+        box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2);
+        transition: all 0.2s;
+        border: none; cursor: pointer;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #64748b;
+        border: 1px solid #cbd5e1;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+        display: inline-flex; align-items: center;
+    }
+    .btn-secondary:hover {
+        background: #f8fafc;
+        color: #334155;
+        border-color: #94a3b8;
+    }
+
+    /* Form Labels & Help text */
+    label {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 600;
+        color: #334155;
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .help-text {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Tableau de bord
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <a href="{% url 'parametrage:typehabitation_list' %}"
+       class="text-slate-500 text-sm font-medium font-jakarta hover:text-slate-700 transition-colors">
+        Types d'habitation
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">{% if object %}Modifier{% else %}Nouveau{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 pb-12">
+    <!-- Page Header -->
+    <div class="bg-white border-b border-slate-200 px-6 py-6 mb-8">
+        <div class="max-w-5xl mx-auto flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg">
+                {% if object %}
+                <iconify-icon icon="solar:pen-new-square-bold-duotone" width="24" class="text-white"></iconify-icon>
+                {% else %}
+                <iconify-icon icon="solar:add-square-bold-duotone" width="24" class="text-white"></iconify-icon>
+                {% endif %}
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                    {% if object %}Modifier le type d'habitation{% else %}Nouveau type d'habitation{% endif %}
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">
+                    {% if object %}Modification des paramètres de la catégorie {{ object.nom }}{% else %}Définition d'une nouvelle catégorie de logement{% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Content -->
+    <div class="max-w-5xl mx-auto px-6">
+        <div class="section-card p-8">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3">
+                    <iconify-icon icon="solar:danger-triangle-bold" class="text-red-500 mt-0.5" width="20"></iconify-icon>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-red-800 mb-1">Erreur de validation</h4>
+                        {% for error in form.non_field_errors %}
+                        <p class="text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Colonne Gauche : Identification -->
+                    <div class="space-y-6">
+                        <div class="pb-2 border-b border-slate-100 mb-4">
+                            <h3 class="text-lg font-semibold text-slate-800 font-jakarta">Identification</h3>
+                        </div>
+
+                        <div>
+                            <label for="{{ form.code.id_for_label }}">
+                                {{ form.code.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.code }}
+                            {% if form.code.errors %}
+                            <p class="mt-1 text-sm text-red-500">{{ form.code.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.nom.id_for_label }}">
+                                {{ form.nom.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.nom }}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.categorie.id_for_label }}">
+                                {{ form.categorie.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.categorie }}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.standing.id_for_label }}">
+                                {{ form.standing.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.standing }}
+                        </div>
+                    </div>
+
+                    <!-- Colonne Droite : Métriques -->
+                    <div class="space-y-6">
+                        <div class="pb-2 border-b border-slate-100 mb-4">
+                            <h3 class="text-lg font-semibold text-slate-800 font-jakarta">Métriques & Technique</h3>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="{{ form.surface_moyenne_m2.id_for_label }}">
+                                    {{ form.surface_moyenne_m2.label }}
+                                </label>
+                                {{ form.surface_moyenne_m2 }}
+                            </div>
+                            <div>
+                                <label for="{{ form.nombre_pieces_moyen.id_for_label }}">
+                                    {{ form.nombre_pieces_moyen.label }}
+                                </label>
+                                {{ form.nombre_pieces_moyen }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="{{ form.consommation_estimee_kwh.id_for_label }}">
+                                {{ form.consommation_estimee_kwh.label }}
+                            </label>
+                            {{ form.consommation_estimee_kwh }}
+                            <p class="help-text">Estimation mensuelle en kWh pour le prévisionnel</p>
+                        </div>
+
+                        <div>
+                            <label for="{{ form.type_tarification_recommande.id_for_label }}">
+                                {{ form.type_tarification_recommande.label }}
+                            </label>
+                            {{ form.type_tarification_recommande }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Large : Détails -->
+                <div class="mt-8 pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <label for="{{ form.description.id_for_label }}">
+                            {{ form.description.label }}
+                        </label>
+                        {{ form.description }}
+                    </div>
+
+                </div>
+
+                <!-- Section Bas : Configuration -->
+                <div class="mt-8 pt-8 border-t border-slate-100 bg-slate-50/50 rounded-xl p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                        <div class="col-span-1">
+                            <label for="{{ form.ordre_affichage.id_for_label }}">
+                                {{ form.ordre_affichage.label }}
+                            </label>
+                            {{ form.ordre_affichage }}
+                        </div>
+
+                        <div class="col-span-2 flex items-center gap-4 pt-6 md:pt-0">
+                            <div class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl w-full">
+                                <div class="flex h-6 items-center">
+                                    {{ form.actif }}
+                                </div>
+                                <div class="text-sm">
+                                    <label for="{{ form.actif.id_for_label }}" class="font-medium text-slate-900 !mb-0 cursor-pointer">
+                                        {{ form.actif.label }}
+                                    </label>
+                                    <p class="text-xs text-slate-500">Rend ce type disponible dans les formulaires</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-10 pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <a href="{% url 'parametrage:typehabitation_list' %}" class="btn-secondary">
+                        Annuler
+                    </a>
+                    <button type="submit" class="btn-primary">
+                        <iconify-icon icon="solar:check-circle-bold" width="18"></iconify-icon>
+                        {% if object %}Mettre à jour{% else %}Enregistrer{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Style des champs standards
+    const formControls = document.querySelectorAll('input:not([type=checkbox]), select, textarea');
+    formControls.forEach(field => {
+        field.classList.add(
+            'w-full', 'px-4', 'py-2.5', 'bg-white', 'border', 'border-slate-200',
+            'rounded-xl', 'text-slate-700', 'text-sm', 'font-medium',
+            'placeholder-slate-400', 'focus:outline-none', 'focus:border-emerald-500',
+            'focus:ring-4', 'focus:ring-emerald-500/10', 'transition-all', 'duration-200'
+        );
+    });
+
+    // Style spécifique pour la checkbox
+    const checkboxes = document.querySelectorAll('input[type=checkbox]');
+    checkboxes.forEach(cb => {
+        cb.classList.add(
+            'w-5', 'h-5', 'rounded', 'border-slate-300', 'text-emerald-600',
+            'focus:ring-emerald-500', 'cursor-pointer'
+        );
+    });
+});
+</script>
+{% endblock %}

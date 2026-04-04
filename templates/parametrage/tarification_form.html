@@ -1,0 +1,851 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if object %}Modifier{% else %}Nouvelle{% endif %} tarification - SGE{% endblock %}
+
+{% block extra_css %}
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Card Style */
+    .form-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    /* Input Styling */
+    .form-input {
+        width: 100%;
+        padding: 10px 14px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        color: #334155;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        outline: none;
+    }
+    .form-input:focus {
+        background-color: #fff;
+        border-color: #f59e0b; /* Amber-500 for Tarifs */
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+    }
+    .form-input::placeholder { color: #94a3b8; }
+
+    /* Button Styling */
+    .btn-primary {
+        background: linear-gradient(135deg, #f59e0b, #d97706); /* Amber gradient */
+        color: white;
+        transition: all 0.2s;
+        border: none;
+    }
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+    }
+    .btn-secondary {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #334155;
+    }
+
+    /* Styles spécifiques pour les tranches et taxes */
+    .tranche-row, .taxe-row {
+        background-color: #f8fafc;
+        padding: 16px;
+        margin-bottom: 12px;
+        border-radius: 10px;
+        border-left: 4px solid #f59e0b;
+    }
+    .taxe-row {
+        border-left-color: #10b981;
+    }
+    .preview-card {
+        position: sticky;
+        top: 20px;
+    }
+    .table-calcul {
+        font-size: 0.875rem;
+    }
+    .table-calcul td {
+        padding: 0.5rem;
+    }
+    .total-ttc {
+        font-size: 1.125rem;
+        font-weight: bold;
+        color: #10b981;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li>
+    <a href="{% url 'dashboard:admin_dashboard' %}"
+       class="flex items-center gap-2 text-indigo-600 text-sm font-medium font-jakarta hover:text-indigo-700 transition-colors">
+        <iconify-icon icon="solar:home-2-bold-duotone" width="16"></iconify-icon> Tableau de bord
+    </a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li>
+    <a href="{% url 'parametrage:tarification_list' %}" class="text-slate-500 hover:text-slate-700 text-sm font-medium font-jakarta transition-colors">Tarifications</a>
+</li>
+<li class="text-slate-400 text-sm px-2">›</li>
+<li class="text-sm font-semibold text-slate-900 font-jakarta">{% if object %}Modifier{% else %}Nouvelle{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header Section -->
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg">
+                <iconify-icon icon="solar:bill-list-bold-duotone" width="24" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                    {% if object %}Modifier la tarification{% else %}Nouvelle tarification{% endif %}
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">Définissez les paramètres de facturation</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Colonne principale : Formulaire -->
+            <div class="lg:col-span-2">
+                <!-- Form Card -->
+                <div class="form-card p-6 sm:p-8">
+                    <form method="post" id="tarificationForm">
+                        {% csrf_token %}
+
+                        <!-- Champs cachés pour les données JSON -->
+                        {{ form.tranches_data }}
+                        {{ form.taxes_data }}
+
+                        {% if form.non_field_errors %}
+                        <div class="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3">
+                            <iconify-icon icon="solar:danger-circle-bold-duotone" class="text-red-500 mt-0.5" width="20"></iconify-icon>
+                            <div>
+                                {% for error in form.non_field_errors %}
+                                <p class="text-sm text-red-600 font-medium">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Informations générales -->
+                        <div class="mb-6">
+                            <div class="pb-2 border-b border-slate-100 mb-4">
+                                <h3 class="text-sm font-semibold text-amber-600 uppercase tracking-wider font-jakarta">Informations générales</h3>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ form.code.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                        {{ form.code.label }} <span class="text-red-500">*</span>
+                                    </label>
+                                    {{ form.code }}
+                                    {% if form.code.errors %}
+                                    <p class="mt-1.5 text-xs text-red-500 font-medium flex items-center gap-1">
+                                        <iconify-icon icon="solar:danger-triangle-bold" width="12"></iconify-icon>
+                                        {{ form.code.errors.0 }}
+                                    </p>
+                                    {% endif %}
+                                    <p class="mt-1 text-xs text-slate-500">Code unique, en majuscules</p>
+                                </div>
+
+                                <div>
+                                    <label for="{{ form.nom.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                        {{ form.nom.label }} <span class="text-red-500">*</span>
+                                    </label>
+                                    {{ form.nom }}
+                                </div>
+
+                                <div>
+                                    <label for="{{ form.categorie.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                        {{ form.categorie.label }} <span class="text-red-500">*</span>
+                                    </label>
+                                    {{ form.categorie }}
+                                </div>
+
+                                <div>
+                                    <label for="{{ form.periodicite.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                        {{ form.periodicite.label }}
+                                    </label>
+                                    {{ form.periodicite }}
+                                </div>
+
+                                <div>
+                                    <label for="{{ form.devise.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                        {{ form.devise.label }}
+                                    </label>
+                                    {{ form.devise }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tarification -->
+                        <div class="mb-6">
+                            <div class="pb-2 border-b border-slate-100 mb-4">
+                                <h3 class="text-sm font-semibold text-amber-600 uppercase tracking-wider font-jakarta">Tarification de base</h3>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ form.abonnement_mensuel.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                        {{ form.abonnement_mensuel.label }}
+                                    </label>
+                                    <div class="relative">
+                                        {{ form.abonnement_mensuel }}
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <span class="text-sm text-slate-500">FCFA/mois</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="{{ form.tva_taux.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                        {{ form.tva_taux.label }}
+                                    </label>
+                                    <div class="relative">
+                                        {{ form.tva_taux }}
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <span class="text-sm text-slate-500">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tranches -->
+                        <div class="mb-6">
+                            <div class="pb-2 border-b border-slate-100 mb-4 flex justify-between items-center">
+                                <h3 class="text-sm font-semibold text-amber-600 uppercase tracking-wider font-jakarta">Tranches de consommation</h3>
+                                <button type="button" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-semibold font-jakarta flex items-center gap-1" id="addTrancheBtn">
+                                    <iconify-icon icon="solar:add-circle-bold" width="16"></iconify-icon>
+                                    Ajouter une tranche
+                                </button>
+                            </div>
+
+                            <div id="tranchesContainer">
+                                <!-- Les tranches seront insérées ici par JS -->
+                            </div>
+
+                            <div class="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-100">
+                                <div class="flex gap-2">
+                                    <iconify-icon icon="solar:info-circle-bold" class="text-amber-600 mt-0.5" width="16"></iconify-icon>
+                                    <div class="text-xs text-amber-800">
+                                        <p class="font-semibold mb-1">Conseils :</p>
+                                        <ul class="space-y-1">
+                                            <li>• L'ordre est automatique</li>
+                                            <li>• Laissez la borne supérieure vide pour la dernière tranche (illimitée)</li>
+                                            <li>• Les tranches doivent se suivre sans chevauchement</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Taxes -->
+                        <div class="mb-6">
+                            <div class="pb-2 border-b border-slate-100 mb-4 flex justify-between items-center">
+                                <h3 class="text-sm font-semibold text-amber-600 uppercase tracking-wider font-jakarta">Taxes spécifiques</h3>
+                                <button type="button" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-semibold font-jakarta flex items-center gap-1" id="addTaxeBtn">
+                                    <iconify-icon icon="solar:add-circle-bold" width="16"></iconify-icon>
+                                    Ajouter une taxe
+                                </button>
+                            </div>
+
+                            <div id="taxesContainer">
+                                <!-- Les taxes seront insérées ici par JS -->
+                            </div>
+
+                            <div class="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-100">
+                                <div class="flex gap-2">
+                                    <iconify-icon icon="solar:info-circle-bold" class="text-amber-600 mt-0.5" width="16"></iconify-icon>
+                                    <div class="text-xs text-amber-800">
+                                        <p class="font-semibold mb-1">Taxes standards Congo :</p>
+                                        <ul class="space-y-1">
+                                            <li>• <strong>RAV</strong> - Redevance Audiovisuelle : 1000 FCFA (fixe, non soumis TVA)</li>
+                                            <li>• <strong>CA</strong> - Contribution Audiovisuelle : 0.9% du HT (non soumis TVA)</li>
+                                            <li>• <strong>TIMBRE</strong> - Timbre électronique : 50 FCFA (fixe, non soumis TVA)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Période de validité -->
+                        <div class="mb-6">
+                            <div class="pb-2 border-b border-slate-100 mb-4">
+                                <h3 class="text-sm font-semibold text-amber-600 uppercase tracking-wider font-jakarta">Période de validité</h3>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ form.date_effet.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                        {{ form.date_effet.label }} <span class="text-red-500">*</span>
+                                    </label>
+                                    {{ form.date_effet }}
+                                </div>
+
+                                <div>
+                                    <label for="{{ form.date_fin.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                        {{ form.date_fin.label }}
+                                    </label>
+                                    {{ form.date_fin }}
+                                    <p class="mt-1 text-xs text-slate-500">Laissez vide si toujours valide</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <label for="{{ form.reference_arrete.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                    {{ form.reference_arrete.label }}
+                                </label>
+                                {{ form.reference_arrete }}
+                                <p class="mt-1 text-xs text-slate-500">Ex: Loi N°16-2001 du 31 Décembre</p>
+                            </div>
+
+                            <div class="mt-4 flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                {{ form.actif }}
+                                <label for="{{ form.actif.id_for_label }}" class="text-sm font-medium text-slate-700 cursor-pointer select-none">
+                                    {{ form.actif.label }}
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Description et conditions -->
+                        <div class="mb-6">
+                            <div class="pb-2 border-b border-slate-100 mb-4">
+                                <h3 class="text-sm font-semibold text-amber-600 uppercase tracking-wider font-jakarta">Informations complémentaires</h3>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ form.description.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                        {{ form.description.label }}
+                                    </label>
+                                    {{ form.description }}
+                                </div>
+
+                                <div>
+                                    <label for="{{ form.conditions.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">
+                                        {{ form.conditions.label }}
+                                    </label>
+                                    {{ form.conditions }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Boutons d'action -->
+                        <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+                            <a href="{% url 'parametrage:tarification_list' %}"
+                               class="btn-secondary px-5 py-2.5 rounded-xl font-semibold text-sm font-jakarta flex items-center gap-2">
+                                <iconify-icon icon="solar:close-circle-bold" width="18"></iconify-icon>
+                                Annuler
+                            </a>
+                            <button type="submit"
+                                    class="btn-primary px-6 py-2.5 rounded-xl font-semibold text-sm font-jakarta flex items-center gap-2 shadow-lg shadow-amber-200">
+                                <iconify-icon icon="solar:check-circle-bold" width="18"></iconify-icon>
+                                {% if object %}Mettre à jour{% else %}Enregistrer{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Colonne de droite : Prévisualisation -->
+            <div class="lg:col-span-1">
+                <div class="form-card preview-card p-6">
+                    <div class="pb-2 border-b border-slate-100 mb-4">
+                        <h3 class="text-sm font-semibold text-amber-600 uppercase tracking-wider font-jakarta">Prévisualisation du calcul</h3>
+                    </div>
+
+                    <form id="previewForm">
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">Consommation (kWh)</label>
+                            <input type="number" class="form-input" id="previewConsommation" value="830" min="0" step="1">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-slate-700 mb-2 font-jakarta">Nombre de mois</label>
+                            <input type="number" class="form-input" id="previewMois" value="2" min="1" max="12">
+                        </div>
+                        <button type="button" class="btn-primary w-full py-2 rounded-lg text-sm font-semibold font-jakarta flex items-center justify-center gap-2 mb-4" id="btnCalculer">
+                            <iconify-icon icon="solar:calculator-bold" width="18"></iconify-icon>
+                            Calculer
+                        </button>
+                    </form>
+
+                    <div id="previewResult">
+                        <table class="w-full table-calcul">
+                            <tr>
+                                <td class="py-2 text-sm text-slate-600">Consommation (830 kWh × 44.64):</td>
+                                <td class="py-2 text-sm text-right font-medium" id="previewConso">37 051</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 text-sm text-slate-600">Abonnement (2 mois):</td>
+                                <td class="py-2 text-sm text-right font-medium" id="previewAbonnement">5 736</td>
+                            </tr>
+                            <tr class="border-t border-slate-100">
+                                <td class="py-2 text-sm font-semibold text-slate-800">Total HT:</td>
+                                <td class="py-2 text-sm text-right font-semibold" id="previewTotalHT">42 787</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 text-sm text-slate-600">RAV:</td>
+                                <td class="py-2 text-sm text-right font-medium" id="previewRAV">1 000</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 text-sm text-slate-600">TVA (18%):</td>
+                                <td class="py-2 text-sm text-right font-medium" id="previewTVA">7 702</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 text-sm text-slate-600">CA:</td>
+                                <td class="py-2 text-sm text-right font-medium" id="previewCA">385</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 text-sm text-slate-600">Timbre:</td>
+                                <td class="py-2 text-sm text-right font-medium" id="previewTimbre">50</td>
+                            </tr>
+                            <tr class="border-t border-slate-200">
+                                <td class="py-3 total-ttc">TOTAL TTC:</td>
+                                <td class="py-3 text-right total-ttc" id="previewTotalTTC">51 924</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Appliquer les styles aux champs Django
+    const formControls = document.querySelectorAll('input:not([type=checkbox]):not(.taxe-valeur):not(.borne-inf):not(.borne-sup):not(.prix-kwh):not(.taxe-code):not(.taxe-nom), select:not(.taxe-type):not(.taxe-base), textarea');
+    formControls.forEach(field => {
+        field.className = ''; // Reset classes
+        field.classList.add('form-input');
+    });
+
+    // Style spécifique pour la checkbox
+    const checkbox = document.querySelector('input[type=checkbox]');
+    if (checkbox) {
+        checkbox.classList.add('w-5', 'h-5', 'text-amber-600', 'bg-slate-100', 'border-slate-300', 'rounded', 'focus:ring-amber-500', 'focus:ring-2');
+    }
+
+    // Éléments du DOM
+    const tranchesContainer = document.getElementById('tranchesContainer');
+    const taxesContainer = document.getElementById('taxesContainer');
+    const addTrancheBtn = document.getElementById('addTrancheBtn');
+    const addTaxeBtn = document.getElementById('addTaxeBtn');
+    const tranchesDataField = document.getElementById('id_tranches_data');
+    const taxesDataField = document.getElementById('id_taxes_data');
+
+    // Données
+    let tranches = [];
+    let taxes = [];
+
+    // Charger les données existantes
+    try {
+        if (tranchesDataField.value) {
+            tranches = JSON.parse(tranchesDataField.value);
+        }
+        if (taxesDataField.value) {
+            taxes = JSON.parse(taxesDataField.value);
+        }
+    } catch(e) {
+        console.error('Erreur parsing JSON:', e);
+    }
+
+    // Si c'est un nouveau formulaire, ajouter les taxes par défaut du Congo
+    if (taxes.length === 0 && !document.getElementById('id_code').value) {
+        taxes = [
+            {
+                code: 'RAV',
+                nom: 'Redevance Audiovisuelle',
+                type_taxe: 'FIXE',
+                montant_fixe: 1000,
+                base_calcul: 'HT',
+                soumis_tva: false,
+                ordre_application: 1
+            },
+            {
+                code: 'TVA',
+                nom: 'Taxe sur la Valeur Ajoutée',
+                type_taxe: 'POURCENTAGE',
+                pourcentage: 18,
+                base_calcul: 'HT',
+                soumis_tva: false,
+                ordre_application: 2
+            },
+            {
+                code: 'CA',
+                nom: 'Contribution Audiovisuelle',
+                type_taxe: 'POURCENTAGE',
+                pourcentage: 0.9,
+                base_calcul: 'HT',
+                soumis_tva: false,
+                ordre_application: 3
+            },
+            {
+                code: 'TIMBRE',
+                nom: 'Timbre électronique',
+                type_taxe: 'FIXE',
+                montant_fixe: 50,
+                base_calcul: 'HT',
+                soumis_tva: false,
+                ordre_application: 4
+            }
+        ];
+    }
+
+    // Fonctions pour les tranches
+    function renderTranches() {
+        if (tranches.length === 0) {
+            // Ajouter une tranche par défaut
+            tranches.push({
+                ordre: 0,
+                borne_inferieure: 0,
+                borne_superieure: null,
+                prix_kwh: 44.64
+            });
+        }
+
+        tranchesContainer.innerHTML = '';
+
+        tranches.sort((a, b) => a.ordre - b.ordre);
+
+        tranches.forEach((tranche, index) => {
+            const div = document.createElement('div');
+            div.className = 'tranche-row';
+            div.innerHTML = `
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="bg-amber-100 text-amber-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                        ${index + 1}
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 flex-1">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Borne inférieure (kWh)</label>
+                            <input type="number" step="0.01" min="0" class="form-input text-sm"
+                                   value="${tranche.borne_inferieure}" data-index="${index}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Borne supérieure (kWh)</label>
+                            <input type="number" step="0.01" min="0" class="form-input text-sm"
+                                   value="${tranche.borne_superieure || ''}" placeholder="Illimité" data-index="${index}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Prix (FCFA/kWh)</label>
+                            <input type="number" step="0.01" min="0" class="form-input text-sm"
+                                   value="${tranche.prix_kwh}" data-index="${index}">
+                        </div>
+                    </div>
+                    <button type="button" class="text-red-500 hover:text-red-700 mt-5" onclick="removeTranche(${index})">
+                        <iconify-icon icon="solar:trash-bin-trash-bold" width="18"></iconify-icon>
+                    </button>
+                </div>
+            `;
+            tranchesContainer.appendChild(div);
+        });
+
+        updateTranchesData();
+    }
+
+    window.removeTranche = function(index) {
+        tranches.splice(index, 1);
+        // Réindexer
+        tranches.forEach((t, idx) => t.ordre = idx);
+        renderTranches();
+    };
+
+    function updateTranchesData() {
+        // Mettre à jour les données depuis les inputs
+        const inputs = tranchesContainer.querySelectorAll('input');
+        inputs.forEach(input => {
+            const idx = input.dataset.index;
+            if (!idx) return;
+
+            if (input.placeholder === 'Illimité') {
+                tranches[idx].borne_superieure = input.value ? parseFloat(input.value) : null;
+            } else if (input.value) {
+                if (idx !== undefined) {
+                    if (input.parentElement.textContent.includes('Borne inférieure')) {
+                        tranches[idx].borne_inferieure = parseFloat(input.value) || 0;
+                    } else if (input.parentElement.textContent.includes('Prix')) {
+                        tranches[idx].prix_kwh = parseFloat(input.value) || 0;
+                    }
+                }
+            }
+        });
+
+        tranchesDataField.value = JSON.stringify(tranches);
+    }
+
+    // Fonctions pour les taxes
+    function renderTaxes() {
+        taxesContainer.innerHTML = '';
+
+        taxes.sort((a, b) => a.ordre_application - b.ordre_application);
+
+        taxes.forEach((taxe, index) => {
+            const div = document.createElement('div');
+            div.className = 'taxe-row';
+
+            const isFixe = taxe.type_taxe === 'FIXE';
+
+            div.innerHTML = `
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="bg-green-100 text-green-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                        ${index + 1}
+                    </div>
+                    <div class="grid grid-cols-5 gap-2 flex-1">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Code</label>
+                            <input type="text" class="form-input text-sm"
+                                   value="${taxe.code}" placeholder="Code" data-index="${index}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nom</label>
+                            <input type="text" class="form-input text-sm"
+                                   value="${taxe.nom}" placeholder="Nom" data-index="${index}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Type</label>
+                            <select class="form-input text-sm" data-index="${index}">
+                                <option value="FIXE" ${taxe.type_taxe === 'FIXE' ? 'selected' : ''}>Fixe</option>
+                                <option value="POURCENTAGE" ${taxe.type_taxe === 'POURCENTAGE' ? 'selected' : ''}>%</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Valeur</label>
+                            <input type="number" step="0.01" min="0" class="form-input text-sm"
+                                   value="${isFixe ? (taxe.montant_fixe || '') : (taxe.pourcentage || '')}"
+                                   placeholder="${isFixe ? 'Montant' : '%'}" data-index="${index}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Base</label>
+                            <select class="form-input text-sm" data-index="${index}">
+                                <option value="HT" ${taxe.base_calcul === 'HT' ? 'selected' : ''}>HT</option>
+                                <option value="TTC" ${taxe.base_calcul === 'TTC' ? 'selected' : ''}>TTC</option>
+                                <option value="CONSO" ${taxe.base_calcul === 'CONSO' ? 'selected' : ''}>Conso</option>
+                                <option value="ABONNEMENT" ${taxe.base_calcul === 'ABONNEMENT' ? 'selected' : ''}>Abonn.</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" class="text-red-500 hover:text-red-700 mt-5" onclick="removeTaxe(${index})">
+                        <iconify-icon icon="solar:trash-bin-trash-bold" width="18"></iconify-icon>
+                    </button>
+                </div>
+                <div class="flex items-center gap-2 ml-11">
+                    <input type="checkbox" class="w-4 h-4 text-amber-600 bg-slate-100 border-slate-300 rounded focus:ring-amber-500"
+                           ${taxe.soumis_tva ? 'checked' : ''} data-index="${index}">
+                    <label class="text-xs font-medium text-slate-700">Soumis TVA</label>
+                </div>
+            `;
+            taxesContainer.appendChild(div);
+        });
+
+        updateTaxesData();
+    }
+
+    window.removeTaxe = function(index) {
+        taxes.splice(index, 1);
+        renderTaxes();
+    };
+
+    function updateTaxesData() {
+        // Mettre à jour les données depuis les inputs
+        const rows = taxesContainer.querySelectorAll('.taxe-row');
+
+        rows.forEach((row, idx) => {
+            const inputs = row.querySelectorAll('input, select');
+
+            inputs.forEach(input => {
+                if (input.dataset.index != idx) return;
+
+                if (input.type === 'text') {
+                    if (input.placeholder === 'Code') {
+                        taxes[idx].code = input.value;
+                    } else if (input.placeholder === 'Nom') {
+                        taxes[idx].nom = input.value;
+                    }
+                } else if (input.type === 'number') {
+                    const value = input.value ? parseFloat(input.value) : 0;
+                    if (taxes[idx].type_taxe === 'FIXE') {
+                        taxes[idx].montant_fixe = value;
+                        taxes[idx].pourcentage = null;
+                    } else {
+                        taxes[idx].pourcentage = value;
+                        taxes[idx].montant_fixe = null;
+                    }
+                } else if (input.type === 'checkbox') {
+                    taxes[idx].soumis_tva = input.checked;
+                } else if (input.tagName === 'SELECT') {
+                    if (input.options[0].value === 'FIXE') {
+                        taxes[idx].type_taxe = input.value;
+                    } else {
+                        taxes[idx].base_calcul = input.value;
+                    }
+                }
+            });
+        });
+
+        taxesDataField.value = JSON.stringify(taxes);
+    }
+
+    // Écouteurs d'événements
+    addTrancheBtn.addEventListener('click', function() {
+        const lastTranche = tranches.length > 0 ? tranches[tranches.length - 1] : null;
+        const newOrdre = tranches.length;
+
+        const newTranche = {
+            ordre: newOrdre,
+            borne_inferieure: lastTranche ? (lastTranche.borne_superieure || lastTranche.borne_inferieure + 100) : 0,
+            borne_superieure: null,
+            prix_kwh: lastTranche ? lastTranche.prix_kwh : 44.64
+        };
+
+        tranches.push(newTranche);
+        renderTranches();
+    });
+
+    addTaxeBtn.addEventListener('click', function() {
+        const newTaxe = {
+            code: 'NOUVELLE',
+            nom: 'Nouvelle taxe',
+            type_taxe: 'FIXE',
+            montant_fixe: 100,
+            base_calcul: 'HT',
+            soumis_tva: false,
+            ordre_application: taxes.length + 1
+        };
+
+        taxes.push(newTaxe);
+        renderTaxes();
+    });
+
+    // Mettre à jour les données à chaque modification
+    document.addEventListener('input', function(e) {
+        if (e.target.closest('.tranche-row')) {
+            updateTranchesData();
+        }
+        if (e.target.closest('.taxe-row')) {
+            updateTaxesData();
+        }
+    });
+
+    document.addEventListener('change', function(e) {
+        if (e.target.closest('.taxe-row')) {
+            updateTaxesData();
+        }
+    });
+
+    // Prévisualisation
+    document.getElementById('btnCalculer').addEventListener('click', function() {
+        const conso = parseFloat(document.getElementById('previewConsommation').value) || 0;
+        const mois = parseFloat(document.getElementById('previewMois').value) || 1;
+
+        // Mettre à jour les données avant calcul
+        updateTranchesData();
+        updateTaxesData();
+
+        // Récupérer les valeurs
+        const abonnementMensuel = parseFloat(document.getElementById('id_abonnement_mensuel').value) || 0;
+        const tvaTaux = parseFloat(document.getElementById('id_tva_taux').value) || 0;
+
+        // Calculer la consommation selon les tranches
+        let montantConso = 0;
+        let reste = conso;
+
+        for (let tranche of tranches) {
+            if (reste <= 0) break;
+
+            const maxTranche = tranche.borne_superieure ? (tranche.borne_superieure - tranche.borne_inferieure) : reste;
+            const quantite = Math.min(reste, maxTranche);
+            montantConso += quantite * tranche.prix_kwh;
+            reste -= quantite;
+        }
+
+        const abonnement = abonnementMensuel * mois;
+        const totalHT = montantConso + abonnement;
+
+        // Mettre à jour l'affichage
+        document.getElementById('previewConso').textContent = Math.round(montantConso).toLocaleString();
+        document.getElementById('previewAbonnement').textContent = Math.round(abonnement).toLocaleString();
+        document.getElementById('previewTotalHT').textContent = Math.round(totalHT).toLocaleString();
+
+        // Calculer les taxes
+        let totalTTC = totalHT;
+        let tvaBase = totalHT;
+        let tvaMontant = 0;
+        let ravMontant = 0;
+        let caMontant = 0;
+        let timbreMontant = 0;
+
+        for (let taxe of taxes) {
+            let montant = 0;
+
+            if (taxe.type_taxe === 'FIXE') {
+                montant = taxe.montant_fixe || 0;
+            } else {
+                let base = totalHT;
+                if (taxe.base_calcul === 'TTC') base = totalTTC;
+                else if (taxe.base_calcul === 'CONSO') base = montantConso;
+                else if (taxe.base_calcul === 'ABONNEMENT') base = abonnement;
+
+                montant = base * (taxe.pourcentage || 0) / 100;
+            }
+
+            if (taxe.code === 'TVA') {
+                tvaMontant = montant;
+            } else if (taxe.code === 'RAV') {
+                ravMontant = montant;
+            } else if (taxe.code === 'CA') {
+                caMontant = montant;
+            } else if (taxe.code === 'TIMBRE') {
+                timbreMontant = montant;
+            }
+
+            totalTTC += montant;
+        }
+
+        // Afficher les résultats
+        document.getElementById('previewRAV').textContent = Math.round(ravMontant).toLocaleString();
+        document.getElementById('previewTVA').textContent = Math.round(tvaMontant).toLocaleString();
+        document.getElementById('previewCA').textContent = Math.round(caMontant).toLocaleString();
+        document.getElementById('previewTimbre').textContent = Math.round(timbreMontant).toLocaleString();
+        document.getElementById('previewTotalTTC').textContent = Math.round(totalTTC).toLocaleString();
+    });
+
+    // Initialisation
+    renderTranches();
+    renderTaxes();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Périodes de facturation - SGE{% endblock %}
+
+{% block extra_css %}
+<style>
+    .badge-actif { background: rgba(16, 185, 129, 0.1); color: #059669; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; }
+    .badge-inactif { background: rgba(100, 116, 139, 0.1); color: #64748b; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; }
+    .section-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { padding: 12px 24px; text-align: left; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+    .data-table td { padding: 16px 24px; border-bottom: 1px solid #f1f5f9; }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{% url 'dashboard:admin_dashboard' %}" class="text-indigo-600 text-sm">Accueil</a></li>
+<li class="text-slate-400 px-2">›</li>
+<li class="text-sm font-semibold">Périodes de facturation</li>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 p-6">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Périodes de facturation</h1>
+            <p class="text-sm text-slate-500 mt-1">Gestion des périodes de facturation</p>
+        </div>
+        <a href="{% url 'facturation:periode_create' %}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">+ Nouvelle période</a>
+    </div>
+
+    <div class="section-card">
+        <div class="overflow-x-auto">
+            <table class="data-table">
+                <thead><tr><th>Libellé</th><th>Début</th><th>Fin</th><th>Échéance (jours)</th><th>Génération</th><th>Statut</th><th>Actions</th></tr></thead>
+                <tbody>
+                    {% for periode in periodes %}
+                    <tr>
+                        <td class="font-medium">{{ periode.libelle }}</td>
+                        <td>{{ periode.date_debut|date:"d/m/Y" }}</td>
+                        <td>{{ periode.date_fin|date:"d/m/Y" }}</td>
+                        <td>{{ periode.date_echeance_default }}</td>
+                        <td>{{ periode.date_generation_factures|date:"d/m/Y"|default:"-" }}</td>
+                        <td>{% if periode.actif %}<span class="badge-actif">Actif</span>{% else %}<span class="badge-inactif">Inactif</span>{% endif %}</td>
+                        <td><a href="{% url 'facturation:periode_update' periode.id %}" class="text-indigo-600">Modifier</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="text-center py-12 text-slate-500">Aucune période</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
