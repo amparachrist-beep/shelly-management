@@ -1,27 +1,42 @@
-FROM ghcr.io/osgeo/gdal:ubuntu-small-3.10.3
+FROM python:3.10-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=config.settings.production
 
-# Installer Python pip et dépendances système
+# Librairies système GeoDjango
 RUN apt-get update && apt-get install -y \
-    python3-pip \
+    build-essential \
+    g++ \
+    gcc \
+    binutils \
+    libproj-dev \
+    gdal-bin \
+    libgdal-dev \
+    libgeos-dev \
+    libgeos-c1v5 \
     python3-dev \
     postgresql-client \
-    libgeos-dev \
     && rm -rf /var/lib/apt/lists/*
+
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
+ENV C_INCLUDE_PATH=/usr/include/gdal
 
 WORKDIR /app
 
-# Copier requirements sans la ligne GDAL (déjà installé dans l'image)
+# 1. Installer tous les packages Django (sans GDAL)
 COPY requirements.txt .
-RUN sed 's/\r//' requirements.txt | grep -v "^GDAL" > requirements_clean.txt && \
-    pip install --no-cache-dir --break-system-packages -r requirements_clean.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
+# 2. Installer GDAL avec la version exacte du système
+RUN pip install --no-cache-dir GDAL==$(gdal-config --version)
+
+# 3. Copier le projet
 COPY . .
 
-RUN python3 manage.py collectstatic --no-input
+# 4. Collecter les fichiers statiques
+RUN python manage.py collectstatic --no-input
 
 EXPOSE 8000
 
