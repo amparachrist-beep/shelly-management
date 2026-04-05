@@ -1,41 +1,27 @@
-FROM python:3.10-slim
+FROM ghcr.io/osgeo/gdal:ubuntu-small-3.10.3
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=config.settings.production
 
-# Librairies système + python3-gdal précompilé
+# Installer Python pip et dépendances système
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    gcc \
-    binutils \
-    libproj-dev \
-    gdal-bin \
-    libgdal-dev \
-    python3-gdal \
-    libgeos-dev \
-    libgeos-c1v5 \
+    python3-pip \
     python3-dev \
     postgresql-client \
+    libgeos-dev \
     && rm -rf /var/lib/apt/lists/*
-
-# Variables pour que pip trouve les headers GDAL
-ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
-ENV C_INCLUDE_PATH=/usr/include/gdal
 
 WORKDIR /app
 
+# Copier requirements sans la ligne GDAL (déjà installé dans l'image)
 COPY requirements.txt .
-
-# Installer tous les packages SAUF GDAL, puis GDAL avec version exacte du système
-RUN pip install --no-cache-dir --upgrade pip && \
-    grep -v "^GDAL" requirements.txt > requirements_no_gdal.txt && \
-    pip install --no-cache-dir -r requirements_no_gdal.txt && \
-    pip install --no-cache-dir GDAL==$(gdal-config --version)
+RUN sed 's/\r//' requirements.txt | grep -v "^GDAL" > requirements_clean.txt && \
+    pip install --no-cache-dir --break-system-packages -r requirements_clean.txt
 
 COPY . .
 
-RUN python manage.py collectstatic --no-input
+RUN python3 manage.py collectstatic --no-input
 
 EXPOSE 8000
 
