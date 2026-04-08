@@ -39,3 +39,483 @@ Traceback (most recent call last):
   File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
     raise ImportError(
 ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 42, in main
+    from django.core.management import execute_from_command_line
+ModuleNotFoundError: No module named 'django'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 44, in main
+    raise ImportError(
+ImportError: Couldn't import Django. Are you sure it's installed and available on your PYTHONPATH environment variable? Did you forget to activate a virtual environment?
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 50, in main
+    execute_from_command_line(sys.argv)
+  File "C:\Users\HP\miniconda3\envs\geo\lib\site-packages\django\core\management\__init__.py", line 442, in execute_from_command_line
+    utility.execute()
+  File "C:\Users\HP\miniconda3\envs\geo\lib\site-packages\django\core\management\__init__.py", line 382, in execute
+    settings.INSTALLED_APPS
+  File "C:\Users\HP\miniconda3\envs\geo\lib\site-packages\django\conf\__init__.py", line 81, in __getattr__
+    self._setup(name)
+  File "C:\Users\HP\miniconda3\envs\geo\lib\site-packages\django\conf\__init__.py", line 68, in _setup
+    self._wrapped = Settings(settings_module)
+  File "C:\Users\HP\miniconda3\envs\geo\lib\site-packages\django\conf\__init__.py", line 166, in __init__
+    mod = importlib.import_module(self.SETTINGS_MODULE)
+  File "C:\Users\HP\miniconda3\envs\geo\lib\importlib\__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\config\settings\development.py", line 72, in <module>
+    print("\u2705 Development settings loaded successfully")
+  File "C:\Users\HP\miniconda3\envs\geo\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 50, in main
+    execute_from_command_line(sys.argv)
+  File "C:\Users\HP\miniconda3\envs\geo\lib\site-packages\django\core\management\__init__.py", line 442, in execute_from_command_line
+    utility.execute()
+  File "C:\Users\HP\miniconda3\envs\geo\lib\site-packages\django\core\management\__init__.py", line 382, in execute
+    settings.INSTALLED_APPS
+  File "C:\Users\HP\miniconda3\envs\geo\lib\site-packages\django\conf\__init__.py", line 81, in __getattr__
+    self._setup(name)
+  File "C:\Users\HP\miniconda3\envs\geo\lib\site-packages\django\conf\__init__.py", line 68, in _setup
+    self._wrapped = Settings(settings_module)
+  File "C:\Users\HP\miniconda3\envs\geo\lib\site-packages\django\conf\__init__.py", line 166, in __init__
+    mod = importlib.import_module(self.SETTINGS_MODULE)
+  File "C:\Users\HP\miniconda3\envs\geo\lib\importlib\__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\config\settings\development.py", line 72, in <module>
+    print("\u2705 Development settings loaded successfully")
+  File "C:\Users\HP\miniconda3\envs\geo\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+[OK] Development settings loaded successfully
+Traceback (most recent call last):
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 54, in <module>
+    main()
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\manage.py", line 50, in main
+    execute_from_command_line(sys.argv)
+  File "C:\Users\HP\miniconda3\envs\geo\lib\site-packages\django\core\management\__init__.py", line 442, in execute_from_command_line
+    utility.execute()
+  File "C:\Users\HP\miniconda3\envs\geo\lib\site-packages\django\core\management\__init__.py", line 436, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "C:\Users\HP\miniconda3\envs\geo\lib\site-packages\django\core\management\base.py", line 420, in run_from_argv
+    self.execute(*args, **cmd_options)
+  File "C:\Users\HP\miniconda3\envs\geo\lib\site-packages\django\core\management\base.py", line 464, in execute
+    output = self.handle(*args, **options)
+  File "C:\Users\HP\PycharmProjects\Shelly-management\backend\apps\consommation\management\commands\sync_shelly_consommations.py", line 36, in handle
+    self.stdout.write(f"\n\U0001f50d Synchronisation de {compteurs.count()} compteur(s)...\n")
+  File "C:\Users\HP\miniconda3\envs\geo\lib\site-packages\django\core\management\base.py", line 185, in write
+    self._out.write(style_func(msg))
+  File "C:\Users\HP\miniconda3\envs\geo\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f50d' in position 2: character maps to <undefined>
+[OK] Development settings loaded successfully
+
+🔍 Synchronisation de 1 compteur(s)...
+
+==================================================
+📡 Compteur: CONTRAT-2026-0001
+✅ Shelly OK
+⚡ Total: 59.905 W | 📊 62.531 kWh
+📊 Index réel: 62.53141 kWh
+  📌 Index précédent (2026-04-05): 57.07 kWh
+  📊 Index actuel réel: 62.53141 kWh
+  📊 Consommation du jour: 5.46 kWh
+  ✅ Consommation mise à jour pour 2026-04-06: 5.46 kWh
+
+✅ Synchronisation terminée !
+[OK] Development settings loaded successfully
+
+🔍 Synchronisation de 1 compteur(s)...
+
+==================================================
+📡 Compteur: CONTRAT-2026-0001
+❌ Erreur de connexion: Vérifiez l'IP 192.168.11.234
+
+✅ Synchronisation terminée !
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+
+🔍 Synchronisation de 1 compteur(s)...
+
+==================================================
+📡 Compteur: CONTRAT-2026-0001
+✅ Shelly OK
+⚡ Total: 12.533 W | 📊 65.710 kWh
+📊 Index réel: 65.71022 kWh
+  📌 Index précédent (2026-04-06): 62.53 kWh
+  📊 Index actuel réel: 65.71022 kWh
+  📊 Consommation du jour: 3.18 kWh
+  ✅ Consommation créée pour 2026-04-07: 3.18 kWh
+
+✅ Synchronisation terminée !
+[OK] Development settings loaded successfully
+
+🔍 Synchronisation de 1 compteur(s)...
+
+==================================================
+📡 Compteur: CONTRAT-2026-0001
+❌ Timeout: Shelly injoignable
+
+✅ Synchronisation terminée !
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé

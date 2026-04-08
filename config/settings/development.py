@@ -69,4 +69,4 @@ SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
-print("✅ Development settings loaded successfully")
+print("[OK] Development settings loaded successfully")

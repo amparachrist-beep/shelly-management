@@ -52,4 +52,5 @@ urlpatterns = [
     path('admin/widgets/<int:widget_id>/delete/', views.admin_widget_delete, name='admin_widget_delete'),
 
     path('api/stats/', views.dashboard_stats_ajax, name='dashboard_stats_ajax'),
+    path('cron/sync/', views.cron_sync, name='cron_sync'),
 ]

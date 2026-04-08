@@ -9,7 +9,9 @@ from apps.menages.models import Menage
 from apps.compteurs.models import Compteur
 from apps.parametrage.models import Departement, Localite
 from apps.dashboard.utils import calculate_variation
-
+from apps.facturation.models import FactureConsommation
+from apps.paiements.models import Paiement
+from apps.alertes.models import Alerte
 
 class SuiviService:
     """Service principal pour les données de suivi des consommations"""
@@ -246,83 +248,175 @@ class SuiviService:
 
     @staticmethod
     def get_localite_stats(localite_id: int, date_debut: date, date_fin: date) -> Dict[str, Any]:
-        """
-        Statistiques pour une localité spécifique
-        """
         localite = Localite.objects.select_related('departement').get(pk=localite_id)
 
-        # Récupérer les compteurs de la localité
-        compteurs_loc = Compteur.objects.filter(
-            menage__localite=localite,
-            statut='ACTIF'
-        ).values_list('id', flat=True)
+        # ── Ménages ──────────────────────────────────────────────
+        menages_qs = Menage.objects.filter(localite=localite)
+        total_menages = menages_qs.count()
+        menages_actifs = menages_qs.filter(statut='ACTIF').count()
+        menages_inactifs = menages_qs.filter(statut='INACTIF').count()
+        menages_demenages = menages_qs.filter(statut='DEMENAGE').count()
 
-        # Période précédente
+        # ── Compteurs actifs de la localité ──────────────────────
+        compteurs_loc = list(
+            Compteur.objects.filter(
+                menage__localite=localite,
+                statut='ACTIF'
+            ).values_list('id', flat=True)
+        )
+
+        # ── Période précédente ────────────────────────────────────
         delta = date_fin - date_debut
-        prev_debut = date_debut - delta
+        prev_debut = date_debut - delta - timedelta(days=1)
         prev_fin = date_debut - timedelta(days=1)
 
-        # Consommations
+        # ── Consommations période courante ────────────────────────
         consos = Consommation.objects.filter(
             compteur_id__in=compteurs_loc,
             periode__gte=date_debut,
             periode__lte=date_fin
         )
 
-        stats = consos.aggregate(
-            total_consommation=Sum(F('index_fin_periode') - F('index_debut_periode')),
+        conso_agg = consos.aggregate(
             total_phase1=Sum('phase_1_kwh'),
             total_phase2=Sum('phase_2_kwh'),
             total_phase3=Sum('phase_3_kwh'),
             puissance_max_moyenne=Avg('puissance_max_kw'),
             nombre_compteurs=Count('compteur_id', distinct=True),
-            nombre_menages=Count('compteur__menage_id', distinct=True),
-            nombre_anomalies=Count('id', filter=Q(anomalie=True))
         )
 
-        # Période précédente
-        prev_total = Consommation.objects.filter(
+        total_consommation = float(
+            (conso_agg['total_phase1'] or 0) +
+            (conso_agg['total_phase2'] or 0) +
+            (conso_agg['total_phase3'] or 0)
+        )
+        moyenne_consommation = (
+            round(total_consommation / total_menages, 2) if total_menages > 0 else 0
+        )
+
+        # ── Consommation période précédente ───────────────────────
+        prev_consos = Consommation.objects.filter(
             compteur_id__in=compteurs_loc,
             periode__gte=prev_debut,
             periode__lte=prev_fin
         ).aggregate(
-            total=Sum(F('index_fin_periode') - F('index_debut_periode'))
-        )['total'] or 0
+            p1=Sum('phase_1_kwh'),
+            p2=Sum('phase_2_kwh'),
+            p3=Sum('phase_3_kwh'),
+        )
+        prev_total = float(
+            (prev_consos['p1'] or 0) +
+            (prev_consos['p2'] or 0) +
+            (prev_consos['p3'] or 0)
+        )
+        variation_conso = calculate_variation(total_consommation, prev_total)
 
-        current_total = stats['total_consommation'] or 0
-        variation = calculate_variation(float(current_total), float(prev_total))
+        # ── Facturation / Recouvrement ────────────────────────────
+        # ✅ FactureConsommation au lieu de Facture
+        factures_qs = FactureConsommation.objects.filter(
+            compteur__menage__localite=localite
+        )
+        montant_facture = float(
+            factures_qs.filter(
+                date_emission__gte=date_debut,
+                date_emission__lte=date_fin
+            ).aggregate(t=Sum('montant_consommation'))['t'] or 0
+        )
+        montant_recouvre = float(
+            Paiement.objects.filter(
+                facture__compteur__menage__localite=localite,
+                statut='CONFIRMÉ',
+                date_paiement__gte=date_debut,
+                date_paiement__lte=date_fin
+            ).aggregate(t=Sum('montant'))['t'] or 0
+        )
+        taux_recouvrement = round(
+            (montant_recouvre / montant_facture * 100) if montant_facture > 0 else 0, 1
+        )
 
-        # Évolution mensuelle
+        # ✅ FactureConsommation au lieu de Facture
+        factures_impayees = FactureConsommation.objects.filter(
+            compteur__menage__localite=localite,
+            statut__in=['ÉMISE', 'PARTIELLEMENT_PAYÉE', 'EN_RETARD']
+        ).select_related('compteur__menage').order_by('date_echeance')
+
+        total_impayes = float(
+            factures_impayees.aggregate(t=Sum('montant_consommation'))['t'] or 0
+        )
+
+        # ── Alertes ───────────────────────────────────────────────
+        alertes_qs = Alerte.objects.filter(compteur__menage__localite=localite)
+        total_alertes = alertes_qs.filter(statut='ACTIVE').count()
+        alertes_critiques = alertes_qs.filter(statut='ACTIVE', niveau='CRITIQUE').count()
+        alertes_traitees = alertes_qs.filter(
+            statut='TRAITEE',
+            date_detection__gte=date_debut
+        ).count()
+
+        # ── Top consommateurs ─────────────────────────────────────
+        top_consommateurs = Consommation.objects.filter(
+            compteur_id__in=compteurs_loc,
+            periode__gte=date_debut,
+            periode__lte=date_fin
+        ).values(
+            'compteur__menage__nom_menage',
+            'compteur__menage__reference_menage',
+            'compteur__menage__statut',
+        ).annotate(
+            total=Sum('phase_1_kwh') + Sum('phase_2_kwh') + Sum('phase_3_kwh')
+        ).order_by('-total')[:10]
+
+        # ── Évolution mensuelle ───────────────────────────────────
         evolution = []
         mois_courant = date_debut.replace(day=1)
         while mois_courant <= date_fin.replace(day=1):
-            conso_mois = Consommation.objects.filter(
+            c = Consommation.objects.filter(
                 compteur_id__in=compteurs_loc,
                 periode=mois_courant
             ).aggregate(
-                total=Sum(F('index_fin_periode') - F('index_debut_periode'))
-            )['total'] or 0
-
-            evolution.append({
-                'mois': mois_courant,
-                'total': float(conso_mois)
-            })
-
-            mois_suivant = mois_courant.replace(
-                day=1,
-                month=mois_courant.month + 1 if mois_courant.month < 12 else 1,
-                year=mois_courant.year + 1 if mois_courant.month == 12 else mois_courant.year
+                p1=Sum('phase_1_kwh'),
+                p2=Sum('phase_2_kwh'),
+                p3=Sum('phase_3_kwh'),
             )
-            mois_courant = mois_suivant
+            total_mois = float((c['p1'] or 0) + (c['p2'] or 0) + (c['p3'] or 0))
+            evolution.append({'mois': mois_courant, 'total': total_mois})
+
+            m = mois_courant.month + 1
+            y = mois_courant.year + (1 if m > 12 else 0)
+            mois_courant = mois_courant.replace(year=y, month=(m - 1) % 12 + 1, day=1)
+
+        # ── Tous les ménages (pour le tableau) ────────────────────
+        menages = menages_qs.select_related(
+            'type_habitation', 'utilisateur'
+        ).prefetch_related('compteurs')
+
+        # ── Stats dict ────────────────────────────────────────────
+        stats = {
+            'total_menages': total_menages,
+            'menages_actifs': menages_actifs,
+            'menages_inactifs': menages_inactifs,
+            'menages_suspendus': menages_demenages,
+            'total_consommation': round(total_consommation, 2),
+            'moyenne_consommation': moyenne_consommation,
+            'variation_conso': variation_conso,
+            'taux_recouvrement': taux_recouvrement,
+            'montant_recouvre': round(montant_recouvre, 0),
+            'total_impayes': round(total_impayes, 0),
+            'total_alertes': total_alertes,
+            'alertes_critiques': alertes_critiques,
+            'alertes_traitees': alertes_traitees,
+            'repartition_statuts': total_menages > 0,
+        }
 
         return {
             'localite': localite,
             'stats': stats,
-            'variation': variation,
+            'menages': menages,
+            'top_consommateurs': list(top_consommateurs),
+            'factures_impayees': factures_impayees,
             'evolution': evolution,
-            'total_menages': Menage.objects.filter(localite=localite).count(),
             'date_debut': date_debut,
-            'date_fin': date_fin
+            'date_fin': date_fin,
         }
 
     @staticmethod

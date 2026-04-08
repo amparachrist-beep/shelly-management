@@ -90,7 +90,25 @@ class Compteur(models.Model):
     )
     shelly_status = models.CharField(max_length=20, choices=SHELLY_STATUS, default='DECONNECTE')
     derniere_sync_shelly = models.DateTimeField(null=True, blank=True)
+    # Gestion avancée Shelly (IMPORTANT)
+    # Gestion avancée Shelly (IMPORTANT)
+    shelly_offset = models.DecimalField(
+        max_digits=12,
+        decimal_places=3,
+        default=0.000
+    )
 
+    dernier_index_shelly = models.DecimalField(
+        max_digits=12,
+        decimal_places=3,
+        null=True,
+        blank=True
+    )
+
+    date_reset_shelly = models.DateTimeField(
+        null=True,
+        blank=True
+    )
     # Métadonnées
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

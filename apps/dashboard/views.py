@@ -73,7 +73,7 @@ def get_date_range(period='month'):
     """Obtenir la plage de dates selon la période"""
     today = timezone.now().date()
 
-    if period == 'today':
+    if period == 'today' or period == 'day':  # ✅ Ajouter 'day'
         start_date = today
         end_date = today
     elif period == 'yesterday':
@@ -106,8 +106,6 @@ def get_date_range(period='month'):
         end_date = today
 
     return start_date, end_date
-
-
 # ============================================
 # VUES PRINCIPALES DU DASHBOARD
 # ============================================
@@ -315,6 +313,8 @@ def agent_dashboard(request):
     }
 
     return render(request, 'dashboard/agent_dashboard.html', context)
+
+
 @login_required
 @role_required(['CLIENT'])
 def client_dashboard(request):
@@ -343,11 +343,27 @@ def client_dashboard(request):
     # Récupérer les compteurs du ménage
     compteurs = Compteur.objects.filter(menage=household)
 
+    # ✅ Définir compteur_principal (le premier compteur actif)
+    compteur_principal = compteurs.filter(statut='ACTIF').first()
+
     # Statistiques du client
     stats = get_client_stats(household, today, current_month)
 
     # Consommation du mois en cours
     consommation_mois = get_current_consumption(household)
+
+    # ✅ Calcul du coût estimé pour le dashboard
+    cout_estime = 0
+    if compteur_principal and compteur_principal.type_tarification and consommation_mois > 0:
+        try:
+            montant_ht = compteur_principal.type_tarification.calculer_montant(consommation_mois)
+            tva = montant_ht * (compteur_principal.type_tarification.tva_taux / 100)
+            abonnement = compteur_principal.type_tarification.abonnement_mensuel
+            cout_estime = float(montant_ht + tva + abonnement)
+        except:
+            cout_estime = consommation_mois * 109
+    else:
+        cout_estime = consommation_mois * 109
 
     # Factures impayées
     factures_impayees_qs = Facture.objects.filter(
@@ -457,13 +473,20 @@ def client_dashboard(request):
     # Conseils d'économie
     savings_tips = get_savings_tips(household)
 
+    # Récupérer les factures récentes pour le tableau
+    factures_recents = Facture.objects.filter(
+        compteur__menage=household
+    ).order_by('-date_emission')[:5]
+
     context = {
         'page_title': 'Mon Tableau de Bord',
         'household': household,
         'menage': household,
         'compteurs': compteurs,
         'consommation_mois': consommation_mois,
+        'cout_estime': round(cout_estime, 0),
         'factures_impayees': factures_impayees,
+        'factures_recents': factures_recents,  # ✅ AJOUT
         'prochaine_echeance': prochaine_echeance,
         'derniere_conso': derniere_conso,
         'notifications': unread_notifications,
@@ -635,100 +658,106 @@ def client_consumption_analysis(request):
     # Récupérer le compteur et sa tarification
     compteur = household.compteurs.filter(statut='ACTIF').first()
 
-    # === Pour la période "aujourd'hui", utiliser les données LIVE ===
+    # === Pour la période "aujourd'hui", utiliser les données de la BASE ===
     if period == 'day':
-        if compteur and compteur.shelly_status == 'CONNECTE':
-            import requests
-            try:
-                # Récupérer les données en temps réel depuis Shelly
-                url = f"http://{compteur.shelly_ip}/rpc/EM.GetStatus"
-                response = requests.get(url, timeout=5)
-                data = response.json()
-                result = data.get('result', {})
+        # Récupérer la consommation en base pour aujourd'hui
+        conso = Consommation.objects.filter(
+            compteur__menage=household,
+            periode=start_date
+        ).first()
 
-                # Puissance actuelle en Watts
-                puissance_w = result.get('total_act_power', 0)
+        if conso:
+            total_kwh = conso.consommation_kwh
+            consumption_analysis = {
+                'total': round(float(total_kwh), 2),
+                'daily_avg': round(float(total_kwh), 2),
+                'peak': round(float(total_kwh), 2),
+                'nombre_releves': 1,
+            }
 
-                # Estimer la consommation de la journée
-                conso_jour_estimee = (puissance_w * 24) / 1000  # kWh
+            # Calcul du coût
+            cout_estime = 0
+            if compteur and compteur.type_tarification and total_kwh > 0:
+                montant_ht = compteur.type_tarification.calculer_montant(total_kwh)
+                tva = montant_ht * (compteur.type_tarification.tva_taux / 100)
+                abonnement_jour = compteur.type_tarification.abonnement_mensuel / 30
+                cout_estime = float(montant_ht + tva + abonnement_jour)
+            else:
+                cout_estime = total_kwh * 109
 
-                # === APPLIQUER LA TARIFICATION RÉELLE ===
-                cout_estime = 0
-                if compteur and compteur.type_tarification and conso_jour_estimee > 0:
-                    # 1. Calculer le montant HT de la consommation selon les tranches
-                    montant_ht = compteur.type_tarification.calculer_montant(conso_jour_estimee)
+            # Répartition par phase
+            appliance_breakdown = [
+                {'name': 'Phase 1', 'value': round(float(conso.phase_1_kwh or 0), 2)},
+                {'name': 'Phase 2', 'value': round(float(conso.phase_2_kwh or 0), 2)},
+                {'name': 'Phase 3', 'value': round(float(conso.phase_3_kwh or 0), 2)},
+            ]
 
-                    # 2. Calculer la TVA
+            # Historique pour le graphique
+            trends_list = get_consumption_trends(household, 12)
+
+            # Détail du tableau
+            consommations_detaillees = []
+            for t in trends_list:
+                kwh_ligne = t["value"]
+                if compteur and compteur.type_tarification and kwh_ligne > 0:
+                    montant_ht = compteur.type_tarification.calculer_montant(kwh_ligne)
                     tva = montant_ht * (compteur.type_tarification.tva_taux / 100)
-
-                    # 3. Abonnement journalier (proportionnel)
-                    abonnement_jour = compteur.type_tarification.abonnement_mensuel / 30
-
-                    # 4. Total TTC
-                    cout_estime = float(montant_ht + tva + abonnement_jour)
+                    cout_ligne = float(montant_ht + tva)
                 else:
-                    # Fallback si pas de tarification
-                    cout_estime = conso_jour_estimee * 109
+                    cout_ligne = kwh_ligne * 109
+                consommations_detaillees.append({
+                    "periode": t["label"],
+                    "total_kwh": kwh_ligne,
+                    "cout": round(cout_ligne, 0),
+                })
 
-                # Créer l'objet consumption_analysis
-                consumption_analysis = {
-                    'total': round(conso_jour_estimee, 2),
-                    'daily_avg': round(conso_jour_estimee, 2),
-                    'peak': round(conso_jour_estimee, 2),
-                    'nombre_releves': 1,
-                }
+            comparison_data = get_consumption_comparison(household, start_date, end_date)
+            consumption_forecast = get_consumption_forecast(household)
 
-                # Historique (pour le graphique)
-                trends_list = get_consumption_trends(household, 12)
+            context = {
+                'page_title': 'Analyse de Ma Consommation',
+                'household': household,
+                'period': period,
+                'start_date': start_date,
+                'end_date': end_date,
+                'consumption_analysis': consumption_analysis,
+                'cout_estime': round(cout_estime, 0),
+                'consommations_detaillees': consommations_detaillees,
+                'comparison_data': comparison_data,
+                'consumption_trends': json.dumps(trends_list),
+                'appliance_breakdown': json.dumps(appliance_breakdown),
+                'consumption_forecast': consumption_forecast,
+            }
 
-                # Répartition par phase (données live)
-                appliance_breakdown = [
-                    {'name': 'Phase 1', 'value': round(result.get('a_act_power', 0) * 24 / 1000, 2)},
-                    {'name': 'Phase 2', 'value': round(result.get('b_act_power', 0) * 24 / 1000, 2)},
-                    {'name': 'Phase 3', 'value': round(result.get('c_act_power', 0) * 24 / 1000, 2)},
-                ]
+            return render(request, 'dashboard/client_consumption_analysis.html', context)
+        else:
+            # Pas de consommation en base pour aujourd'hui
+            consumption_analysis = {'total': 0, 'daily_avg': 0, 'peak': 0, 'nombre_releves': 0}
+            trends_list = get_consumption_trends(household, 12)
+            consommations_detaillees = []
+            for t in trends_list:
+                consommations_detaillees.append({
+                    "periode": t["label"],
+                    "total_kwh": t["value"],
+                    "cout": round(t["value"] * 109, 0),
+                })
 
-                # Détail du tableau avec la vraie tarification
-                consommations_detaillees = []
-                for t in trends_list:
-                    kwh_ligne = t["value"]
-                    if compteur and compteur.type_tarification and kwh_ligne > 0:
-                        montant_ht = compteur.type_tarification.calculer_montant(kwh_ligne)
-                        tva = montant_ht * (compteur.type_tarification.tva_taux / 100)
-                        cout_ligne = float(montant_ht + tva)
-                    else:
-                        cout_ligne = kwh_ligne * 109
+            context = {
+                'page_title': 'Analyse de Ma Consommation',
+                'household': household,
+                'period': period,
+                'start_date': start_date,
+                'end_date': end_date,
+                'consumption_analysis': consumption_analysis,
+                'cout_estime': 0,
+                'consommations_detaillees': consommations_detaillees,
+                'comparison_data': {},
+                'consumption_trends': json.dumps(trends_list),
+                'appliance_breakdown': json.dumps([]),
+                'consumption_forecast': 0,
+            }
 
-                    consommations_detaillees.append({
-                        "periode": t["label"],
-                        "total_kwh": kwh_ligne,
-                        "cout": round(cout_ligne, 0),
-                    })
-
-                comparison_data = get_consumption_comparison(household, start_date, end_date)
-                consumption_forecast = get_consumption_forecast(household)
-
-                context = {
-                    'page_title': 'Analyse de Ma Consommation',
-                    'household': household,
-                    'period': period,
-                    'start_date': start_date,
-                    'end_date': end_date,
-                    'consumption_analysis': consumption_analysis,
-                    'cout_estime': round(cout_estime, 0),
-                    'consommations_detaillees': consommations_detaillees,
-                    'comparison_data': comparison_data,
-                    'consumption_trends': json.dumps(trends_list),
-                    'appliance_breakdown': json.dumps(appliance_breakdown),
-                    'consumption_forecast': consumption_forecast,
-                }
-
-                return render(request, 'dashboard/client_consumption_analysis.html', context)
-
-            except Exception as e:
-                print(f"Erreur récupération données live: {e}")
-                # Si erreur, continuer avec les données historiques
-                pass
+            return render(request, 'dashboard/client_consumption_analysis.html', context)
 
     # === Données historiques (pour "semaine", "mois", "année") ===
     consumption_analysis = get_consumption_analysis(household, start_date, end_date)
@@ -740,13 +769,9 @@ def client_consumption_analysis(request):
 
     try:
         if compteur and compteur.type_tarification and total_kwh > 0:
-            # 1. Montant HT selon les tranches
             montant_ht = compteur.type_tarification.calculer_montant(total_kwh)
-            # 2. TVA
             tva = montant_ht * (compteur.type_tarification.tva_taux / 100)
-            # 3. Abonnement mensuel
             abonnement = compteur.type_tarification.abonnement_mensuel
-            # 4. Total TTC
             cout_estime = float(montant_ht + tva + abonnement)
         else:
             cout_estime = total_kwh * 109
@@ -791,7 +816,6 @@ def client_consumption_analysis(request):
     }
 
     return render(request, 'dashboard/client_consumption_analysis.html', context)
-
 
 @login_required
 @role_required(['CLIENT'])
@@ -1615,6 +1639,7 @@ def get_agent_performance(agent, current_month):
     }
 
 
+# apps/dashboard/views.py
 def get_client_stats(household, today, current_month):
     """Stats client réelles"""
     factures = Facture.objects.filter(compteur__menage=household)
@@ -1637,11 +1662,25 @@ def get_client_stats(household, today, current_month):
             total_ttc = total_ht + tva
             total_du += total_ttc - (facture.montant_paye or 0)
 
+    # ✅ AJOUT : Calcul du coût estimé pour le mois
+    compteur = household.compteurs.filter(statut='ACTIF').first()
+    cout_estime = 0
+    consommation_mois = get_current_consumption(household)
+
+    if compteur and compteur.type_tarification and consommation_mois > 0:
+        montant_ht = compteur.type_tarification.calculer_montant(consommation_mois)
+        tva = montant_ht * (compteur.type_tarification.tva_taux / 100)
+        abonnement = compteur.type_tarification.abonnement_mensuel
+        cout_estime = float(montant_ht + tva + abonnement)
+    else:
+        cout_estime = consommation_mois * 109
+
     return {
-        'monthly_consumption': get_current_consumption(household),
+        'monthly_consumption': consommation_mois,
         'pending_invoices_count': factures.filter(statut__in=['ÉMISE', 'PARTIELLEMENT_PAYÉE', 'EN_RETARD']).count(),
         'pending_invoices_total': total_du,
-        'total_paye': float(paiements.aggregate(t=Sum('montant'))['t'] or 0)
+        'total_paye': float(paiements.aggregate(t=Sum('montant'))['t'] or 0),
+        'cout_estime': round(cout_estime, 0),  # ✅ AJOUT
     }
 
 def get_current_consumption(household):
@@ -2236,11 +2275,19 @@ def dashboard_stats_ajax(request):
             )
             tendance = 'HAUSSE' if variation > 0 else 'BAISSE'
 
-    # ── Coût estimé ───────────────────────────────────────────
-    tarif = 0.0
-    if compteur and compteur.type_tarification:
-        tarif = float(getattr(compteur.type_tarification, 'prix_kwh', 0) or 0)
-    cout_estime = round(conso_mois * tarif, 0)
+    # ── ✅ Coût estimé avec la tarification réelle (tranches) ──
+    cout_estime = 0
+    if compteur and compteur.type_tarification and conso_mois > 0:
+        try:
+            montant_ht = compteur.type_tarification.calculer_montant(conso_mois)
+            tva = montant_ht * (compteur.type_tarification.tva_taux / 100)
+            abonnement = compteur.type_tarification.abonnement_mensuel
+            cout_estime = round(montant_ht + tva + abonnement, 0)
+        except Exception as e:
+            print(f"Erreur calcul tarif: {e}")
+            cout_estime = round(conso_mois * 109, 0)
+    else:
+        cout_estime = round(conso_mois * 109, 0)
 
     # ── Factures impayées ─────────────────────────────────────
     factures_impayees = {'total': 0, 'montant': 0}
@@ -2279,8 +2326,8 @@ def dashboard_stats_ajax(request):
         'consommation_mois': round(conso_mois, 2),
         'variation': variation,
         'tendance': tendance,
-        'cout_estime': cout_estime,
-        'index_actuel': round(index_temps_reel, 3),  # ← ICI : index en temps réel
+        'cout_estime': cout_estime,  # ✅ Maintenant correct
+        'index_actuel': round(index_temps_reel, 3),
         'factures_impayees': factures_impayees,
         'nb_alertes': nb_alertes,
         'shelly_status': compteur.shelly_status if compteur else 'DECONNECTE',
@@ -2290,3 +2337,45 @@ def dashboard_stats_ajax(request):
         'historique': historique,
         'timestamp': timezone.now().isoformat(),
     })
+
+
+# apps/dashboard/views.py
+from django.core.management import call_command
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+
+# À mettre dans settings.py ou directement ici
+CRON_SECRET_TOKEN = "shelly-sync-token-2026"
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def cron_sync(request):
+    """
+    Endpoint pour cron-job.org - Déclenche la synchronisation Shelly
+    URL: /cron/sync/?token=shelly-sync-token-2026
+    """
+    token = request.GET.get('token')
+
+    # Vérification du token
+    if token != CRON_SECRET_TOKEN:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Token invalide'
+        }, status=401)
+
+    try:
+        # Exécuter la commande de synchronisation
+        call_command('sync_shelly_consommations')
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Synchronisation terminée avec succès'
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)

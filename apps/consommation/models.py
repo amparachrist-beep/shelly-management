@@ -27,7 +27,8 @@ class Consommation(models.Model):
     # Champ calculé
     @property
     def consommation_kwh(self):
-        return self.index_fin_periode - self.index_debut_periode
+        """Calcule la consommation totale à partir des phases"""
+        return (self.phase_1_kwh or 0) + (self.phase_2_kwh or 0) + (self.phase_3_kwh or 0)
 
     # Détails par phase
     phase_1_kwh = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -104,7 +105,6 @@ class ConsommationQuotidienne(models.Model):
         return f"{self.date} - {self.consommation_kwh} kWh"
 
 
-    app_label = 'consommation'
     app_label = 'consommation'
 class HistoriqueConsommation(models.Model):
     """Historique des modifications de consommation"""
