@@ -18,10 +18,13 @@
     .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     .kpi-card {
-        background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px;
         position: relative; overflow: hidden;
         transition: all 0.3s cubic-bezier(.22,.68,0,1.2);
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
     }
     .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
     .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 16px 16px 0 0; }
@@ -29,50 +32,49 @@
     .kpi-amber::before   { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
     .kpi-red::before     { background: linear-gradient(90deg, #ef4444, #f87171); }
     .kpi-emerald::before { background: linear-gradient(90deg, #10b981, #34d399); }
-    .kpi-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .kpi-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .kpi-icon.sky     { background: rgba(14, 165, 233, 0.1); }
     .kpi-icon.amber   { background: rgba(245, 158, 11, 0.1); }
     .kpi-icon.red     { background: rgba(239, 68, 68, 0.1); }
     .kpi-icon.emerald { background: rgba(16, 185, 129, 0.1); }
-    .kpi-number { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.5rem; font-weight: 700; line-height: 1.1; color: #1e293b; margin: 16px 0 8px; display: block; }
-    .kpi-label  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 4px; }
-    .section-card   { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .section-header { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
-    .section-title  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.125rem; font-weight: 600; color: #1e293b; margin: 0; line-height: 1.3; }
-    .section-sub    { font-size: 0.875rem; color: #64748b; margin: 4px 0 0; font-weight: 500; }
-    .pill          { border-radius: 999px; padding: 6px 14px; font-size: 0.75rem; font-weight: 600; font-family: 'Inter', sans-serif; display: inline-block; letter-spacing: 0.025em; }
+    .kpi-number { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2rem; font-weight: 700; line-height: 1.1; color: #1e293b; margin: 12px 0 6px; display: block; }
+    .kpi-label  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 4px; }
+    .section-card   { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); height: 100%; display: flex; flex-direction: column; }
+    .section-header { padding: 16px 20px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
+    .section-title  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1rem; font-weight: 600; color: #1e293b; margin: 0; line-height: 1.3; }
+    .section-sub    { font-size: 0.75rem; color: #64748b; margin: 2px 0 0; font-weight: 500; }
+    .pill          { border-radius: 999px; padding: 4px 12px; font-size: 0.7rem; font-weight: 600; font-family: 'Inter', sans-serif; display: inline-block; letter-spacing: 0.025em; }
     .pill-emerald  { background: rgba(16, 185, 129, 0.1); color: #10b981; }
     .pill-sky      { background: rgba(14, 165, 233, 0.1); color: #0ea5e9; }
     .pill-amber    { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
     .pill-red      { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
     .pill-gray     { background: #f1f5f9; color: #64748b; }
     .data-table { width: 100%; border-collapse: collapse; }
-    .data-table th { padding: 12px 16px; text-align: left; font-size: 0.75rem; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
-    .data-table td { padding: 14px 16px; font-size: 0.875rem; color: #334155; border-bottom: 1px solid #f1f5f9; font-weight: 500; }
+    .data-table th { padding: 10px 12px; text-align: left; font-size: 0.7rem; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+    .data-table td { padding: 12px 12px; font-size: 0.8rem; color: #334155; border-bottom: 1px solid #f1f5f9; font-weight: 500; }
     .data-table tr:last-child td { border-bottom: none; }
     .data-table tr:hover td { background: #f8fafc; }
-    .btn-primary  { background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%); color: #fff; border: none; border-radius: 12px; padding: 10px 16px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(14,165,233,0.3); transition: all 0.22s; text-decoration: none; }
-    .btn-primary:hover  { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(14,165,233,0.4); color: #fff; }
-    .btn-secondary { background: #fff; border: 1px solid #e2e8f0; color: #475569; border-radius: 12px; padding: 10px 16px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.22s; text-decoration: none; }
+    .btn-primary  { background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%); color: #fff; border: none; border-radius: 10px; padding: 8px 14px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 8px rgba(14,165,233,0.3); transition: all 0.22s; text-decoration: none; }
+    .btn-primary:hover  { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(14,165,233,0.4); color: #fff; }
+    .btn-secondary { background: #fff; border: 1px solid #e2e8f0; color: #475569; border-radius: 10px; padding: 8px 14px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.22s; text-decoration: none; }
     .btn-secondary:hover { background: #f8fafc; border-color: #cbd5e1; color: #334155; }
-    .btn-orange  { background: linear-gradient(135deg, #f97316 0%, #fb923c 100%); color: #fff; border: none; border-radius: 12px; padding: 10px 16px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(249,115,22,0.3); transition: all 0.22s; text-decoration: none; }
-    .btn-orange:hover  { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(249,115,22,0.4); color: #fff; }
-    .btn-emerald { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); color: #fff; border: none; border-radius: 12px; padding: 10px 16px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(16,185,129,0.3); transition: all 0.22s; text-decoration: none; }
-    .btn-emerald:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(16,185,129,0.4); color: #fff; }
+    .btn-orange  { background: linear-gradient(135deg, #f97316 0%, #fb923c 100%); color: #fff; border: none; border-radius: 10px; padding: 8px 14px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 8px rgba(249,115,22,0.3); transition: all 0.22s; text-decoration: none; }
+    .btn-orange:hover  { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(249,115,22,0.4); color: #fff; }
+    .btn-emerald { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); color: #fff; border: none; border-radius: 10px; padding: 8px 14px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 8px rgba(16,185,129,0.3); transition: all 0.22s; text-decoration: none; }
+    .btn-emerald:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(16,185,129,0.4); color: #fff; }
 
-    /* Indicateur de rafraîchissement */
     @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse-dot 1.5s ease-in-out infinite; }
     .live-dot.offline { background: #ef4444; animation: none; }
 
     @keyframes fadeUp    { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slideRight { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-    .anim-fade-up { animation: fadeUp 0.6s cubic-bezier(.22,.68,0,1.1) both; }
-    .anim-slide   { animation: slideRight 0.6s cubic-bezier(.22,.68,0,1.1) both; }
-    .delay-1 { animation-delay: 0.1s; }
-    .delay-2 { animation-delay: 0.18s; }
-    .delay-3 { animation-delay: 0.26s; }
-    .delay-4 { animation-delay: 0.34s; }
+    .anim-fade-up { animation: fadeUp 0.5s cubic-bezier(.22,.68,0,1.1) both; }
+    .anim-slide   { animation: slideRight 0.5s cubic-bezier(.22,.68,0,1.1) both; }
+    .delay-1 { animation-delay: 0.08s; }
+    .delay-2 { animation-delay: 0.16s; }
+    .delay-3 { animation-delay: 0.24s; }
+    .delay-4 { animation-delay: 0.32s; }
 </style>
 {% endblock %}
 
@@ -85,20 +87,20 @@
 {% block content %}
 <div class="min-h-screen bg-slate-50">
 
-    <!-- ══════════════════════════════════════════
-         PAGE HEADER
-    ══════════════════════════════════════════ -->
-    <div class="bg-white border-b border-slate-200 px-6 py-6">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
-                    <iconify-icon icon="solar:home-smile-bold-duotone" width="24" class="text-white"></iconify-icon>
+    <!-- ═══════════════════════════════════════════════════════════════
+         PAGE HEADER (réduit)
+    ═══════════════════════════════════════════════════════════════ -->
+    <div class="bg-white border-b border-slate-200 px-6 py-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
+                    <iconify-icon icon="solar:home-smile-bold-duotone" width="20" class="text-white"></iconify-icon>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-semibold text-slate-900 font-jakarta tracking-tight">
+                    <h1 class="text-xl font-semibold text-slate-900 font-jakarta tracking-tight">
                         Mon Tableau de Bord
                     </h1>
-                    <p class="text-sm text-slate-500 mt-1">
+                    <p class="text-xs text-slate-500 mt-0.5">
                         Bienvenue {{ menage.nom_menage|default:"Client" }}
                         &nbsp;·&nbsp;
                         <span class="live-dot" id="live-indicator"></span>
@@ -108,24 +110,24 @@
             </div>
             <div class="flex flex-wrap gap-2">
                 <a href="{% url 'facturation:client_factures_list' %}" class="btn-orange">
-                    <iconify-icon icon="solar:file-invoice-dollar-bold-duotone" width="18"></iconify-icon>
+                    <iconify-icon icon="solar:file-invoice-dollar-bold-duotone" width="16"></iconify-icon>
                     <span>Mes factures</span>
                 </a>
                 <a href="{% url 'dashboard:client_consumption_analysis' %}" class="btn-primary">
-                    <iconify-icon icon="solar:chart-line-bold-duotone" width="18"></iconify-icon>
+                    <iconify-icon icon="solar:chart-line-bold-duotone" width="16"></iconify-icon>
                     <span>Ma consommation</span>
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- ══════════════════════════════════════════
-         MAIN CONTENT
-    ══════════════════════════════════════════ -->
-    <div class="p-6">
+    <!-- ═══════════════════════════════════════════════════════════════
+         MAIN CONTENT (espacement réduit)
+    ═══════════════════════════════════════════════════════════════ -->
+    <div class="p-5">
 
-        <!-- ── Informations ménage + Alertes ── -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- ── LIGNE 1 : Informations ménage + Alertes (mb-5) ── -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
 
             <!-- Informations du ménage (2/3) -->
             <div class="lg:col-span-2 section-card anim-fade-up">
@@ -134,52 +136,51 @@
                         <h3 class="section-title">Informations de mon foyer</h3>
                         <p class="section-sub">Détails de votre abonnement et compteurs</p>
                     </div>
-                    <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
-                        <iconify-icon icon="solar:home-smile-bold-duotone" width="20" class="text-orange-600"></iconify-icon>
+                    <div class="w-8 h-8 rounded-xl bg-orange-100 flex items-center justify-center">
+                        <iconify-icon icon="solar:home-smile-bold-duotone" width="18" class="text-orange-600"></iconify-icon>
                     </div>
                 </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-4">
+                <div class="p-5 pt-0">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-3">
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Nom du ménage</label>
-                                <p class="text-base font-semibold text-slate-900">{{ menage.nom_menage }}</p>
+                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-0.5">Nom du ménage</label>
+                                <p class="text-sm font-semibold text-slate-900">{{ menage.nom_menage }}</p>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Localité</label>
-                                <p class="text-slate-700">{{ menage.localite.nom|default:"Non spécifié" }}</p>
+                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-0.5">Localité</label>
+                                <p class="text-sm text-slate-700">{{ menage.localite.nom|default:"Non spécifié" }}</p>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Date d'abonnement</label>
-                                <p class="text-slate-700">{{ menage.date_creation|date:"d/m/Y" }}</p>
+                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-0.5">Date d'abonnement</label>
+                                <p class="text-sm text-slate-700">{{ menage.date_creation|date:"d/m/Y" }}</p>
                             </div>
                         </div>
-                        <div class="space-y-4">
+                        <div class="space-y-3">
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Statut</label>
+                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-0.5">Statut</label>
                                 <span class="pill pill-emerald">{{ menage.get_statut_display }}</span>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Compteur actif</label>
-                                <p class="text-base font-semibold text-slate-900">{{ compteurs.count }}</p>
+                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-0.5">Compteur actif</label>
+                                <p class="text-sm font-semibold text-slate-900">{{ compteurs.count }}</p>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Shelly</label>
-                                <!-- Statut Shelly mis à jour en temps réel -->
+                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-0.5">Shelly</label>
                                 <span id="shelly-status-badge" class="pill {% if compteurs.exists and compteurs.first.shelly_status == 'CONNECTE' %}pill-emerald{% else %}pill-red{% endif %}">
                                     {% if compteurs.exists and compteurs.first.shelly_status == 'CONNECTE' %}Connecté{% else %}Déconnecté{% endif %}
                                 </span>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Contact principal</label>
-                                <p class="text-slate-700">{{ request.user.email }}</p>
+                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-0.5">Contact principal</label>
+                                <p class="text-sm text-slate-700">{{ request.user.email }}</p>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-6 pt-6 border-t border-slate-100">
+                    <div class="mt-4 pt-4 border-t border-slate-100">
                         <div class="flex justify-end">
-                            <a href="{% url 'users:profile' %}" class="btn-secondary">
-                                <iconify-icon icon="solar:pen-bold-duotone" width="18"></iconify-icon>
+                            <a href="{% url 'users:profile' %}" class="btn-secondary text-sm">
+                                <iconify-icon icon="solar:pen-bold-duotone" width="16"></iconify-icon>
                                 <span>Modifier mon profil</span>
                             </a>
                         </div>
@@ -188,245 +189,165 @@
             </div>
 
             <!-- Alertes importantes (1/3) -->
-            <div class="lg:col-span-1 section-card anim-fade-up delay-1">
+            <div class="section-card anim-fade-up delay-1">
                 <div class="section-header">
                     <div>
                         <h3 class="section-title">Alertes importantes</h3>
                         <p class="section-sub">Notifications à prendre en compte</p>
                     </div>
-                    <!-- Badge alertes mis à jour en temps réel -->
                     <span id="badge-alertes"
                           class="pill pill-amber"
                           {% if not recent_alerts %}style="display:none"{% endif %}>
                         {{ recent_alerts|length }}
                     </span>
                 </div>
-                <div class="p-6 max-h-96 overflow-y-auto custom-scroll">
+                <div class="p-4 max-h-80 overflow-y-auto custom-scroll">
                     {% for alerte in recent_alerts %}
-                    <div class="mb-3 p-3 rounded-lg border
+                    <div class="mb-2 p-2 rounded-lg border
                         {% if alerte.niveau == 'CRITIQUE' %}border-red-200 bg-red-50
                         {% elif alerte.niveau == 'HAUTE' %}border-amber-200 bg-amber-50
                         {% else %}border-sky-200 bg-sky-50{% endif %}">
                         <div class="flex items-start gap-2">
                             <iconify-icon
                                 icon="{% if alerte.niveau == 'CRITIQUE' %}solar:danger-triangle-bold-duotone{% elif alerte.niveau == 'HAUTE' %}solar:danger-circle-bold-duotone{% else %}solar:info-circle-bold-duotone{% endif %}"
-                                width="18"
+                                width="16"
                                 class="{% if alerte.niveau == 'CRITIQUE' %}text-red-500{% elif alerte.niveau == 'HAUTE' %}text-amber-500{% else %}text-sky-500{% endif %} flex-shrink-0 mt-0.5">
                             </iconify-icon>
-                            <p class="text-sm text-slate-700 flex-1">{{ alerte.message|truncatechars:80 }}</p>
+                            <p class="text-xs text-slate-700 flex-1">{{ alerte.message|truncatechars:80 }}</p>
                         </div>
                     </div>
                     {% empty %}
-                    <div class="flex flex-col items-center justify-center py-8">
-                        <div class="p-4 bg-emerald-100 rounded-full mb-3">
-                            <iconify-icon icon="solar:check-circle-bold-duotone" width="32" class="text-emerald-500"></iconify-icon>
+                    <div class="flex flex-col items-center justify-center py-6">
+                        <div class="p-3 bg-emerald-100 rounded-full mb-2">
+                            <iconify-icon icon="solar:check-circle-bold-duotone" width="24" class="text-emerald-500"></iconify-icon>
                         </div>
-                        <p class="text-slate-500 text-sm">Aucune alerte importante</p>
+                        <p class="text-slate-500 text-xs">Aucune alerte importante</p>
                     </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
 
-        <!-- ── KPI Cards ── -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-5">
 
-            <!-- KPI 1 : Consommation du mois — mis à jour toutes les 30 s -->
-            <div class="kpi-card kpi-sky anim-fade-up delay-1">
-                <div class="flex items-start justify-between">
-                    <div class="kpi-icon sky">
-                        <iconify-icon icon="solar:bolt-bold-duotone" width="24" class="text-sky-600"></iconify-icon>
-                    </div>
-                    <a href="{% url 'dashboard:client_consumption_analysis' %}" class="pill pill-sky" style="text-decoration:none;">Détails →</a>
+    <!-- KPI 1 : Factures impayées -->
+        <div class="kpi-card kpi-amber anim-fade-up delay-2">
+            <div class="flex items-start justify-between">
+                <div class="kpi-icon amber">
+                    <iconify-icon icon="solar:file-invoice-dollar-bold-duotone" width="22" class="text-amber-600"></iconify-icon>
                 </div>
-                <p class="kpi-label">Consommation ce mois</p>
-                <!-- id="kpi-conso-mois" mis à jour par JS -->
-                <span class="kpi-number" id="kpi-conso-mois">{{ consommation_mois|floatformat:0 }}</span>
-                <p class="text-xs text-slate-400 mb-1">kWh</p>
-                <div class="flex items-center gap-2 mt-1">
-                    <!-- id="kpi-variation" mis à jour par JS -->
-                    <span class="text-sm" id="kpi-variation">
-                        {% if derniere_conso and derniere_conso.variation %}
-                            {{ derniere_conso.variation|floatformat:1 }}% vs mois dernier
-                        {% else %}
-                            Données non disponibles
-                        {% endif %}
-                    </span>
-                </div>
-                <!-- Coût estimé mis à jour par JS -->
-                <p class="text-xs text-slate-500 mt-2">Coût estimé :
-                    <span id="kpi-cout" class="font-semibold text-slate-700">—</span>
-                </p>
+                <a href="{% url 'facturation:client_factures_list' %}" class="pill pill-amber" style="text-decoration:none;">Payer →</a>
             </div>
+            <p class="kpi-label">Factures impayées</p>
+            <span class="kpi-number" id="kpi-factures-nb">{{ factures_impayees.total }}</span>
+            <p class="text-base font-semibold text-amber-600 mt-1 mb-0" id="kpi-factures-montant">
+                {{ factures_impayees.montant|floatformat:0 }} FCFA
+            </p>
+            <span class="text-xs text-slate-600">Montant total dû</span>
+        </div>
 
-            <!-- KPI 2 : Factures impayées — mis à jour toutes les 30 s -->
-            <div class="kpi-card kpi-amber anim-fade-up delay-2">
-                <div class="flex items-start justify-between">
-                    <div class="kpi-icon amber">
-                        <iconify-icon icon="solar:file-invoice-dollar-bold-duotone" width="24" class="text-amber-600"></iconify-icon>
-                    </div>
-                    <a href="{% url 'facturation:client_factures_list' %}" class="pill pill-amber" style="text-decoration:none;">Payer →</a>
+        <!-- KPI 2 : Prochaine échéance -->
+        <div class="kpi-card kpi-red anim-fade-up delay-3">
+            <div class="flex items-start justify-between">
+                <div class="kpi-icon red">
+                    <iconify-icon icon="solar:calendar-bold-duotone" width="22" class="text-red-600"></iconify-icon>
                 </div>
-                <p class="kpi-label">Factures impayées</p>
-                <!-- id="kpi-factures-nb" mis à jour par JS -->
-                <span class="kpi-number" id="kpi-factures-nb">{{ factures_impayees.total }}</span>
-                <!-- id="kpi-factures-montant" mis à jour par JS -->
-                <p class="text-lg font-semibold text-amber-600 mt-2 mb-1" id="kpi-factures-montant">
-                    {{ factures_impayees.montant|floatformat:0 }} FCFA
-                </p>
-                <span class="text-sm text-slate-600">Montant total dû</span>
+                <a href="{% url 'facturation:client_factures_list' %}" class="pill pill-red" style="text-decoration:none;">Payer →</a>
             </div>
+            <p class="kpi-label">Prochaine échéance</p>
+            <span class="kpi-number">
+                {% if prochaine_echeance %}{{ prochaine_echeance|date:"d/m" }}{% else %}Aucune{% endif %}
+            </span>
+            <div class="flex items-center gap-1 text-xs text-slate-600">
+                {% if prochaine_echeance %}
+                <iconify-icon icon="solar:calendar-mark-bold-duotone" width="12"></iconify-icon>
+                <span>Dans {{ prochaine_echeance|timeuntil }}</span>
+                {% else %}
+                <iconify-icon icon="solar:check-circle-bold-duotone" width="12" class="text-emerald-500"></iconify-icon>
+                <span>À jour</span>
+                {% endif %}
+            </div>
+        </div>
 
-            <!-- KPI 3 : Prochaine échéance (statique — donnée peu changeante) -->
-            <div class="kpi-card kpi-red anim-fade-up delay-3">
-                <div class="flex items-start justify-between">
-                    <div class="kpi-icon red">
-                        <iconify-icon icon="solar:calendar-bold-duotone" width="24" class="text-red-600"></iconify-icon>
-                    </div>
-                    <a href="{% url 'facturation:client_factures_list' %}" class="pill pill-red" style="text-decoration:none;">Payer →</a>
+        <!-- KPI 3 : Puissance instantanée -->
+        <div class="kpi-card kpi-emerald anim-fade-up delay-4">
+            <div class="flex items-start justify-between">
+                <div class="kpi-icon emerald">
+                    <iconify-icon icon="solar:chart-square-bold-duotone" width="22" class="text-emerald-600"></iconify-icon>
                 </div>
-                <p class="kpi-label">Prochaine échéance</p>
-                <span class="kpi-number">
-                    {% if prochaine_echeance %}{{ prochaine_echeance|date:"d/m" }}{% else %}Aucune{% endif %}
+                <a href="{% url 'dashboard:client_consumption_analysis' %}" class="pill pill-emerald" style="text-decoration:none;">Live →</a>
+            </div>
+            <p class="kpi-label">Puissance actuelle</p>
+            <span class="kpi-number" id="live-power">—</span>
+            <div class="space-y-1 mt-1">
+                <div class="w-full bg-emerald-100 rounded-full h-1">
+                    <div class="bg-emerald-500 h-1 rounded-full transition-all duration-300"
+                         id="live-bar" style="width:0%"></div>
+                </div>
+                <p class="text-xs text-slate-600" id="live-charge">Données non disponibles</p>
+            </div>
+            <div class="grid grid-cols-3 gap-1 mt-2 text-center">
+                <div class="bg-emerald-50 rounded py-1">
+                    <p class="text-xs text-slate-400">Ph.1</p>
+                    <p class="text-xs font-semibold text-slate-700" id="p1">—</p>
+                </div>
+                <div class="bg-emerald-50 rounded py-1">
+                    <p class="text-xs text-slate-400">Ph.2</p>
+                    <p class="text-xs font-semibold text-slate-700" id="p2">—</p>
+                </div>
+                <div class="bg-emerald-50 rounded py-1">
+                    <p class="text-xs text-slate-400">Ph.3</p>
+                    <p class="text-xs font-semibold text-slate-700" id="p3">—</p>
+                </div>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">Index :
+                <span id="kpi-index" class="font-semibold text-slate-600">
+                    {% if compteurs.exists %}{{ compteurs.first.index_actuel|floatformat:1 }}{% else %}—{% endif %} kWh
                 </span>
-                <div class="flex items-center gap-2 text-sm text-slate-600">
-                    {% if prochaine_echeance %}
-                    <iconify-icon icon="solar:calendar-mark-bold-duotone" width="14"></iconify-icon>
-                    <span>Dans {{ prochaine_echeance|timeuntil }}</span>
-                    {% else %}
-                    <iconify-icon icon="solar:check-circle-bold-duotone" width="14" class="text-emerald-500"></iconify-icon>
-                    <span>À jour</span>
-                    {% endif %}
-                </div>
-            </div>
+            </p>
+        </div>
 
-            <!-- KPI 4 : Puissance instantanée — mis à jour toutes les 5 s -->
-            <div class="kpi-card kpi-emerald anim-fade-up delay-4">
-                <div class="flex items-start justify-between">
-                    <div class="kpi-icon emerald">
-                        <iconify-icon icon="solar:chart-square-bold-duotone" width="24" class="text-emerald-600"></iconify-icon>
-                    </div>
-                    <a href="{% url 'dashboard:client_consumption_analysis' %}" class="pill pill-emerald" style="text-decoration:none;">Live →</a>
+        <!-- KPI 4 : Mon compteur -->
+        <div class="kpi-card kpi-sky anim-fade-up delay-4">
+            <div class="flex items-start justify-between">
+                <div class="kpi-icon sky">
+                    <iconify-icon icon="solar:home-bold-duotone" width="22" class="text-sky-600"></iconify-icon>
                 </div>
-                <p class="kpi-label">Puissance actuelle</p>
-                <!-- id="live-power" mis à jour toutes les 5 s -->
-                <span class="kpi-number" id="live-power">—</span>
-                <div class="space-y-2 mt-1">
-                    <div class="w-full bg-emerald-100 rounded-full h-1.5">
-                        <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-300"
-                             id="live-bar" style="width:0%"></div>
-                    </div>
-                    <!-- id="live-charge" mis à jour par JS -->
-                    <p class="text-sm text-slate-600" id="live-charge">Données non disponibles</p>
-                </div>
-                <!-- Détail des 3 phases -->
-                <div class="grid grid-cols-3 gap-1 mt-3 text-center">
-                    <div class="bg-emerald-50 rounded-lg py-1">
-                        <p class="text-xs text-slate-400">Ph.1</p>
-                        <p class="text-xs font-semibold text-slate-700" id="p1">—</p>
-                    </div>
-                    <div class="bg-emerald-50 rounded-lg py-1">
-                        <p class="text-xs text-slate-400">Ph.2</p>
-                        <p class="text-xs font-semibold text-slate-700" id="p2">—</p>
-                    </div>
-                    <div class="bg-emerald-50 rounded-lg py-1">
-                        <p class="text-xs text-slate-400">Ph.3</p>
-                        <p class="text-xs font-semibold text-slate-700" id="p3">—</p>
-                    </div>
-                </div>
-                <!-- Index actuel mis à jour par JS -->
-                <p class="text-xs text-slate-400 mt-2">Index :
-                    <span id="kpi-index" class="font-semibold text-slate-600">
-                        {% if compteurs.exists %}{{ compteurs.first.index_actuel|floatformat:1 }}{% else %}—{% endif %} kWh
+                {% if compteurs.first %}
+                <a href="{% url 'compteurs:client_compteur_detail' pk=compteurs.first.id %}" class="pill pill-sky" style="text-decoration:none;">Détails →</a>
+                {% else %}
+                <span class="pill pill-gray">Aucun</span>
+                {% endif %}
+            </div>
+            <p class="kpi-label">Mon compteur</p>
+            {% if compteurs.first %}
+                <div class="mt-1">
+                    <span class="text-lg font-bold text-slate-900 block truncate">
+                        {{ compteurs.first.numero_contrat }}
                     </span>
-                </p>
-            </div>
+                    <div class="flex items-center justify-between mt-2">
+                        <div>
+                            <span class="text-xl font-bold text-slate-900">{{ compteurs.first.index_actuel|floatformat:0 }}</span>
+                            <span class="text-xs text-slate-500">kWh</span>
+                        </div>
+                        <span class="pill {% if compteurs.first.shelly_status == 'CONNECTE' %}pill-emerald{% else %}pill-red{% endif %} text-xs">
+                            {{ compteurs.first.get_shelly_status_display }}
+                        </span>
+                    </div>
+                    <div class="mt-2 pt-2 border-t border-slate-100">
+                        <p class="text-xs text-slate-500 truncate">{{ compteurs.first.adresse_installation|default:"Adresse non spécifiée"|truncatechars:25 }}</p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="mt-3 text-center">
+                    <p class="text-slate-500 text-xs">Aucun compteur actif</p>
+                </div>
+            {% endif %}
         </div>
+    </div>
 
-        <!-- ── Graphique + Compteurs ── -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-
-            <!-- Graphique historique (2/3) — mis à jour toutes les 5 min -->
-            <div class="lg:col-span-2 section-card anim-fade-up delay-2">
-                <div class="section-header">
-                    <div>
-                        <h3 class="section-title">Historique de consommation</h3>
-                        <p class="section-sub">Évolution de votre consommation électrique</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="button" class="px-3 py-1.5 text-xs font-medium bg-orange-500 text-white rounded-lg period-btn" data-period="6m">6 mois</button>
-                        <button type="button" class="px-3 py-1.5 text-xs font-medium border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg period-btn" data-period="1y">1 an</button>
-                        <button type="button" class="px-3 py-1.5 text-xs font-medium border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg period-btn" data-period="2y">2 ans</button>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <div id="chart-container" style="position:relative; height:250px;">
-                        <canvas id="consommationChart"></canvas>
-                    </div>
-                    <div id="no-data-message" class="flex flex-col items-center justify-center py-12" style="display:none;">
-                        <div class="p-4 bg-slate-100 rounded-full mb-4">
-                            <iconify-icon icon="solar:chart-line-bold-duotone" width="48" class="text-slate-400"></iconify-icon>
-                        </div>
-                        <p class="text-slate-500">Aucune donnée de consommation disponible</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mes compteurs (1/3) -->
-            <div class="lg:col-span-1 section-card anim-fade-up delay-3">
-                <div class="section-header">
-                    <div>
-                        <h3 class="section-title">Mon compteur</h3>
-                        <p class="section-sub">État et informations</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-                        <iconify-icon icon="solar:chart-square-bold-duotone" width="20" class="text-emerald-600"></iconify-icon>
-                    </div>
-                </div>
-                <div class="p-6 space-y-3 max-h-96 overflow-y-auto custom-scroll">
-                    {% for compteur in compteurs %}
-                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                        <div class="flex items-center justify-between mb-3">
-                            <h6 class="font-semibold text-slate-900 text-sm">{{ compteur.numero_contrat }}</h6>
-                            <span class="pill {% if compteur.statut == 'ACTIF' %}pill-emerald{% elif compteur.statut == 'INACTIF' %}pill-gray{% else %}pill-amber{% endif %}">
-                                {{ compteur.get_statut_display }}
-                            </span>
-                        </div>
-                        <div class="mb-3">
-                            <p class="text-xs text-slate-500 mb-1">Adresse :</p>
-                            <p class="text-sm text-slate-700">{{ compteur.adresse_installation|default:"Non spécifié"|truncatechars:40 }}</p>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3 mb-3">
-                            <div>
-                                <p class="text-xs text-slate-500 mb-1">Index actuel</p>
-                                <p class="font-semibold text-slate-900 text-sm">{{ compteur.index_actuel|floatformat:0 }} kWh</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-slate-500 mb-1">Shelly</p>
-                                <span class="pill {% if compteur.shelly_ip %}pill-emerald{% else %}pill-red{% endif %}">
-                                    {{ compteur.get_shelly_status_display }}
-                                </span>
-                            </div>
-                        </div>
-                        <a href="{% url 'compteurs:client_compteur_detail' pk=compteur.id %}" class="btn-secondary w-full justify-center text-sm">
-                            <iconify-icon icon="solar:chart-line-bold-duotone" width="16"></iconify-icon>
-                            <span>Voir détails</span>
-                        </a>
-                    </div>
-                    {% empty %}
-                    <div class="flex flex-col items-center justify-center py-8">
-                        <div class="p-4 bg-slate-100 rounded-full mb-3">
-                            <iconify-icon icon="solar:chart-square-bold-duotone" width="32" class="text-slate-400"></iconify-icon>
-                        </div>
-                        <p class="text-slate-500 text-sm">Aucun compteur actif</p>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <!-- ── Factures récentes + Conseils ── -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- ── LIGNE 3 : Factures récentes + Conseils d'économie (pas de graphique) ── -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
 
             <!-- Factures récentes -->
             <div class="section-card anim-fade-up delay-3">
@@ -435,7 +356,7 @@
                         <h3 class="section-title">Factures récentes</h3>
                         <p class="section-sub">Historique de vos factures</p>
                     </div>
-                    <a href="{% url 'facturation:client_factures_list' %}" class="text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors">
+                    <a href="{% url 'facturation:client_factures_list' %}" class="text-xs text-orange-600 hover:text-orange-700 font-medium transition-colors">
                         Voir historique
                     </a>
                 </div>
@@ -466,17 +387,17 @@
                                 </td>
                                 <td class="text-slate-700">{{ facture.date_echeance|date:"d/m/Y" }}</td>
                                 <td>
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-1">
                                         <a href="{% url 'facturation:detail' facture.pk %}"
-                                           class="p-2 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                                           class="p-1 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
                                            title="Voir">
-                                            <iconify-icon icon="solar:eye-bold-duotone" width="18"></iconify-icon>
+                                            <iconify-icon icon="solar:eye-bold-duotone" width="16"></iconify-icon>
                                         </a>
                                         {% if facture.statut != 'PAYÉE' %}
                                         <a href="{% url 'facturation:detail' facture.pk %}"
-                                           class="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                           class="p-1 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
                                            title="Payer">
-                                            <iconify-icon icon="solar:card-bold-duotone" width="18"></iconify-icon>
+                                            <iconify-icon icon="solar:card-bold-duotone" width="16"></iconify-icon>
                                         </a>
                                         {% endif %}
                                     </div>
@@ -484,12 +405,12 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="py-8 text-center">
+                                <td colspan="5" class="py-6 text-center">
                                     <div class="flex flex-col items-center justify-center">
-                                        <div class="p-4 bg-emerald-100 rounded-full mb-3">
-                                            <iconify-icon icon="solar:check-circle-bold-duotone" width="32" class="text-emerald-500"></iconify-icon>
+                                        <div class="p-3 bg-emerald-100 rounded-full mb-2">
+                                            <iconify-icon icon="solar:check-circle-bold-duotone" width="24" class="text-emerald-500"></iconify-icon>
                                         </div>
-                                        <p class="text-slate-500">Aucune facture en attente</p>
+                                        <p class="text-slate-500 text-sm">Aucune facture en attente</p>
                                     </div>
                                 </td>
                             </tr>
@@ -506,19 +427,19 @@
                         <h3 class="section-title">Conseils pour économiser</h3>
                         <p class="section-sub">Optimisez votre consommation</p>
                     </div>
-                    <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-                        <iconify-icon icon="solar:lightbulb-bold-duotone" width="20" class="text-amber-600"></iconify-icon>
+                    <div class="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center">
+                        <iconify-icon icon="solar:lightbulb-bold-duotone" width="18" class="text-amber-600"></iconify-icon>
                     </div>
                 </div>
-                <div class="p-6 space-y-4">
-                    <div class="p-4 bg-sky-50 border border-sky-200 rounded-lg">
-                        <div class="flex items-start gap-3">
-                            <div class="p-2 bg-sky-100 rounded-lg flex-shrink-0">
-                                <iconify-icon icon="solar:info-circle-bold-duotone" width="20" class="text-sky-600"></iconify-icon>
+                <div class="p-5 space-y-3">
+                    <div class="p-3 bg-sky-50 border border-sky-200 rounded-lg">
+                        <div class="flex items-start gap-2">
+                            <div class="p-1.5 bg-sky-100 rounded flex-shrink-0">
+                                <iconify-icon icon="solar:info-circle-bold-duotone" width="16" class="text-sky-600"></iconify-icon>
                             </div>
                             <div>
-                                <h6 class="text-sm font-semibold text-slate-900 mb-1">Votre consommation</h6>
-                                <p class="text-sm text-slate-700" id="conseil-niveau">
+                                <h6 class="text-xs font-semibold text-slate-900 mb-0.5">Votre consommation</h6>
+                                <p class="text-xs text-slate-700" id="conseil-niveau">
                                     {% if consommation_mois > 300 %}
                                         Votre consommation ce mois est <span class="font-semibold text-red-600">élevée</span>. Voici quelques conseils pour réduire :
                                     {% elif consommation_mois > 200 %}
@@ -530,42 +451,42 @@
                             </div>
                         </div>
                     </div>
-                    <div class="space-y-3">
-                        <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors">
-                            <div class="p-2 bg-amber-100 rounded-lg flex-shrink-0">
-                                <iconify-icon icon="solar:sun-bold-duotone" width="18" class="text-amber-600"></iconify-icon>
+                    <div class="space-y-2">
+                        <div class="flex items-start gap-2 p-2 rounded hover:bg-slate-50 transition-colors">
+                            <div class="p-1.5 bg-amber-100 rounded flex-shrink-0">
+                                <iconify-icon icon="solar:sun-bold-duotone" width="14" class="text-amber-600"></iconify-icon>
                             </div>
                             <div>
-                                <h6 class="text-sm font-semibold text-slate-900 mb-1">Optimisez vos heures pleines</h6>
-                                <p class="text-sm text-slate-600">Déplacez l'utilisation des gros appareils en heures creuses (22h–6h)</p>
+                                <h6 class="text-xs font-semibold text-slate-900 mb-0.5">Optimisez vos heures pleines</h6>
+                                <p class="text-xs text-slate-600">Déplacez l'utilisation des gros appareils en heures creuses (22h–6h)</p>
                             </div>
                         </div>
-                        <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors">
-                            <div class="p-2 bg-sky-100 rounded-lg flex-shrink-0">
-                                <iconify-icon icon="solar:temperature-bold-duotone" width="18" class="text-sky-600"></iconify-icon>
+                        <div class="flex items-start gap-2 p-2 rounded hover:bg-slate-50 transition-colors">
+                            <div class="p-1.5 bg-sky-100 rounded flex-shrink-0">
+                                <iconify-icon icon="solar:temperature-bold-duotone" width="14" class="text-sky-600"></iconify-icon>
                             </div>
                             <div>
-                                <h6 class="text-sm font-semibold text-slate-900 mb-1">Réglez votre chauffage</h6>
-                                <p class="text-sm text-slate-600">1°C de moins = 7% d'économie sur votre facture de chauffage</p>
+                                <h6 class="text-xs font-semibold text-slate-900 mb-0.5">Réglez votre chauffage</h6>
+                                <p class="text-xs text-slate-600">1°C de moins = 7% d'économie sur votre facture de chauffage</p>
                             </div>
                         </div>
-                        <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors">
-                            <div class="p-2 bg-emerald-100 rounded-lg flex-shrink-0">
-                                <iconify-icon icon="solar:plug-bold-duotone" width="18" class="text-emerald-600"></iconify-icon>
+                        <div class="flex items-start gap-2 p-2 rounded hover:bg-slate-50 transition-colors">
+                            <div class="p-1.5 bg-emerald-100 rounded flex-shrink-0">
+                                <iconify-icon icon="solar:plug-bold-duotone" width="14" class="text-emerald-600"></iconify-icon>
                             </div>
                             <div>
-                                <h6 class="text-sm font-semibold text-slate-900 mb-1">Évitez les veilles inutiles</h6>
-                                <p class="text-sm text-slate-600">Les appareils en veille consomment jusqu'à 10% de votre électricité</p>
+                                <h6 class="text-xs font-semibold text-slate-900 mb-0.5">Évitez les veilles inutiles</h6>
+                                <p class="text-xs text-slate-600">Les appareils en veille consomment jusqu'à 10% de votre électricité</p>
                             </div>
                         </div>
                     </div>
                     {% if savings_tips %}
-                    <div class="pt-4 border-t border-slate-100">
-                        <h6 class="text-sm font-semibold text-slate-900 mb-3">Conseils personnalisés</h6>
-                        <ul class="space-y-2">
+                    <div class="pt-3 border-t border-slate-100">
+                        <h6 class="text-xs font-semibold text-slate-900 mb-2">Conseils personnalisés</h6>
+                        <ul class="space-y-1">
                             {% for tip in savings_tips %}
-                            <li class="flex items-start gap-2 text-sm text-slate-700">
-                                <iconify-icon icon="solar:lightbulb-bold-duotone" width="16" class="text-amber-500 flex-shrink-0 mt-0.5"></iconify-icon>
+                            <li class="flex items-start gap-1 text-xs text-slate-700">
+                                <iconify-icon icon="solar:lightbulb-bold-duotone" width="12" class="text-amber-500 flex-shrink-0 mt-0.5"></iconify-icon>
                                 <span>{{ tip }}</span>
                             </li>
                             {% endfor %}
@@ -576,74 +497,68 @@
             </div>
         </div>
 
-        <!-- ── Actions rapides ── -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- ── LIGNE 4 : Actions rapides (remontées) ── -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div class="section-card hover:border-orange-200 transition-all group anim-fade-up delay-4">
-                <div class="p-6 text-center">
-                    <div class="inline-flex p-4 bg-orange-100 rounded-full mb-4 group-hover:bg-orange-200 transition-colors">
-                        <iconify-icon icon="solar:chart-line-bold-duotone" width="32" class="text-orange-600"></iconify-icon>
+                <div class="p-4 text-center">
+                    <div class="inline-flex p-3 bg-orange-100 rounded-full mb-2 group-hover:bg-orange-200 transition-colors">
+                        <iconify-icon icon="solar:chart-line-bold-duotone" width="24" class="text-orange-600"></iconify-icon>
                     </div>
-                    <h5 class="text-lg font-semibold text-slate-900 mb-2">Ma consommation</h5>
-                    <p class="text-slate-600 text-sm mb-4">Consultez votre historique</p>
-                    <a href="{% url 'dashboard:client_consumption_analysis' %}" class="btn-orange w-full justify-center">
+                    <h5 class="text-base font-semibold text-slate-900 mb-1">Ma consommation</h5>
+                    <p class="text-slate-600 text-xs mb-3">Consultez votre historique</p>
+                    <a href="{% url 'dashboard:client_consumption_analysis' %}" class="btn-orange w-full justify-center text-sm">
                         <span>Voir détails</span>
-                        <iconify-icon icon="solar:alt-arrow-right-bold-duotone" width="16"></iconify-icon>
+                        <iconify-icon icon="solar:alt-arrow-right-bold-duotone" width="14"></iconify-icon>
                     </a>
                 </div>
             </div>
             <div class="section-card hover:border-emerald-200 transition-all group anim-fade-up delay-4">
-                <div class="p-6 text-center">
-                    <div class="inline-flex p-4 bg-emerald-100 rounded-full mb-4 group-hover:bg-emerald-200 transition-colors">
-                        <iconify-icon icon="solar:user-circle-bold-duotone" width="32" class="text-emerald-600"></iconify-icon>
+                <div class="p-4 text-center">
+                    <div class="inline-flex p-3 bg-emerald-100 rounded-full mb-2 group-hover:bg-emerald-200 transition-colors">
+                        <iconify-icon icon="solar:user-circle-bold-duotone" width="24" class="text-emerald-600"></iconify-icon>
                     </div>
-                    <h5 class="text-lg font-semibold text-slate-900 mb-2">Mon profil</h5>
-                    <p class="text-slate-600 text-sm mb-4">Gérez vos informations</p>
-                    <a href="{% url 'users:profile' %}" class="btn-emerald w-full justify-center">
+                    <h5 class="text-base font-semibold text-slate-900 mb-1">Mon profil</h5>
+                    <p class="text-slate-600 text-xs mb-3">Gérez vos informations</p>
+                    <a href="{% url 'users:profile' %}" class="btn-emerald w-full justify-center text-sm">
                         <span>Modifier</span>
-                        <iconify-icon icon="solar:alt-arrow-right-bold-duotone" width="16"></iconify-icon>
+                        <iconify-icon icon="solar:alt-arrow-right-bold-duotone" width="14"></iconify-icon>
                     </a>
                 </div>
             </div>
             <div class="section-card hover:border-sky-200 transition-all group anim-fade-up delay-4">
-                <div class="p-6 text-center">
-                    <div class="inline-flex p-4 bg-sky-100 rounded-full mb-4 group-hover:bg-sky-200 transition-colors">
-                        <iconify-icon icon="solar:settings-bold-duotone" width="32" class="text-sky-600"></iconify-icon>
+                <div class="p-4 text-center">
+                    <div class="inline-flex p-3 bg-sky-100 rounded-full mb-2 group-hover:bg-sky-200 transition-colors">
+                        <iconify-icon icon="solar:settings-bold-duotone" width="24" class="text-sky-600"></iconify-icon>
                     </div>
-                    <h5 class="text-lg font-semibold text-slate-900 mb-2">Mes capteurs</h5>
-                    <p class="text-slate-600 text-sm mb-4">Vos appareils Shelly</p>
-                    <a href="{% url 'compteurs:capteur_list' %}" class="btn-primary w-full justify-center">
+                    <h5 class="text-base font-semibold text-slate-900 mb-1">Mes capteurs</h5>
+                    <p class="text-slate-600 text-xs mb-3">Vos appareils Shelly</p>
+                    <a href="{% url 'compteurs:capteur_list' %}" class="btn-primary w-full justify-center text-sm">
                         <span>Voir capteurs</span>
-                        <iconify-icon icon="solar:alt-arrow-right-bold-duotone" width="16"></iconify-icon>
+                        <iconify-icon icon="solar:alt-arrow-right-bold-duotone" width="14"></iconify-icon>
                     </a>
                 </div>
             </div>
         </div>
 
-    </div><!-- /p-6 -->
+    </div><!-- /p-5 -->
 </div><!-- /min-h-screen -->
 {% endblock %}
 
-
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // ════════════════════════════════════════════════════════════════
     // CONFIGURATION
     // ════════════════════════════════════════════════════════════════
-    const LIVE_INTERVAL  = 5000;   // puissance instantanée
-    const STATS_INTERVAL = 30000;  // KPI
-    const CHART_INTERVAL = 300000; // graphique
+    const LIVE_INTERVAL  = 5000;
+    const STATS_INTERVAL = 30000;
 
-    // Récupération dynamique depuis les attributs data
     let COMPTEUR_ID = null;
-    let SHELLY_CONNECTE = false;
 
     {% if compteurs.exists %}
         {% with compteur=compteurs.first %}
             COMPTEUR_ID = {{ compteur.id }};
-            SHELLY_CONNECTE = {% if compteur.shelly_status == 'CONNECTE' %}true{% else %}false{% endif %};
-            console.log('✅ Compteur trouvé:', COMPTEUR_ID, '| Connecté:', SHELLY_CONNECTE);
+            console.log('✅ Compteur trouvé:', COMPTEUR_ID);
         {% endwith %}
     {% else %}
         console.log('⚠️ Aucun compteur trouvé pour cet utilisateur');
@@ -653,13 +568,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const LIVE_URL = COMPTEUR_ID
         ? "{% url 'compteurs:live_data' 0 %}".replace('/0/', '/' + COMPTEUR_ID + '/')
         : null;
-
-    console.log('📡 STATS_URL:', STATS_URL);
-    console.log('🔴 LIVE_URL:', LIVE_URL);
-
-    // ════════════════════════════════════════════════════════════════
-    // FONCTIONS UTILITAIRES
-    // ════════════════════════════════════════════════════════════════
 
     function setText(elementId, value) {
         const el = document.getElementById(elementId);
@@ -692,165 +600,44 @@ document.addEventListener('DOMContentLoaded', function () {
         return num.toLocaleString('fr-FR', { maximumFractionDigits: decimals });
     }
 
-
-    /* ══════════════════════════════════════════════════
-       GRAPHIQUE HISTORIQUE
-    ══════════════════════════════════════════════════ */
-    let chart = null;
-
-    function renderChart(historique) {
-        const ctxEl = document.getElementById('consommationChart');
-        if (!ctxEl) return;
-
-        if (!historique || historique.length === 0) {
-            const chartContainer = document.getElementById('chart-container');
-            const noDataMsg = document.getElementById('no-data-message');
-            if (chartContainer) chartContainer.style.display = 'none';
-            if (noDataMsg) noDataMsg.style.display = 'flex';
-            return;
-        }
-
-        const chartContainer = document.getElementById('chart-container');
-        const noDataMsg = document.getElementById('no-data-message');
-        if (chartContainer) chartContainer.style.display = 'block';
-        if (noDataMsg) noDataMsg.style.display = 'none';
-
-        const labels = historique.map(h => h.mois);
-        const data   = historique.map(h => h.valeur);
-
-        /* Mise à jour sans recréer si déjà initialisé */
-        if (chart) {
-            chart.data.labels              = labels;
-            chart.data.datasets[0].data   = data;
-            chart.update('none');
-            return;
-        }
-
-        chart = new Chart(ctxEl.getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels,
-                datasets: [{
-                    label: 'Consommation (kWh)',
-                    data,
-                    backgroundColor: 'rgba(249,115,22,0.5)',
-                    borderColor:     'rgba(249,115,22,1)',
-                    borderWidth: 1,
-                    borderRadius: 6,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(255,255,255,0.95)',
-                        titleColor: '#1e293b',
-                        bodyColor:  '#64748b',
-                        borderColor: 'rgba(249,115,22,0.2)',
-                        borderWidth: 1,
-                        padding: 12,
-                        cornerRadius: 8,
-                        callbacks: {
-                            label: ctx => ctx.dataset.label + ' : ' + ctx.raw + ' kWh'
-                        }
-                    }
-                },
-                scales: {
-                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: '#f1f5f9' },
-                        ticks: { color: '#94a3b8', callback: v => v + ' kWh' }
-                    }
-                }
-            }
-        });
-
-        /* Boutons période (cosmétique uniquement) */
-        document.querySelectorAll('.period-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                document.querySelectorAll('.period-btn').forEach(b => {
-                    b.classList.remove('bg-orange-500', 'text-white');
-                    b.classList.add('border', 'border-slate-200', 'text-slate-600');
-                });
-                this.classList.add('bg-orange-500', 'text-white');
-                this.classList.remove('border', 'border-slate-200', 'text-slate-600');
-            });
-        });
-    }
-
-
-    /* ══════════════════════════════════════════════════
-       MISE À JOUR KPI — endpoint /api/stats/
-       Appelé toutes les 30 s (+ au chargement avec historique)
-    ══════════════════════════════════════════════════ */
-    function updateStats(includeHistorique = false) {
-        const url = STATS_URL + (includeHistorique ? '?include_historique=1' : '');
-        fetch(url)
+    function updateStats() {
+        fetch(STATS_URL)
             .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
             .then(data => {
                 if (data.error) return;
-
-                /* ── Consommation du mois ── */
                 setText('kpi-conso-mois', fmt(data.consommation_mois));
-
-                /* ── Variation ── */
-                const varEl = document.getElementById('kpi-variation');
-                if (varEl && data.variation !== null && data.variation !== undefined) {
-                    const sign = data.variation > 0 ? '+' : '';
-                    varEl.textContent = sign + data.variation + '% vs mois dernier';
-                    varEl.className   = data.variation > 0 ? 'text-sm text-red-500'
-                                      : data.variation < 0 ? 'text-sm text-emerald-500'
-                                      : 'text-sm text-slate-500';
-                } else if (varEl) {
-                    varEl.textContent = 'Données non disponibles';
-                    varEl.className   = 'text-sm text-slate-400';
-                }
-
-                /* ── Coût estimé ── */
-                setText('kpi-cout', fmt(data.cout_estime) + ' FCFA');
-
-                /* ── Factures impayées ── */
-                setText('kpi-factures-nb',     data.factures_impayees.total);
+                setText('kpi-factures-nb', data.factures_impayees.total);
                 setText('kpi-factures-montant', fmt(data.factures_impayees.montant) + ' FCFA');
 
-                /* ── Badge alertes ── */
                 const badge = document.getElementById('badge-alertes');
                 if (badge) {
-                    badge.textContent    = data.nb_alertes;
-                    badge.style.display  = data.nb_alertes > 0 ? 'inline-block' : 'none';
+                    badge.textContent = data.nb_alertes;
+                    badge.style.display = data.nb_alertes > 0 ? 'inline-block' : 'none';
                 }
 
-                /* ── Statut Shelly dans la fiche ménage ── */
                 const shellyBadge = document.getElementById('shelly-status-badge');
                 if (shellyBadge) {
                     const ok = data.shelly_status === 'CONNECTE';
                     shellyBadge.textContent = ok ? 'Connecté' : 'Déconnecté';
-                    shellyBadge.className   = 'pill ' + (ok ? 'pill-emerald' : 'pill-red');
+                    shellyBadge.className = 'pill ' + (ok ? 'pill-emerald' : 'pill-red');
                 }
 
-                /* ── Index depuis le serveur (si pas mis à jour par live) ── */
                 if (data.index_actuel != null) {
                     setText('kpi-index', fmt(data.index_actuel, 1) + ' kWh');
                 }
 
-                /* ── Graphique ── */
-                if (includeHistorique && data.historique) {
-                    renderChart(data.historique);
+                const varEl = document.getElementById('kpi-variation');
+                if (varEl && data.variation !== null) {
+                    const sign = data.variation > 0 ? '+' : '';
+                    varEl.textContent = sign + data.variation + '% vs mois dernier';
+                    varEl.className = data.variation > 0 ? 'text-xs text-red-500' : (data.variation < 0 ? 'text-xs text-emerald-500' : 'text-xs text-slate-500');
                 }
             })
             .catch(err => console.warn('[Stats] Erreur :', err));
     }
 
-
-    /* ══════════════════════════════════════════════════
-       DONNÉES LIVE SHELLY — endpoint /compteurs/<id>/live/
-       Appelé toutes les 5 s
-    ══════════════════════════════════════════════════ */
     function setOffline() {
-        setText('live-power',  'Offline');
+        setText('live-power', 'Offline');
         setText('live-charge', 'Capteur indisponible');
         setBar('live-bar', 0);
         setText('p1', '—'); setText('p2', '—'); setText('p3', '—');
@@ -859,29 +646,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateLive() {
         if (!LIVE_URL) { setOffline(); return; }
-
         fetch(LIVE_URL)
             .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
             .then(data => {
                 if (data.error) { setOffline(); return; }
-
                 setLiveStatus(true);
-
-                /* Puissance totale */
                 const w = parseFloat(data.avg_power || 0);
                 setText('live-power', w.toFixed(1) + ' W');
-
-                /* Barre de charge (base 5 000 W = puissance max référence) */
                 const pct = Math.min((w / 5000) * 100, 100);
                 setBar('live-bar', pct);
                 setText('live-charge', 'Charge : ' + pct.toFixed(0) + '%');
-
-                /* Phases */
                 setText('p1', parseFloat(data.phase1 || 0).toFixed(1) + ' W');
                 setText('p2', parseFloat(data.phase2 || 0).toFixed(1) + ' W');
                 setText('p3', parseFloat(data.phase3 || 0).toFixed(1) + ' W');
-
-                /* Index actuel (mis à jour si le Shelly retourne l'énergie totale) */
                 if (data.energie_totale_kwh != null) {
                     setText('kpi-index', fmt(data.energie_totale_kwh, 1) + ' kWh');
                 }
@@ -889,78 +666,44 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(() => setOffline());
     }
 
+    // Lancement
+    updateStats();
+    setInterval(() => updateStats(), STATS_INTERVAL);
 
-
-        /* ══════════════════════════════════════════════════
-       LANCEMENT — Version corrigée
-    ══════════════════════════════════════════════════ */
-
-    // 1. Chargement initial : stats + graphique
-    updateStats(true);
-
-    // 2. Live Shelly — ON ESSAIE TOUJOURS (peu importe le statut en base)
     if (LIVE_URL) {
-        console.log('🟢 Tentative de connexion au Shelly...');
-
-        // Fonction pour démarrer le live data
         function startLiveData() {
             if (window.liveInterval) clearInterval(window.liveInterval);
-            updateLive(); // Appel immédiat
+            updateLive();
             window.liveInterval = setInterval(updateLive, LIVE_INTERVAL);
-            console.log('✅ Live data démarré (intervalle toutes les 5s)');
         }
-
-        // Test initial de connexion
         fetch(LIVE_URL)
             .then(r => r.json())
             .then(data => {
-                if (!data.error) {
-                    console.log('🎉 Shelly répond ! Démarrage du live data');
-                    startLiveData();
-                } else {
-                    console.warn('⚠️ Shelly ne répond pas au premier appel, tentative périodique...');
-                    // Réessayer toutes les 30 secondes de reconnecter
+                if (!data.error) startLiveData();
+                else {
                     window.reconnectInterval = setInterval(() => {
-                        fetch(LIVE_URL)
-                            .then(r => r.json())
-                            .then(data => {
-                                if (!data.error && !window.liveInterval) {
-                                    console.log('🎉 Shelly connecté ! Démarrage du live data');
-                                    clearInterval(window.reconnectInterval);
-                                    startLiveData();
-                                }
-                            })
-                            .catch(() => {});
+                        fetch(LIVE_URL).then(r => r.json()).then(data => {
+                            if (!data.error && !window.liveInterval) {
+                                clearInterval(window.reconnectInterval);
+                                startLiveData();
+                            }
+                        }).catch(() => {});
                     }, 30000);
                 }
             })
             .catch(() => {
-                console.warn('⚠️ Échec initial, tentative périodique...');
-                // Même mécanisme de reconnexion périodique
                 window.reconnectInterval = setInterval(() => {
-                    fetch(LIVE_URL)
-                        .then(r => r.json())
-                        .then(data => {
-                            if (!data.error && !window.liveInterval) {
-                                console.log('🎉 Shelly connecté ! Démarrage du live data');
-                                clearInterval(window.reconnectInterval);
-                                startLiveData();
-                            }
-                        })
-                        .catch(() => {});
+                    fetch(LIVE_URL).then(r => r.json()).then(data => {
+                        if (!data.error && !window.liveInterval) {
+                            clearInterval(window.reconnectInterval);
+                            startLiveData();
+                        }
+                    }).catch(() => {});
                 }, 30000);
             });
     } else {
-        console.warn('❌ Pas d\'URL live (COMPTEUR_ID null)');
         setLiveStatus(false);
     }
-
-    // 3. KPI toutes les 30 s
-    setInterval(() => updateStats(false), STATS_INTERVAL);
-
-    // 4. Graphique toutes les 5 min
-    setInterval(() => updateStats(true), CHART_INTERVAL);
-
 });
 </script>
 {% endblock %}

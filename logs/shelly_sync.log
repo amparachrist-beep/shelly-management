@@ -519,3 +519,222 @@ UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f50d' in posit
 ⚠️ Aucun compteur trouvé
 [OK] Development settings loaded successfully
 ⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+⚠️ Aucun compteur trouvé
+[OK] Development settings loaded successfully
+
+🔍 Synchronisation de 1 compteur(s)...
+
+==================================================
+📡 Compteur: CONTRAT-2026-0001
+✅ Shelly OK
+⚡ Total: 60.713 W | 📊 70.877 kWh
+📊 Index réel: 70.87728 kWh
+  📌 Index précédent (2026-04-07): 65.71 kWh
+  📊 Index actuel réel: 70.87728 kWh
+  📊 Consommation du jour: 5.17 kWh
+  ✅ Consommation créée pour 2026-04-08: 5.17 kWh
+
+✅ Synchronisation terminée !
+[OK] Development settings loaded successfully
+
+🔍 Synchronisation de 1 compteur(s)...
+
+==================================================
+📡 Compteur: CONTRAT-2026-0001
+✅ Shelly OK
+⚡ Total: 55.414 W | 📊 70.950 kWh
+📊 Index réel: 70.94978 kWh
+  📌 Index précédent (2026-04-07): 65.71 kWh
+  📊 Index actuel réel: 70.94978 kWh
+  📊 Consommation du jour: 5.24 kWh
+  ✅ Consommation mise à jour pour 2026-04-08: 5.24 kWh
+
+✅ Synchronisation terminée !
+[OK] Development settings loaded successfully
+
+🔍 Synchronisation de 1 compteur(s)...
+
+==================================================
+📡 Compteur: CONTRAT-2026-0001
+✅ Shelly OK
+⚡ Total: 55.531 W | 📊 71.005 kWh
+📊 Index réel: 71.00497 kWh
+  📌 Index précédent (2026-04-01): 27194.44 kWh
+  📊 Index actuel réel: 71.00497 kWh
+  📊 Consommation du jour: -27123.44 kWh
+  ⚠️ Consommation incohérente, utilisation estimation
+  📊 Consommation estimée: 1.33 kWh
+  ✅ Consommation créée pour 2026-04-09: 1.33 kWh
+  📊 Mise à jour mensuelle Apr 2026: 15.00 kWh
+
+✅ Synchronisation terminée !
+[OK] Development settings loaded successfully
+
+🔍 Synchronisation de 1 compteur(s)...
+
+==================================================
+📡 Compteur: CONTRAT-2026-0001
+✅ Shelly OK
+⚡ Total: 53.9 W | 📊 71.059 kWh
+📊 Index réel: 27197.05912 kWh
+  📌 Index précédent (2026-04-01): 27142.3 kWh
+  📊 Index actuel réel: 27197.05912 kWh
+  📊 Consommation du jour: 54.76 kWh
+  ✅ Consommation mise à jour pour 2026-04-09: 54.76 kWh
+  📊 Mise à jour mensuelle Apr 2026: 69.76 kWh
+
+✅ Synchronisation terminée !
+[OK] Development settings loaded successfully
+
+Synchronisation de 1 compteur(s)...
+
+==================================================
+Compteur: CONTRAT-2026-0001
+Shelly OK
+Total: 52.201 W | 71.117 kWh
+Index reel: 27197.11671 kWh
+  Index precedent (derniere: 2026-04-01): 27195.76 kWh
+  Index actuel reel: 27197.11671 kWh
+  Consommation du jour: 1.36 kWh
+  Consommation mise a jour pour 2026-04-09: 1.36 kWh
+  Mensuel Apr 2026: journee du 1er presente (source=SHELLY), agregat = 71.12 kWh (calcul a la volee)
+
+Synchronisation terminee !
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+
+Synchronisation de 1 compteur(s)...
+
+==================================================
+Compteur: CONTRAT-2026-0001
+Shelly OK
+Total: 54.068 W | 75.412 kWh
+Index reel: 27201.41166 kWh
+  Index precedent (derniere: 2026-04-01): 27195.76 kWh
+  Index actuel reel: 27201.41166 kWh
+  Consommation du jour: 5.65 kWh
+  Consommation mise a jour pour 2026-04-09: 5.65 kWh
+  Mensuel Apr 2026: journee du 1er presente (source=SHELLY), agregat = 75.41 kWh (calcul a la volee)
+
+Synchronisation terminee !
+[OK] Development settings loaded successfully
+
+Synchronisation de 1 compteur(s)...
+
+==================================================
+Compteur: CONTRAT-2026-0001
+Erreur connexion: 192.168.11.234
+
+Synchronisation terminee !
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+
+Synchronisation de 1 compteur(s)...
+
+==================================================
+Compteur: CONTRAT-2026-0001
+Timeout: Shelly injoignable
+
+Synchronisation terminee !
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+
+Synchronisation de 1 compteur(s)...
+
+==================================================
+Compteur: CONTRAT-2026-0001
+Shelly OK
+Total: 13.29 W | 82.589 kWh
+Index reel: 27208.58936 kWh
+  Index precedent (hier 2026-04-10): 27204.57 kWh
+  Index actuel reel: 27208.58936 kWh
+  Consommation du jour: 4.02 kWh
+  Consommation creee pour 2026-04-11: 4.02 kWh
+  Mensuel Apr 2026: journee du 1er presente (source=SHELLY), agregat = 82.59 kWh (calcul a la volee)
+
+Synchronisation terminee !
+[OK] Development settings loaded successfully
+
+Synchronisation de 1 compteur(s)...
+
+==================================================
+Compteur: CONTRAT-2026-0001
+Erreur connexion: 192.168.11.234
+
+Synchronisation terminee !
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+
+Synchronisation de 1 compteur(s)...
+
+==================================================
+Compteur: CONTRAT-2026-0001
+Shelly OK
+Total: 1147.217 W | 85.981 kWh
+Index reel: 27211.98113 kWh
+  Index precedent (hier 2026-04-11): 27208.59 kWh
+  Index actuel reel: 27211.98113 kWh
+  Consommation du jour: 3.39 kWh
+  Consommation creee pour 2026-04-12: 3.39 kWh
+  Mensuel Apr 2026: journee du 1er presente (source=SHELLY), agregat = 85.98 kWh (calcul a la volee)
+
+Synchronisation terminee !
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve
+[OK] Development settings loaded successfully
+Aucun compteur trouve

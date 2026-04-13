@@ -44,37 +44,42 @@ def consommation_list(request):
     """Liste des consommations"""
     # Déterminer le type d'utilisateur et filtrer
     if request.user.is_admin or request.user.is_agent:
-        consommations = Consommation.objects.select_related(
+        # ✅ MODIFICATION: Utiliser ConsommationJournaliere au lieu de Consommation
+        from apps.consommation.models import ConsommationJournaliere
+        consommations = ConsommationJournaliere.objects.select_related(
             'compteur', 'compteur__menage'
-        ).order_by('-periode', 'compteur__menage__nom_menage')
+        ).order_by('-date', 'compteur__menage__nom_menage')
     else:
         try:
             menage = Menage.objects.get(utilisateur=request.user)
-            consommations = Consommation.objects.filter(
+            from apps.consommation.models import ConsommationJournaliere
+            consommations = ConsommationJournaliere.objects.filter(
                 compteur__menage=menage
-            ).select_related('compteur').order_by('-periode')
+            ).select_related('compteur').order_by('-date')
         except Menage.DoesNotExist:
-            consommations = Consommation.objects.none()
+            from apps.consommation.models import ConsommationJournaliere
+            consommations = ConsommationJournaliere.objects.none()
 
     # Filtres
     form = PeriodeFilterForm(request.GET or None)
     if form.is_valid():
         if form.cleaned_data['periode_debut']:
             consommations = consommations.filter(
-                periode__gte=form.cleaned_data['periode_debut']
+                date__gte=form.cleaned_data['periode_debut']  # ✅ date au lieu de periode
             )
         if form.cleaned_data['periode_fin']:
             consommations = consommations.filter(
-                periode__lte=form.cleaned_data['periode_fin']
+                date__lte=form.cleaned_data['periode_fin']  # ✅ date au lieu de periode
             )
         if form.cleaned_data['compteur']:
             consommations = consommations.filter(
                 compteur=form.cleaned_data['compteur']
             )
-        if form.cleaned_data['statut']:
-            consommations = consommations.filter(
-                statut=form.cleaned_data['statut']
-            )
+        # ✅ Le champ statut n'existe pas dans ConsommationJournaliere, on le retire ou on l'adapte
+        # if form.cleaned_data['statut']:
+        #     consommations = consommations.filter(
+        #         statut=form.cleaned_data['statut']
+        #     )
 
     # Pagination
     paginator = Paginator(consommations, 20)
@@ -85,10 +90,10 @@ def consommation_list(request):
     stats = {
         'total': consommations.count(),
         'total_kwh': consommations.aggregate(
-            total=Sum('index_fin_periode') - Sum('index_debut_periode')
+            total=Sum('consommation_kwh')  # ✅ champ direct dans ConsommationJournaliere
         )['total'] or Decimal('0'),
         'moyenne': consommations.aggregate(
-            avg=Avg('index_fin_periode') - Avg('index_debut_periode')
+            avg=Avg('consommation_kwh')  # ✅ champ direct dans ConsommationJournaliere
         )['avg'] or Decimal('0'),
     }
 
@@ -103,7 +108,6 @@ def consommation_list(request):
     }
 
     return render(request, 'gestion/consommation/list.html', context)
-
 
 @login_required
 def consommation_detail(request, pk):

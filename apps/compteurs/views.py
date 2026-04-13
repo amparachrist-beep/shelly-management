@@ -816,28 +816,31 @@ def client_compteur_detail(request, pk):
             (total_consommation['total_phase3'] or 0)
     )
 
-    # Calcul du pourcentage de consommation par rapport à la puissance souscrite
+    # ✅ Calcul du pourcentage de consommation par rapport à la puissance souscrite (CORRIGÉ)
     pourcentage = 0
     max_consommation = 0
 
     if consommation_mois and compteur.puissance_souscrite and compteur.puissance_souscrite > 0:
-        # Calcul du total du mois
-        total_mois = (
-                (consommation_mois.phase_1_kwh or 0) +
-                (consommation_mois.phase_2_kwh or 0) +
-                (consommation_mois.phase_3_kwh or 0)
+        # Calcul du total du mois (converti en float)
+        total_mois = float(
+            (consommation_mois.phase_1_kwh or 0) +
+            (consommation_mois.phase_2_kwh or 0) +
+            (consommation_mois.phase_3_kwh or 0)
         )
         # Puissance maximale possible pour le mois (720 heures = 30 jours * 24h)
         max_possible = float(compteur.puissance_souscrite) * 720
-        pourcentage = (total_mois / max_possible) * 100 if max_possible > 0 else 0
+        if max_possible > 0:
+            pourcentage = (total_mois / max_possible) * 100
+        else:
+            pourcentage = 0
 
     # Calcul de la consommation maximale parmi l'historique
     if consommations:
         for conso in consommations:
-            total_conso = (
-                    (conso.phase_1_kwh or 0) +
-                    (conso.phase_2_kwh or 0) +
-                    (conso.phase_3_kwh or 0)
+            total_conso = float(
+                (conso.phase_1_kwh or 0) +
+                (conso.phase_2_kwh or 0) +
+                (conso.phase_3_kwh or 0)
             )
             if total_conso > max_consommation:
                 max_consommation = total_conso
@@ -847,8 +850,8 @@ def client_compteur_detail(request, pk):
     donnees_instantanee = None
     if compteur.shelly_status == 'CONNECTE' and capteur:
         donnees_instantanee = {
-            'puissance': capteur.puissance_instantanee,
-            'energie_totale': capteur.energie_totale,
+            'puissance': float(capteur.puissance_instantanee) if capteur.puissance_instantanee else 0,
+            'energie_totale': float(capteur.energie_totale) if capteur.energie_totale else 0,
             'status': capteur.status,
             'derniere_maj': capteur.derniere_communication,
         }
@@ -856,22 +859,22 @@ def client_compteur_detail(request, pk):
     # Calcul de la moyenne mensuelle
     moyenne_mensuelle = 0
     if consommations:
-        moyenne_mensuelle = total_consommation_kwh / consommations.count()
+        moyenne_mensuelle = float(total_consommation_kwh) / consommations.count()
 
     context = {
-        'page_title': f'Compteur {compteur.matricule_compteur}',  # ✅ Changé de numero_serie à matricule_compteur
+        'page_title': f'Compteur {compteur.matricule_compteur}',
         'household': household,
         'compteur': compteur,
         'consommations': consommations,
         'alertes': alertes,
         'consommation_mois': consommation_mois,
-        'total_consommation_kwh': total_consommation_kwh,
+        'total_consommation_kwh': float(total_consommation_kwh),
         'capteur': capteur,
         'donnees_instantanee': donnees_instantanee,
         'current_month': current_month,
-        'pourcentage': pourcentage,
-        'max_consommation': max_consommation,
-        'moyenne_mensuelle': moyenne_mensuelle,
+        'pourcentage': round(pourcentage, 1),
+        'max_consommation': round(max_consommation, 2),
+        'moyenne_mensuelle': round(moyenne_mensuelle, 2),
     }
 
     return render(request, 'client/compteur_detail.html', context)

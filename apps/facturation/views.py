@@ -698,7 +698,8 @@ class GenererFacturesView(LoginRequiredMixin, AdminOrAgentRequiredMixin, Templat
         # sans filtre par agent (100% Shelly EM, pas d'agent terrain)
         consommations = Consommation.objects.filter(
             periode=periode,
-            statut='VALIDÉ'
+            statut='VALIDÉ',
+            source = 'SHELLY_MENSUEL',
         ).select_related('compteur', 'compteur__type_tarification')
 
         batch.total_factures = consommations.count()

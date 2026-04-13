@@ -234,6 +234,6 @@ class ConsommationJournaliere(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.date} - {self.compteur.numero_serie}: {self.consommation_kwh} kWh"
-    app_label = 'consommation'
+        # ✅ CORRECTION: utiliser matricule_compteur au lieu de numero_serie
+        return f"{self.date} - {self.compteur.matricule_compteur}: {self.consommation_kwh} kWh"
     app_label = 'consommation'
