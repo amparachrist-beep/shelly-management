@@ -145,7 +145,7 @@ class UserDashboardLayout(models.Model):
     # Widgets activés/désactivés
     enabled_widgets = models.ManyToManyField(
         DashboardWidget,
-        through='UserWidgetPreference',
+        blank=True,
         related_name='user_preferences',
         verbose_name=_("Widgets activés")
     )
@@ -174,62 +174,6 @@ class UserDashboardLayout(models.Model):
             allowed_roles__contains=[self.user.role] if self.user.role != 'ALL' else 'ALL'
         )
 
-
-class UserWidgetPreference(models.Model):
-    """Préférences utilisateur par widget"""
-    user_dashboard = models.ForeignKey(
-        UserDashboardLayout,
-        on_delete=models.CASCADE,
-        related_name='widget_preferences',
-        verbose_name=_("Dashboard utilisateur")
-    )
-    widget = models.ForeignKey(
-        DashboardWidget,
-        on_delete=models.CASCADE,
-        related_name='user_settings',
-        verbose_name=_("Widget")
-    )
-
-    # Configuration personnalisée
-    custom_config = models.JSONField(
-        default=dict,
-        verbose_name=_("Configuration personnalisée")
-    )
-    position = models.JSONField(
-        default=dict,
-        verbose_name=_("Position"),
-        help_text=_("Format: {x: 0, y: 0, w: 2, h: 2}")
-    )
-    enabled = models.BooleanField(default=True, verbose_name=_("Activé"))
-    order = models.IntegerField(default=0, verbose_name=_("Ordre"))
-    refresh_rate = models.IntegerField(
-        default=60,
-        verbose_name=_("Taux de rafraîchissement (secondes)")
-    )
-
-    # Filtres personnalisés
-    custom_filters = models.JSONField(
-        default=dict,
-        verbose_name=_("Filtres personnalisés")
-    )
-
-    # Métadonnées
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Date création"))
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Date modification"))
-
-    class Meta:
-        app_label = 'dashboard'
-        db_table = 'user_widget_preference'
-        verbose_name = _('Préférence widget utilisateur')
-        verbose_name_plural = _('Préférences widgets utilisateurs')
-        unique_together = ['user_dashboard', 'widget']
-        ordering = ['order']
-        indexes = [
-            models.Index(fields=['user_dashboard', 'enabled']),
-        ]
-
-    def __str__(self):
-        return f"{self.widget.name} pour {self.user_dashboard.user.email}"
 
 
 class DashboardNotification(models.Model):
@@ -358,89 +302,6 @@ class DashboardNotification(models.Model):
         return False
 
 
-class CachedDashboardData(models.Model):
-    """Cache pour les données du dashboard (optimisation)"""
-
-    class CacheType(models.TextChoices):
-        ADMIN_STATS = 'ADMIN_STATS', _('Statistiques admin')
-        AGENT_STATS = 'AGENT_STATS', _('Statistiques agent')
-        CLIENT_STATS = 'CLIENT_STATS', _('Statistiques client')
-        CONSOMMATION_TRENDS = 'CONSOMMATION_TRENDS', _('Tendances consommation')
-        FINANCIAL_STATS = 'FINANCIAL_STATS', _('Statistiques financières')
-        TECHNICAL_STATS = 'TECHNICAL_STATS', _('Statistiques techniques')
-        WIDGET_DATA = 'WIDGET_DATA', _('Données widget')
-
-    cache_key = models.CharField(
-        max_length=500,
-        unique=True,
-        verbose_name=_("Clé de cache")
-    )
-    cache_type = models.CharField(
-        max_length=50,
-        choices=CacheType.choices,
-        verbose_name=_("Type de cache")
-    )
-
-    # Données
-    data = models.JSONField(verbose_name=_("Données"))
-
-    # Métadonnées
-    version = models.CharField(
-        max_length=50,
-        default='1.0',
-        verbose_name=_("Version des données")
-    )
-    hash = models.CharField(
-        max_length=64,
-        blank=True,
-        verbose_name=_("Hash des données"),
-        help_text=_("SHA256 des données pour détecter les changements")
-    )
-
-    # Expiration
-    expires_at = models.DateTimeField(verbose_name=_("Expire le"))
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Date création"))
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Date modification"))
-
-    # Contexte
-    user = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name=_("Utilisateur")
-    )
-    query_params = models.JSONField(
-        default=dict,
-        blank=True,
-        verbose_name=_("Paramètres requête")
-    )
-    context = models.JSONField(
-        default=dict,
-        blank=True,
-        verbose_name=_("Contexte")
-    )
-
-    class Meta:
-        app_label = 'dashboard'
-        db_table = 'cached_dashboard_data'
-        verbose_name = _('Donnée cache dashboard')
-        verbose_name_plural = _('Données cache dashboard')
-        indexes = [
-            models.Index(fields=['cache_key']),
-            models.Index(fields=['cache_type']),
-            models.Index(fields=['expires_at']),
-            models.Index(fields=['user', 'cache_type']),
-            models.Index(fields=['created_at']),
-        ]
-
-    def __str__(self):
-        return f"{self.get_cache_type_display()} - {self.cache_key}"
-
-    def is_expired(self):
-        """Vérifier si le cache est expiré"""
-        from django.utils import timezone
-        return timezone.now() > self.expires_at
 
 
 class DashboardQuickAction(models.Model):
@@ -580,73 +441,3 @@ class DashboardQuickAction(models.Model):
         return False
 
 
-class DashboardAnalytics(models.Model):
-    """Analytics d'utilisation du dashboard"""
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='dashboard_analytics',
-        verbose_name=_("Utilisateur")
-    )
-
-    # Statistiques d'utilisation
-    total_views = models.IntegerField(default=0, verbose_name=_("Vues totales"))
-    total_time_spent = models.IntegerField(
-        default=0,
-        verbose_name=_("Temps total passé (secondes)")
-    )
-    avg_session_time = models.IntegerField(
-        default=0,
-        verbose_name=_("Temps moyen par session (secondes)")
-    )
-
-    # Widgets les plus utilisés
-    most_used_widgets = models.JSONField(
-        default=dict,
-        verbose_name=_("Widgets les plus utilisés")
-    )
-
-    # Actions les plus fréquentes
-    most_frequent_actions = models.JSONField(
-        default=dict,
-        verbose_name=_("Actions les plus fréquentes")
-    )
-
-    # Fréquence d'accès
-    access_frequency = models.JSONField(
-        default=dict,
-        verbose_name=_("Fréquence d'accès")
-    )
-
-    # Préférences détectées
-    detected_preferences = models.JSONField(
-        default=dict,
-        verbose_name=_("Préférences détectées")
-    )
-
-    # Métadonnées
-    last_access = models.DateTimeField(
-        auto_now=True,
-        verbose_name=_("Dernier accès")
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name=_("Date création")
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name=_("Date modification")
-    )
-
-    class Meta:
-        app_label = 'dashboard'
-        db_table = 'dashboard_analytics'
-        verbose_name = _('Analytics dashboard')
-        verbose_name_plural = _('Analytics dashboards')
-        unique_together = ['user']
-        indexes = [
-            models.Index(fields=['user', 'last_access']),
-        ]
-
-    def __str__(self):
-        return f"Analytics de {self.user.email}"

@@ -45,6 +45,14 @@ class Alerte(models.Model):
         on_delete=models.CASCADE
     )
 
+    regle = models.ForeignKey(
+        'alertes.RegleAlerte',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='alertes'
+    )
+
     # Détails alerte
     type_alerte = models.CharField(max_length=50, choices=TYPE_ALERTE)
     message = models.TextField()

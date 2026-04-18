@@ -2,8 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from .models import (
     DashboardWidget, UserDashboardLayout, DashboardNotification,
-    DashboardQuickAction, CachedDashboardData, UserWidgetPreference,
-    DashboardAnalytics
+    DashboardQuickAction
 )
 
 
@@ -197,106 +196,3 @@ class DashboardQuickActionAdmin(admin.ModelAdmin):
     action_type_display.short_description = 'Type d\'action'
 
 
-@admin.register(CachedDashboardData)
-class CachedDashboardDataAdmin(admin.ModelAdmin):
-    list_display = ['cache_key_short', 'cache_type_display', 'expires_at', 'created_at']
-    list_filter = ['cache_type', 'expires_at']
-    search_fields = ['cache_key', 'cache_type']
-    readonly_fields = ['created_at', 'updated_at']
-
-    fieldsets = (
-        ('Cache', {
-            'fields': ('cache_key', 'cache_type', 'version', 'hash')
-        }),
-        ('Données', {
-            'fields': ('data',),
-            'classes': ('collapse',)
-        }),
-        ('Expiration', {
-            'fields': ('expires_at',)
-        }),
-        ('Contexte', {
-            'fields': ('user', 'query_params', 'context'),
-            'classes': ('collapse',)
-        }),
-        ('Métadonnées', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-
-    def cache_key_short(self, obj):
-        return obj.cache_key[:50] + '...' if len(obj.cache_key) > 50 else obj.cache_key
-
-    cache_key_short.short_description = 'Clé de cache'
-
-    def cache_type_display(self, obj):
-        return obj.get_cache_type_display()
-
-    cache_type_display.short_description = 'Type'
-
-    actions = ['clear_expired_cache', 'clear_all_cache']
-
-    def clear_expired_cache(self, request, queryset):
-        from django.utils import timezone
-        expired = queryset.filter(expires_at__lt=timezone.now()).count()
-        queryset.filter(expires_at__lt=timezone.now()).delete()
-        self.message_user(request, f"{expired} entrée(s) de cache expirée(s) supprimée(s)")
-
-    clear_expired_cache.short_description = "Supprimer le cache expiré"
-
-    def clear_all_cache(self, request, queryset):
-        count = queryset.count()
-        queryset.delete()
-        self.message_user(request, f"{count} entrée(s) de cache supprimée(s)")
-
-    clear_all_cache.short_description = "Supprimer tout le cache"
-
-
-@admin.register(UserWidgetPreference)
-class UserWidgetPreferenceAdmin(admin.ModelAdmin):
-    list_display = ['user_display', 'widget_display', 'enabled', 'order']
-    list_filter = ['enabled']
-    search_fields = ['user_dashboard__user__email', 'widget__name']
-    readonly_fields = ['created_at', 'updated_at']
-
-    def user_display(self, obj):
-        return obj.user_dashboard.user.email if obj.user_dashboard and obj.user_dashboard.user else '-'
-
-    user_display.short_description = 'Utilisateur'
-
-    def widget_display(self, obj):
-        return obj.widget.name if obj.widget else '-'
-
-    widget_display.short_description = 'Widget'
-
-
-@admin.register(DashboardAnalytics)
-class DashboardAnalyticsAdmin(admin.ModelAdmin):
-    list_display = ['user_display', 'total_views', 'total_time_spent', 'last_access']
-    list_filter = ['last_access']
-    search_fields = ['user__email', 'user__username']
-    readonly_fields = ['created_at', 'updated_at', 'last_access']
-
-    def user_display(self, obj):
-        return obj.user.email if obj.user else '-'
-
-    user_display.short_description = 'Utilisateur'
-
-    fieldsets = (
-        ('Utilisateur', {
-            'fields': ('user',)
-        }),
-        ('Statistiques d\'utilisation', {
-            'fields': ('total_views', 'total_time_spent', 'avg_session_time')
-        }),
-        ('Analytics', {
-            'fields': ('most_used_widgets', 'most_frequent_actions',
-                       'access_frequency', 'detected_preferences'),
-            'classes': ('collapse',)
-        }),
-        ('Métadonnées', {
-            'fields': ('last_access', 'created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )

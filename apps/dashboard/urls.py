@@ -21,7 +21,6 @@ urlpatterns = [
     path('client/conseils/', views.client_conseils, name='client_conseils'),
     # Gestion des widgets
     path('widgets/', views.widget_management, name='widget_management'),
-    path('widgets/<int:widget_id>/configure/', views.widget_configuration, name='widget_configuration'),
     path('save-layout/', views.save_layout, name='save_layout'),
 
     # Notifications

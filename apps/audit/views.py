@@ -10,9 +10,9 @@ import json
 import csv
 import io
 
-from .models import AuditLog, SecurityEvent, AuditPolicy, AuditReport, AuditArchive
+from .models import AuditLog, AuditPolicy, AuditReport, AuditArchive
 from .forms import (
-    AuditLogFilterForm, SecurityEventFilterForm, AuditPolicyForm,
+    AuditLogFilterForm, AuditPolicyForm,
     AuditReportForm, ArchiveFilterForm, DateRangeForm
 )
 from apps.users.models import CustomUser as User

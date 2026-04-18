@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from datetime import date, timedelta
 
-from .models import AuditLog, SecurityEvent, AuditPolicy, AuditReport, AuditArchive
+from .models import AuditLog, AuditPolicy, AuditReport, AuditArchive
 from apps.users.models import CustomUser as User
 
 
@@ -73,62 +73,6 @@ class AuditLogFilterForm(forms.Form):
         self.fields['user'].queryset = User.objects.filter(
             id__in=AuditLog.objects.values_list('user_id', flat=True).distinct()
         ).order_by('username')
-
-    def clean(self):
-        cleaned_data = super().clean()
-        date_debut = cleaned_data.get('date_debut')
-        date_fin = cleaned_data.get('date_fin')
-
-        if date_debut and date_fin and date_debut > date_fin:
-            raise ValidationError("La date de début ne peut pas être postérieure à la date de fin")
-
-        return cleaned_data
-
-
-class SecurityEventFilterForm(forms.Form):
-    """Formulaire de filtrage des événements de sécurité"""
-    event_type = forms.ChoiceField(
-        choices=[('', 'Tous les types')] + list(SecurityEvent.EVENT_TYPES),
-        required=False,
-        label="Type d'événement",
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    severity = forms.ChoiceField(
-        choices=[('', 'Toutes sévérités')] + list(SecurityEvent.SEVERITY_LEVELS),
-        required=False,
-        label="Sévérité",
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    blocked = forms.ChoiceField(
-        choices=[('', 'Tous'), ('true', 'Bloqués'), ('false', 'Non bloqués')],
-        required=False,
-        label="Bloqué",
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    date_debut = forms.DateField(
-        required=False,
-        label="Date début",
-        widget=forms.DateInput(attrs={
-            'type': 'date',
-            'class': 'form-control'
-        })
-    )
-    date_fin = forms.DateField(
-        required=False,
-        label="Date fin",
-        widget=forms.DateInput(attrs={
-            'type': 'date',
-            'class': 'form-control'
-        })
-    )
-    source_ip = forms.CharField(
-        required=False,
-        label="IP source",
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Ex: 192.168.1.1'
-        })
-    )
 
     def clean(self):
         cleaned_data = super().clean()

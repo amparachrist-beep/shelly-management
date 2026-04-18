@@ -17,11 +17,11 @@ import calendar
 
 from .models import (
     DashboardWidget, UserDashboardLayout, DashboardNotification,
-    DashboardQuickAction, CachedDashboardData, UserWidgetPreference
+    DashboardQuickAction
 )
 from .forms import (
     WidgetConfigurationForm, DashboardLayoutForm, NotificationFilterForm,
-    QuickActionForm, WidgetCreateForm, DashboardAnalyticsForm
+    QuickActionForm, WidgetCreateForm
 )
 from apps.menages.models import Menage
 from apps.compteurs.models import Compteur
@@ -1043,66 +1043,6 @@ def widget_management(request):
     return render(request, 'dashboard/widget_management.html', context)
 
 
-@login_required
-def widget_configuration(request, widget_id):
-    """Configuration personnalisée d'un widget"""
-    widget = get_object_or_404(DashboardWidget, id=widget_id)
-
-    # Vérifier les permissions
-    if not widget.is_allowed_for_user(request.user):
-        messages.error(request, "Vous n'avez pas accès à ce widget.")
-        return redirect('dashboard:widget_management')
-
-    user_layout, created = UserDashboardLayout.objects.get_or_create(user=request.user)
-
-    # Récupérer ou créer la préférence utilisateur pour ce widget
-    widget_pref, created = UserWidgetPreference.objects.get_or_create(
-        user_dashboard=user_layout,
-        widget=widget,
-        defaults={
-            'position': widget.default_position,
-            'custom_config': widget.config,
-        }
-    )
-
-    if request.method == 'POST':
-        form = WidgetConfigurationForm(request.POST, widget_type=widget.widget_type)
-        if form.is_valid():
-            # Mettre à jour la configuration personnalisée
-            custom_config = widget_pref.custom_config.copy()
-            custom_config.update(form.cleaned_data)
-            widget_pref.custom_config = custom_config
-
-            # Mettre à jour la position si fournie
-            position_x = request.POST.get('position_x')
-            position_y = request.POST.get('position_y')
-            position_w = request.POST.get('position_w')
-            position_h = request.POST.get('position_h')
-
-            if all([position_x, position_y, position_w, position_h]):
-                widget_pref.position = {
-                    'x': int(position_x),
-                    'y': int(position_y),
-                    'w': int(position_w),
-                    'h': int(position_h)
-                }
-
-            widget_pref.save()
-            messages.success(request, f"Configuration du widget '{widget.name}' sauvegardée")
-            return redirect('dashboard:widget_management')
-    else:
-        # Initialiser le formulaire avec la configuration actuelle
-        initial_data = widget_pref.custom_config.copy()
-        form = WidgetConfigurationForm(initial=initial_data, widget_type=widget.widget_type)
-
-    context = {
-        'page_title': f'Configuration: {widget.name}',
-        'widget': widget,
-        'form': form,
-        'widget_pref': widget_pref,
-    }
-
-    return render(request, 'dashboard/widget_configuration.html', context)
 
 
 @login_required

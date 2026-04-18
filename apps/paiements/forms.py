@@ -4,7 +4,7 @@ from django.utils import timezone
 from decimal import Decimal
 import uuid
 from datetime import datetime
-from .models import Paiement, CommissionAgent, FraisTransaction
+from .models import Paiement
 from apps.facturation.models import FactureConsommation
 from apps.users.models import CustomUser
 
@@ -166,53 +166,6 @@ class PaiementValidationForm(forms.Form):
     )
 
 
-class CommissionAgentForm(forms.ModelForm):
-    """Formulaire pour les commissions des agents"""
-
-    class Meta:
-        model = CommissionAgent
-        fields = ['agent', 'taux_commission', 'montant_commission', 'statut',
-                  'date_paiement_commission', 'notes']
-        widgets = {
-            'agent': forms.Select(attrs={'class': 'form-control'}),
-            'taux_commission': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0',
-                'max': '100'
-            }),
-            'montant_commission': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0'
-            }),
-            'statut': forms.Select(attrs={'class': 'form-control'}),
-            'date_paiement_commission': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
-            }),
-            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-        }
-
-
-class FraisTransactionForm(forms.ModelForm):
-    """Formulaire pour les frais de transaction"""
-
-    class Meta:
-        model = FraisTransaction
-        fields = ['type_frais', 'description', 'montant', 'facture_frais']
-        widgets = {
-            'type_frais': forms.Select(attrs={'class': 'form-control'}),
-            'description': forms.TextInput(attrs={'class': 'form-control'}),
-            'montant': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0'
-            }),
-            'facture_frais': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-        }
-
-
 class RapportJournalierForm(forms.Form):
     """Formulaire pour le rapport journalier"""
     date_rapport = forms.DateField(
@@ -224,33 +177,3 @@ class RapportJournalierForm(forms.Form):
         initial=timezone.now().date
     )
 
-
-class StatsPaiementForm(forms.Form):
-    """Formulaire pour les statistiques de paiement"""
-    date_debut = forms.DateField(
-        label="Date début",
-        widget=forms.DateInput(attrs={
-            'class': 'form-control',
-            'type': 'date'
-        })
-    )
-    date_fin = forms.DateField(
-        label="Date fin",
-        widget=forms.DateInput(attrs={
-            'class': 'form-control',
-            'type': 'date'
-        }),
-        initial=timezone.now().date
-    )
-    mode_paiement = forms.ChoiceField(
-        choices=[('', 'Tous')] + list(Paiement.MODE_PAIEMENT_CHOICES),
-        required=False,
-        label="Mode de paiement",
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    statut = forms.ChoiceField(
-        choices=[('', 'Tous')] + list(Paiement.STATUT_CHOICES),
-        required=False,
-        label="Statut",
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )

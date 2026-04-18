@@ -517,16 +517,21 @@
                         </div>
                     </div>
 
-                    <!-- Role -->
-                    <div>
-                        <label for="id_role" class="form-label">Rôle demandé</label>
-                        <div class="form-group">
-                            <iconify-icon icon="solar:briefcase-bold-duotone" width="20" class="input-icon"></iconify-icon>
-                            <select name="role" id="id_role" required class="form-input" style="padding-left:44px;">
-                                <option value="">Sélectionnez un rôle</option>
-                                <option value="agent">Agent</option>
-                                <option value="client">Client</option>
-                            </select>
+                   <!-- Champ caché — rôle fixé -->
+                    <input type="hidden" name="role" value="CLIENT">
+
+                    <!-- Bandeau informatif -->
+                    <div style="display:flex;align-items:flex-start;gap:12px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:12px;padding:14px 16px;">
+                        <iconify-icon icon="solar:home-2-bold-duotone" width="20"
+                                      style="color:#4f46e5;flex-shrink:0;margin-top:2px;"></iconify-icon>
+                        <div>
+                            <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:0.85rem;font-weight:700;color:#3730a3;margin:0 0 3px;">
+                                Accès réservé aux ménages
+                            </p>
+                            <p style="font-size:0.8rem;color:#4338ca;margin:0;line-height:1.5;">
+                                Ce formulaire est uniquement destiné aux ménages abonnés.
+                                Les agents reçoivent leur accès directement de l'administrateur.
+                            </p>
                         </div>
                     </div>
 

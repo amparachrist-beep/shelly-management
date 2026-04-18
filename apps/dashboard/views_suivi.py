@@ -149,7 +149,7 @@ class SuiviLocaliteView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         # Agent : vérifier que c'est sa localité
         if user.is_agent:
             localite = self.get_object()
-            return user.agent_profile.localites.filter(pk=localite.pk).exists()
+            return user.agence.localite_id == localite.pk if user.agence else False
 
         return False
 
@@ -252,8 +252,9 @@ class SuiviCompteurView(LoginRequiredMixin, DetailView):
         if request.user.is_client:
             if compteur.menage.utilisateur != request.user:
                 return self.handle_no_permission()
+        # Puisque agent est rattaché à une agence, et l'agence à une localité :
         elif request.user.is_agent:
-            if not request.user.agent_profile.localites.filter(pk=compteur.menage.localite.pk).exists():
+            if compteur.menage.localite != request.user.agence.localite:
                 return self.handle_no_permission()
 
         return super().dispatch(request, *args, **kwargs)
@@ -277,7 +278,7 @@ class SuiviCompteurView(LoginRequiredMixin, DetailView):
             **data,
             'evolution_labels': json.dumps(evolution_labels),
             'evolution_values': json.dumps(evolution_values),
-            'page_title': f'Suivi - Compteur {self.object.numero_compteur}',
+            'page_title': f'Suivi - Compteur {self.object.matricule_compteur}',
             'current_page': 'suivi_compteur'
         })
 

@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
-from .models import FactureConsommation, LigneFacture, Remise, PenaliteRetard, BatchFacturation, Relance
+from .models import FactureConsommation, LigneFacture, BatchFacturation, Relance
 
 
 class LigneFactureInline(admin.TabularInline):
@@ -167,102 +167,6 @@ class LigneFactureAdmin(admin.ModelAdmin):
             'fields': ('created_at',)
         }),
     )
-
-
-@admin.register(Remise)
-class RemiseAdmin(admin.ModelAdmin):
-    """Configuration admin pour les remises"""
-    list_display = ['code', 'nom', 'type_remise', 'applicable_sur',
-                    'pourcentage', 'montant_fixe', 'date_debut', 'date_fin', 'active']
-    list_filter = ['type_remise', 'applicable_sur', 'active']
-    search_fields = ['code', 'nom']
-    readonly_fields = ['utilisations_actuelles', 'created_at', 'updated_at']
-
-    fieldsets = (
-        ('Identification', {
-            'fields': ('code', 'nom', 'type_remise', 'applicable_sur')
-        }),
-        ('Valeur', {
-            'fields': ('pourcentage', 'montant_fixe')
-        }),
-        ('Conditions', {
-            'fields': ('montant_minimum', 'montant_maximum',
-                       'consommation_min_kwh', 'consommation_max_kwh')
-        }),
-        ('Validité', {
-            'fields': ('date_debut', 'date_fin', 'utilisations_max', 'utilisations_actuelles')
-        }),
-        ('Clientèle cible', {
-            'fields': ('pour_tous', 'categories_clients')
-        }),
-        ('Statut', {
-            'fields': ('active', 'cree_par')
-        }),
-        ('Dates système', {
-            'fields': ('created_at', 'updated_at')
-        }),
-    )
-
-    actions = ['activer_remises', 'desactiver_remises']
-
-    def activer_remises(self, request, queryset):
-        """Activer les remises"""
-        updated = queryset.update(active=True)
-        self.message_user(request, f"{updated} remise(s) activée(s).")
-
-    activer_remises.short_description = "Activer les remises"
-
-    def desactiver_remises(self, request, queryset):
-        """Désactiver les remises"""
-        updated = queryset.update(active=False)
-        self.message_user(request, f"{updated} remise(s) désactivée(s).")
-
-    desactiver_remises.short_description = "Désactiver les remises"
-
-
-@admin.register(PenaliteRetard)
-class PenaliteRetardAdmin(admin.ModelAdmin):
-    """Configuration admin pour les pénalités de retard"""
-    list_display = ['nom', 'type_penalite', 'delai_jours', 'taux_penalite',
-                    'montant_fixe', 'applicable', 'date_debut', 'date_fin']
-    list_filter = ['type_penalite', 'applicable']
-    search_fields = ['nom', 'description']
-    readonly_fields = ['created_at', 'updated_at']
-
-    fieldsets = (
-        ('Identification', {
-            'fields': ('nom', 'type_penalite', 'description')
-        }),
-        ('Configuration', {
-            'fields': ('delai_jours', 'taux_penalite', 'montant_fixe', 'echelons')
-        }),
-        ('Application', {
-            'fields': ('applicable', 'date_debut', 'date_fin')
-        }),
-        ('Limites', {
-            'fields': ('penalite_maximum', 'pourcentage_maximum')
-        }),
-        ('Dates système', {
-            'fields': ('created_at', 'updated_at')
-        }),
-    )
-
-    actions = ['activer_penalites', 'desactiver_penalites']
-
-    def activer_penalites(self, request, queryset):
-        """Activer les pénalités"""
-        updated = queryset.update(applicable=True)
-        self.message_user(request, f"{updated} pénalité(s) activée(s).")
-
-    activer_penalites.short_description = "Activer les pénalités"
-
-    def desactiver_penalites(self, request, queryset):
-        """Désactiver les pénalités"""
-        updated = queryset.update(applicable=False)
-        self.message_user(request, f"{updated} pénalité(s) désactivée(s).")
-
-    desactiver_penalites.short_description = "Désactiver les pénalités"
-
 
 @admin.register(BatchFacturation)
 class BatchFacturationAdmin(admin.ModelAdmin):

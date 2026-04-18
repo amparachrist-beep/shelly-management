@@ -56,12 +56,12 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
-from django.template.loader import render_to_string
 
 
 def register_view(request):
     """
     Traite la demande d'inscription via Email (Gmail).
+    Seul le rôle CLIENT/ménage est autorisé via ce formulaire public.
     Envoie un récapitulatif à l'administrateur.
     """
     # 1. Redirection si déjà connecté
@@ -71,38 +71,42 @@ def register_view(request):
     # 2. Traitement du formulaire
     if request.method == 'POST':
         # Récupération des données du formulaire HTML
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        email = request.POST.get('email')
-        phone = request.POST.get('phone')
-        role = request.POST.get('role')
-        user_message = request.POST.get('message', 'Aucun message particulier.')
+        first_name   = request.POST.get('first_name', '').strip()
+        last_name    = request.POST.get('last_name', '').strip()
+        email        = request.POST.get('email', '').strip()
+        phone        = request.POST.get('phone', '').strip()
+        user_message = request.POST.get('message', 'Aucun message particulier.').strip()
 
-        # Validation basique
-        if not (first_name and last_name and email and phone and role):
+        # Rôle forcé côté serveur — jamais lu depuis le POST
+        # Peu importe ce que le formulaire envoie, on ignore et on force CLIENT
+        role = 'CLIENT'
+
+        # Validation basique (role retiré de la validation car fixé côté serveur)
+        if not (first_name and last_name and email and phone):
             messages.error(request, "Veuillez remplir tous les champs obligatoires.")
             return render(request, 'authentication/register.html')
 
         # Construction de l'email pour l'ADMIN
         admin_email = 'amparachrist@gmail.com'
-        subject = f"[Shelly SGE] Nouvelle demande d'accès : {first_name} {last_name}"
+        subject = f"[Shelly SGE] Nouvelle demande d'accès ménage : {first_name} {last_name}"
 
         email_content = f"""
-        Bonjour Admin,
+Bonjour Admin,
 
-        Une nouvelle demande d'accès a été soumise sur la plateforme Shelly SGE.
+Une nouvelle demande d'accès ménage a été soumise sur la plateforme Shelly SGE.
 
-        --- DÉTAILS DU DEMANDEUR ---
-        Nom complet : {first_name} {last_name}
-        Email       : {email}
-        Téléphone   : {phone}
-        Rôle demandé: {role}
+--- DÉTAILS DU DEMANDEUR ---
+Nom complet  : {first_name} {last_name}
+Email        : {email}
+Téléphone    : {phone}
+Rôle         : {role} (fixé automatiquement — formulaire public)
 
-        --- MESSAGE ---
-        {user_message}
+--- MESSAGE ---
+{user_message}
 
-        -----------------------------
-        Veuillez vous connecter au panneau d'administration pour créer ce compte manuellement si la demande est valide.
+---
+Veuillez vous connecter au panneau d'administration pour créer ce compte
+manuellement si la demande est valide.
         """
 
         try:
@@ -115,16 +119,20 @@ def register_view(request):
                 fail_silently=False,
             )
 
-            # Succès : Message à l'utilisateur et redirection vers le login
-            messages.success(request,
-                             "Votre demande a été envoyée avec succès ! L'administrateur vous contactera sous peu.")
+            # Succès : message à l'utilisateur et redirection vers le login
+            messages.success(
+                request,
+                "Votre demande a été envoyée avec succès ! L'administrateur vous contactera sous peu."
+            )
             return redirect('users:login')
 
         except Exception as e:
-            # En cas d'erreur SMTP (ex: problème de connexion internet ou config)
+            # En cas d'erreur SMTP (connexion, config, etc.)
             print(f"Erreur d'envoi d'email: {e}")
-            messages.error(request,
-                           "Une erreur est survenue lors de l'envoi de la demande. Veuillez réessayer plus tard.")
+            messages.error(
+                request,
+                "Une erreur est survenue lors de l'envoi de la demande. Veuillez réessayer plus tard."
+            )
 
     # 3. Affichage du formulaire (GET)
     return render(request, 'authentication/register.html')
@@ -185,35 +193,22 @@ def update_profile_photo(request):
                 messages.error(request, 'Format d\'image non supporté. Utilisez JPG, PNG, GIF ou WebP.')
                 return redirect('users:profile')
 
-            # Optimiser l'image
-            img = Image.open(image_file)
-
-            # Convertir en RGB si nécessaire (pour les PNG avec transparence)
-            if img.mode in ('RGBA', 'LA', 'P'):
-                background = Image.new('RGB', img.size, (255, 255, 255))
-                if img.mode == 'P':
-                    img = img.convert('RGBA')
-                background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
-                img = background
-
-            # Redimensionner à 400x400 pour optimiser
-            img.thumbnail((400, 400), Image.Resampling.LANCZOS)
-
-            # Sauvegarder l'image optimisée
-            output = io.BytesIO()
-            img.save(output, format='JPEG', quality=85, optimize=True)
-            output.seek(0)
-
             # Supprimer l'ancienne photo si elle existe
             if request.user.profile_image:
                 try:
-                    default_storage.delete(request.user.profile_image.path)
-                except:
-                    pass
+                    default_storage.delete(request.user.profile_image.name)
+                except Exception as e:
+                    print(f"Erreur suppression ancienne photo: {e}")
 
-            # Sauvegarder la nouvelle photo
-            filename = f'profile_photos/user_{request.user.id}.jpg'
-            path = default_storage.save(filename, ContentFile(output.read()))
+            # Générer un nom unique avec timestamp
+            from django.utils import timezone
+            import os
+            timestamp = int(timezone.now().timestamp())
+            ext = os.path.splitext(image_file.name)[1]  # Garder l'extension originale
+            filename = f'profile_photos/user_{request.user.id}_{timestamp}{ext}'
+
+            # Sauvegarde simple (sans optimisation PIL)
+            path = default_storage.save(filename, ContentFile(image_file.read()))
 
             # Mettre à jour l'utilisateur
             request.user.profile_image = path
@@ -222,7 +217,8 @@ def update_profile_photo(request):
             messages.success(request, 'Votre photo de profil a été mise à jour avec succès !')
 
         except Exception as e:
-            messages.error(request, f'Erreur lors du téléchargement de la photo : {str(e)}')
+            print(f"Erreur détaillée: {str(e)}")
+            messages.error(request, f'Erreur lors du téléchargement : {str(e)}')
 
     return redirect('users:profile')
 
@@ -641,6 +637,9 @@ class UserCreateView(LoginRequiredMixin, AdminRequiredMixin, SuccessMessageMixin
 # ============================================
 # MODIFICATION D'UN UTILISATEUR
 # ============================================
+# ============================================
+# MODIFICATION D'UN UTILISATEUR
+# ============================================
 class UserUpdateView(LoginRequiredMixin, AdminRequiredMixin, SuccessMessageMixin, UpdateView):
     """Modification d'un utilisateur"""
     model = CustomUser
@@ -649,9 +648,13 @@ class UserUpdateView(LoginRequiredMixin, AdminRequiredMixin, SuccessMessageMixin
     success_url = reverse_lazy('users:user_list')
     success_message = "L'utilisateur « %(username)s » a été modifié avec succès."
 
+    def get_success_message(self, cleaned_data):
+        """Surcharge pour récupérer le username depuis l'objet utilisateur"""
+        return self.success_message % {'username': self.object.username}
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['agences'] = Agence.objects.filter(actif=True).order_by('nom')  # ✅
+        context['agences'] = Agence.objects.filter(actif=True).order_by('nom')
         return context
 
 

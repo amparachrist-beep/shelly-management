@@ -424,7 +424,7 @@
                             <!-- Informations supplémentaires pour les clients -->
                             {% if user.is_client %}
                             {% with menage_client=user.menage_set.first %}
-                            {% if menage_client %}
+                            {% if menage %}
                             <div class="info-item">
                                 <div class="flex items-center gap-2 mb-3">
                                     <iconify-icon icon="solar:home-smile-bold-duotone" width="18" class="text-slate-600"></iconify-icon>
@@ -433,15 +433,15 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
                                         <p class="info-label">Nom du ménage</p>
-                                        <p class="info-value">{{ menage_client.nom_menage }}</p>
+                                        <p class="info-value">{{ request.user.get_full_name|default:request.user.username }}</p>
                                     </div>
                                     <div>
                                         <p class="info-label">Localité</p>
-                                        <p class="info-value">{{ menage_client.localite.nom|default:"—" }}</p>
+                                        <p class="info-value">{{ menage.localite.nom|default:"—" }}</p>
                                     </div>
                                     <div class="sm:col-span-2">
                                         <p class="info-label">Adresse</p>
-                                        <p class="info-value">{{ menage_client.adresse_complete|default:"—" }}</p>
+                                        <p class="info-value">{{ menage.adresse_complete|default:"—" }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -451,12 +451,6 @@
                                     <iconify-icon icon="solar:home-smile-bold-duotone" width="48" class="text-slate-400 mb-3"></iconify-icon>
                                     <p class="text-slate-500 text-center">Aucun ménage associé</p>
                                     <p class="text-xs text-slate-400 mt-1">Contactez le support pour vous assigner un ménage</p>
-                                    <a href="https://wa.me/242061814279?text=Bonjour,%20j'ai%20besoin%20de%20modifier%20mes%20informations%20de%20profil"
-                                       target="_blank"
-                                       class="btn-emerald mt-3">
-                                        <iconify-icon icon="solar:phone-calling-rounded-duotone" width="16"></iconify-icon>
-                                        <span>Contacter le support</span>
-                                    </a>
                                 </div>
                             </div>
                             {% endif %}
@@ -485,24 +479,7 @@
                 </div>
 
                 <!-- Section de changement de mot de passe -->
-                <div class="profile-card anim-fade-up delay-3">
-                    <div class="section-header">
-                        <h3 class="section-title">Sécurité</h3>
-                        <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
-                            <iconify-icon icon="solar:lock-key-bold-duotone" width="20" class="text-orange-600"></iconify-icon>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <p class="text-sm text-slate-600 mb-4">
-                            Protégez votre compte en modifiant régulièrement votre mot de passe.
-                        </p>
-                        <a href="{% url 'users:change_password' %}"
-                           class="btn-secondary w-full justify-center">
-                            <iconify-icon icon="solar:key-bold-duotone" width="18"></iconify-icon>
-                            <span>Changer le mot de passe</span>
-                        </a>
-                    </div>
-                </div>
+
             </div>
         </div>
     </div>
@@ -529,8 +506,17 @@ function handlePhotoChange(event) {
         // Prévisualiser l'image
         const reader = new FileReader();
         reader.onload = function(e) {
+            // Garder le même conteneur mais mettre à jour l'image
             const container = document.getElementById('profile-image-container');
-            container.innerHTML = `<img id="profile-image" src="${e.target.result}" alt="Profile" class="w-full h-full object-cover">`;
+            const existingImg = container.querySelector('img');
+
+            if (existingImg) {
+                // Mettre à jour l'image existante
+                existingImg.src = e.target.result;
+            } else {
+                // Créer une nouvelle image
+                container.innerHTML = `<img id="profile-image" src="${e.target.result}" alt="Profile" class="w-full h-full object-cover">`;
+            }
 
             // Afficher le bouton d'upload
             document.getElementById('upload-btn').classList.remove('hidden');

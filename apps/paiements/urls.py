@@ -17,8 +17,6 @@ urlpatterns = [
     path('stats/', views.StatsPaiementsView.as_view(), name='stats'),
     path('rapport-journalier/', views.rapport_journalier, name='rapport_journalier'),
 
-    # ==================== COMMISSIONS ====================
-    path('commissions/', views.CommissionListView.as_view(), name='commissions_list'),
 
     # ==================== EXPORT ====================
     path('export/csv/', views.export_paiements_csv, name='export_csv'),

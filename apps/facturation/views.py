@@ -21,9 +21,9 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet
 
 # ✅ CORRIGÉ: ajout de Facture dans les imports
-from .models import FactureConsommation, LigneFacture, Remise, PenaliteRetard, BatchFacturation, Relance, Facture, DossierImpaye, PeriodeFacturation
+from .models import FactureConsommation, LigneFacture, BatchFacturation, Relance, Facture, DossierImpaye, PeriodeFacturation
 from .forms import (
-    FactureConsommationForm, LigneFactureForm, RemiseForm, PenaliteRetardForm,
+    FactureConsommationForm, LigneFactureForm,
     BatchFacturationForm, RelanceForm, FactureSearchForm, GenererFacturesForm, DossierImpayeForm, TraiterDossierImpayeForm, PeriodeFacturationForm
 )
 from apps.compteurs.models import Compteur

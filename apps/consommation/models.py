@@ -72,40 +72,9 @@ class Consommation(models.Model):
 
 
     app_label = 'consommation'
-from django.db import models
+
 from django.contrib.auth import get_user_model
-
 User = get_user_model()
-
-
-class ConsommationQuotidienne(models.Model):
-    """Détails journaliers de consommation"""
-    consommation = models.ForeignKey(
-        Consommation,
-        on_delete=models.CASCADE,
-        related_name='details_quotidiens'
-    )
-    date = models.DateField()
-    consommation_kwh = models.DecimalField(max_digits=10, decimal_places=2)
-    puissance_max_kw = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
-    puissance_moyenne_kw = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
-    heures_pleines = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
-    heures_creuses = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
-
-    class Meta:
-        db_table = 'consommation_quotidienne'
-        verbose_name = 'Consommation quotidienne'
-        verbose_name_plural = 'Consommations quotidiennes'
-        unique_together = ['consommation', 'date']
-        indexes = [
-            models.Index(fields=['date']),
-        ]
-
-    def __str__(self):
-        return f"{self.date} - {self.consommation_kwh} kWh"
-
-
-    app_label = 'consommation'
 class HistoriqueConsommation(models.Model):
     """Historique des modifications de consommation"""
     ACTION_CHOICES = (

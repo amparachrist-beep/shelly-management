@@ -12,11 +12,11 @@ from django.utils import timezone
 from datetime import date, timedelta, datetime
 import csv
 from decimal import Decimal
-from .models import Paiement, CommissionAgent, FraisTransaction, HistoriqueStatutPaiement
+from .models import Paiement
 from .forms import (
     PaiementForm, MobileMoneyPaymentForm, PaiementValidationForm,
-    CommissionAgentForm, FraisTransactionForm, RapportJournalierForm,
-    StatsPaiementForm
+     RapportJournalierForm
+
 )
 from apps.facturation.models import FactureConsommation
 from apps.users.models import CustomUser
@@ -532,70 +532,6 @@ def rapport_journalier(request):
 
 # ==================== VUES POUR LES COMMISSIONS ====================
 
-class CommissionListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    """Liste des commissions (admin seulement)"""
-    model = CommissionAgent
-    template_name = 'gestion/list_template.html'
-    context_object_name = 'object_list'
-    paginate_by = 20
-
-    def test_func(self):
-        return self.request.user.role == 'ADMIN'
-
-    def get_queryset(self):
-        queryset = CommissionAgent.objects.select_related('agent', 'paiement')
-
-        # Recherche
-        search = self.request.GET.get('search', '')
-        if search:
-            queryset = queryset.filter(
-                Q(agent__username__icontains=search) |
-                Q(agent__first_name__icontains=search) |
-                Q(agent__last_name__icontains=search) |
-                Q(paiement__reference_paiement__icontains=search)
-            )
-
-        # Filtre par statut
-        statut = self.request.GET.get('statut', '')
-        if statut:
-            queryset = queryset.filter(statut=statut)
-
-        return queryset.order_by('-created_at')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # Statistiques
-        queryset = self.get_queryset()
-        stats = queryset.aggregate(
-            total_commission=Sum('montant_commission'),
-            total_due=Sum('montant_commission', filter=Q(statut='DUE')),
-            total_payee=Sum('montant_commission', filter=Q(statut='PAYEE')),
-        )
-
-        context.update({
-            'title': 'Commissions des Agents',
-            'icon': 'fas fa-hand-holding-usd',
-            'headers': ['Agent', 'Paiement', 'Taux', 'Montant', 'Statut', 'Date paiement'],
-            'stats': [
-                {
-                    'title': 'Total Commissions',
-                    'value': f"{stats['total_commission'] or 0:.2f} FCFA",
-                    'color': 'primary'
-                },
-                {
-                    'title': 'Commissions dues',
-                    'value': f"{stats['total_due'] or 0:.2f} FCFA",
-                    'color': 'warning'
-                },
-                {
-                    'title': 'Commissions payées',
-                    'value': f"{stats['total_payee'] or 0:.2f} FCFA",
-                    'color': 'success'
-                },
-            ]
-        })
-        return context
 
 
 # ==================== VUES POUR AJAX/API SIMPLE ====================

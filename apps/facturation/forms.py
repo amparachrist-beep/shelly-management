@@ -4,7 +4,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from decimal import Decimal
 import uuid
-from .models import FactureConsommation, LigneFacture, Remise, PenaliteRetard, BatchFacturation, Relance
+from .models import FactureConsommation, LigneFacture, BatchFacturation, Relance
 from apps.compteurs.models import Compteur
 from apps.consommation.models import Consommation
 
@@ -161,101 +161,6 @@ class LigneFactureForm(forms.ModelForm):
             'ordre': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 
-
-class RemiseForm(forms.ModelForm):
-    """Formulaire pour les remises"""
-
-    class Meta:
-        model = Remise
-        fields = ['code', 'nom', 'type_remise', 'applicable_sur',
-                  'pourcentage', 'montant_fixe', 'montant_minimum',
-                  'montant_maximum', 'consommation_min_kwh',
-                  'consommation_max_kwh', 'date_debut', 'date_fin',
-                  'utilisations_max', 'pour_tous', 'categories_clients',
-                  'active']
-        widgets = {
-            'code': forms.TextInput(attrs={'class': 'form-control'}),
-            'nom': forms.TextInput(attrs={'class': 'form-control'}),
-            'type_remise': forms.Select(attrs={'class': 'form-control'}),
-            'applicable_sur': forms.Select(attrs={'class': 'form-control'}),
-            'pourcentage': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0',
-                'max': '100'
-            }),
-            'montant_fixe': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0'
-            }),
-            'montant_minimum': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0'
-            }),
-            'montant_maximum': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0'
-            }),
-            'consommation_min_kwh': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0'
-            }),
-            'consommation_max_kwh': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0'
-            }),
-            'date_debut': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'date_fin': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'utilisations_max': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
-            'pour_tous': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        }
-
-
-class PenaliteRetardForm(forms.ModelForm):
-    """Formulaire pour les pénalités de retard"""
-
-    class Meta:
-        model = PenaliteRetard
-        fields = ['nom', 'type_penalite', 'description', 'delai_jours',
-                  'taux_penalite', 'montant_fixe', 'echelons', 'applicable',
-                  'date_debut', 'date_fin', 'penalite_maximum', 'pourcentage_maximum']
-        widgets = {
-            'nom': forms.TextInput(attrs={'class': 'form-control'}),
-            'type_penalite': forms.Select(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'delai_jours': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
-            'taux_penalite': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0',
-                'max': '100'
-            }),
-            'montant_fixe': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0'
-            }),
-            'applicable': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'date_debut': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'date_fin': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'penalite_maximum': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0'
-            }),
-            'pourcentage_maximum': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0',
-                'max': '100'
-            }),
-        }
 
 
 class BatchFacturationForm(forms.ModelForm):

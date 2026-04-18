@@ -3,7 +3,7 @@ from django.forms import ModelForm, Form
 from django.utils.translation import gettext_lazy as _
 from .models import (
     UserDashboardLayout, DashboardWidget, DashboardNotification,
-    DashboardQuickAction, DashboardAnalytics
+    DashboardQuickAction
 )
 
 
@@ -334,43 +334,6 @@ class WidgetCreateForm(ModelForm):
         }
 
 
-class DashboardAnalyticsForm(ModelForm):
-    """Formulaire pour les analytics du dashboard"""
-
-    class Meta:
-        model = DashboardAnalytics
-        fields = [
-            'most_used_widgets', 'most_frequent_actions',
-            'access_frequency', 'detected_preferences'
-        ]
-        widgets = {
-            'most_used_widgets': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4,
-                'readonly': True
-            }),
-            'most_frequent_actions': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4,
-                'readonly': True
-            }),
-            'access_frequency': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4,
-                'readonly': True
-            }),
-            'detected_preferences': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4,
-                'readonly': True
-            }),
-        }
-        labels = {
-            'most_used_widgets': _('Widgets les plus utilisés'),
-            'most_frequent_actions': _('Actions les plus fréquentes'),
-            'access_frequency': _('Fréquence d\'accès'),
-            'detected_preferences': _('Préférences détectées'),
-        }
 
 
 class ExportDataForm(Form):
